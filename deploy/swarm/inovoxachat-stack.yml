@@ -1,0 +1,139 @@
+# ============================================================
+# Inovoxachat (Chatwoot fork) — stack para Docker Swarm + Traefik + Portainer
+# Imagem própria buildada pelo GitHub Actions e publicada no GHCR.
+# Deploy: Portainer (Stacks) OU  docker stack deploy -c inovoxachat-stack.yml \
+#         --with-registry-auth inovoxachat
+#
+# Pré-requisitos na VPS:
+#   - Docker Swarm ativo e Traefik já rodando (entrypoint websecure + certresolver letsencrypt).
+#   - Rede overlay externa "inovoxa" (a que o Traefik usa). Se não existir:
+#       docker network create --driver overlay --attachable inovoxa
+#   - Credencial do GHCR no node (para puxar imagem privada):
+#       docker login ghcr.io -u <user> -p <PAT read:packages>
+#     e deploy com --with-registry-auth (ou configure o registry no Portainer).
+#
+# Variáveis: defina no Portainer (Environment variables do stack) — ver deploy/swarm/README.md.
+# ============================================================
+version: "3.8"
+
+x-app-env: &app-env
+  INSTALLATION_ENV: docker
+  NODE_ENV: production
+  RAILS_ENV: production
+  SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+  FRONTEND_URL: ${FRONTEND_URL:-https://chat.inovoxa.com.br}
+  FORCE_SSL: ${FORCE_SSL:-true}
+  DEFAULT_LOCALE: ${DEFAULT_LOCALE:-pt_BR}
+  ENABLE_ACCOUNT_SIGNUP: ${ENABLE_ACCOUNT_SIGNUP:-false}
+  ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY}
+  ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY}
+  ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT}
+  POSTGRES_HOST: postgres
+  POSTGRES_USERNAME: ${POSTGRES_USERNAME:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DATABASE: ${POSTGRES_DATABASE:-chatwoot}
+  RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+  ACTIVE_STORAGE_SERVICE: ${ACTIVE_STORAGE_SERVICE:-local}
+  MAILER_SENDER_EMAIL: ${MAILER_SENDER_EMAIL:-Inovoxachat <atendimento@inovoxa.com.br>}
+  SMTP_DOMAIN: ${SMTP_DOMAIN:-inovoxa.com.br}
+  SMTP_ADDRESS: ${SMTP_ADDRESS}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USERNAME: ${SMTP_USERNAME}
+  SMTP_PASSWORD: ${SMTP_PASSWORD}
+  SMTP_AUTHENTICATION: ${SMTP_AUTHENTICATION:-login}
+  SMTP_ENABLE_STARTTLS_AUTO: ${SMTP_ENABLE_STARTTLS_AUTO:-true}
+  RAILS_LOG_TO_STDOUT: "true"
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  rails:
+    image: ${IMAGE:-ghcr.io/inovoxa/inovoxachat:latest}
+    environment: *app-env
+    entrypoint: docker/entrypoints/rails.sh
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    volumes:
+      - storage_data:/app/storage
+    networks:
+      - inovoxa
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      # Volumes locais: fixe rails/sidekiq/postgres/redis no MESMO node (storage_data
+      # é compartilhado entre rails e sidekiq). Ajuste o constraint à sua topologia.
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=inovoxa
+        - traefik.http.routers.inovoxachat.rule=Host(`chat.inovoxa.com.br`)
+        - traefik.http.routers.inovoxachat.entrypoints=websecure
+        - traefik.http.routers.inovoxachat.tls=true
+        - traefik.http.routers.inovoxachat.tls.certresolver=letsencrypt
+        - traefik.http.services.inovoxachat.loadbalancer.server.port=3000
+
+  sidekiq:
+    image: ${IMAGE:-ghcr.io/inovoxa/inovoxachat:latest}
+    environment: *app-env
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    volumes:
+      - storage_data:/app/storage
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE:-chatwoot}
+      POSTGRES_USER: ${POSTGRES_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+
+  redis:
+    image: redis:alpine
+    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  inovoxa:
+    external: true
+  internal:
+    driver: overlay
+
+volumes:
+  storage_data:
+  postgres_data:
+  redis_data:

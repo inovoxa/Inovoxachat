@@ -61,3 +61,19 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # CD: dispara o redeploy no Portainer (Swarm puxa a imagem :latest recém-publicada).
+      # Configure os secrets PORTAINER_WEBHOOK_RAILS e PORTAINER_WEBHOOK_SIDEKIQ no GitHub
+      # (Settings > Secrets and variables > Actions). Cada um é a URL do webhook do serviço
+      # no Portainer. Sem os secrets, o step é ignorado (não falha).
+      - name: Redeploy no Portainer (webhook)
+        env:
+          HOOK_RAILS: ${{ secrets.PORTAINER_WEBHOOK_RAILS }}
+          HOOK_SIDEKIQ: ${{ secrets.PORTAINER_WEBHOOK_SIDEKIQ }}
+        run: |
+          if [ -n "$HOOK_RAILS" ]; then
+            echo "Disparando redeploy do rails..."; curl -fsSL -X POST "$HOOK_RAILS" && echo " ok"
+          else echo "PORTAINER_WEBHOOK_RAILS não definido — pulando."; fi
+          if [ -n "$HOOK_SIDEKIQ" ]; then
+            echo "Disparando redeploy do sidekiq..."; curl -fsSL -X POST "$HOOK_SIDEKIQ" && echo " ok"
+          else echo "PORTAINER_WEBHOOK_SIDEKIQ não definido — pulando."; fi
