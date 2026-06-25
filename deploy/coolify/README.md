@@ -1,14 +1,29 @@
-# Deploy do Inovoxachat (Chatwoot v4.15.1) no Coolify
+# Deploy do Inovoxachat (Chatwoot fork v4.15.1) no Coolify
 
-Etapa 1 do projeto: subir o **Chatwoot v4.15.1 oficial, sem customização**, em produção
-na VPS via **Coolify**. Branding e integração com a Central vêm em etapas posteriores.
+Subir o **Inovoxachat** (fork do Chatwoot v4.15.1) em produção na VPS via **Coolify**,
+usando a **imagem própria da Inovoxa** buildada do código-fonte pelo GitHub Actions.
 
 Stack que sobe: **Rails (web)** + **Sidekiq (jobs)** + **PostgreSQL `pgvector` pg16** + **Redis**.
 São serviços do próprio Chatwoot — independentes do PostgreSQL do n8n/Central.
 
 ## Arquivos desta pasta
-- `docker-compose.yaml` — compose de produção (imagem fixada em `chatwoot/chatwoot:v4.15.1`).
+- `docker-compose.yaml` — compose de produção (imagem `ghcr.io/inovoxa/inovoxachat:4.15.1`).
 - `.env.example` — lista das variáveis a preencher na UI do Coolify.
+
+## 0. Imagem própria da Inovoxa (GitHub Actions → GHCR)
+A imagem é compilada do source pelo workflow `.github/workflows/inovoxa-build.yml` e publicada
+em `ghcr.io/inovoxa/inovoxachat`. Antes do primeiro deploy:
+1. Em **GitHub → repo Inovoxachat → Actions**, habilite os workflows (se for o 1º uso) e
+   rode **"Build Inovoxachat image"** (push na `main` já dispara; ou *Run workflow* manual).
+2. Aguarde o build (~20–40 min na 1ª vez; depois o cache acelera). Ao fim, o pacote
+   **inovoxachat** aparece em **GitHub → org inovoxa → Packages**.
+3. O pacote nasce **privado**. Para o Coolify puxar, escolha uma opção:
+   - **(simples)** Package → *Settings* → **Change visibility → Public** (a imagem fica pública).
+   - **(privado)** No Coolify, adicione um **Registry/Docker credential** para `ghcr.io`
+     (usuário = seu login GitHub, senha = um **PAT** com escopo `read:packages`), e vincule-a
+     ao recurso. Mantém a imagem privada.
+   > ⚠️ A imagem contém o código Enterprise do Chatwoot (licença comercial). Se for distribuir,
+   > prefira manter **privada** ou migrar para a edição CE.
 
 ## 1. Gerar os segredos (no seu terminal)
 ```bash

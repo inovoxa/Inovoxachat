@@ -1,7 +1,10 @@
 # ============================================================
-# Inovoxachat (Chatwoot v4.15.1) — deploy no Coolify via "Docker Compose Empty"
+# Inovoxachat (Chatwoot fork v4.15.1) — deploy no Coolify via "Docker Compose Empty"
 # Cole este YAML no campo de compose do recurso e preencha as Environment Variables
-# (ver .env.example desta pasta). Usa a imagem OFICIAL pré-construída v4.15.1 — sem build.
+# (ver .env.example desta pasta). Usa a imagem PRÓPRIA da Inovoxa, buildada do source
+# pelo GitHub Actions (.github/workflows/inovoxa-build.yml) e publicada no GHCR.
+# Requer que o primeiro build do Actions já tenha concluído e que o Coolify tenha
+# credencial de pull do GHCR (pacote privado) — ver README desta pasta.
 #
 # O Coolify roteia o domínio público pela variável mágica SERVICE_FQDN_RAILS_3000
 # (serviço `rails`, porta 3000). Defina o domínio na aba do serviço e use o MESMO
@@ -41,7 +44,7 @@ x-app-env: &app-env
   LOG_LEVEL: ${LOG_LEVEL:-info}
 
 x-base: &base
-  image: chatwoot/chatwoot:v4.15.1
+  image: ghcr.io/inovoxa/inovoxachat:4.15.1
   pull_policy: always
   restart: always
   volumes:
