@@ -1,13 +1,13 @@
-# Deploy do Inovoxachat (Chatwoot v4.14.2) no Coolify
+# Deploy do Inovoxachat (Chatwoot v4.15.1) no Coolify
 
-Etapa 1 do projeto: subir o **Chatwoot v4.14.2 oficial, sem customização**, em produção
+Etapa 1 do projeto: subir o **Chatwoot v4.15.1 oficial, sem customização**, em produção
 na VPS via **Coolify**. Branding e integração com a Central vêm em etapas posteriores.
 
 Stack que sobe: **Rails (web)** + **Sidekiq (jobs)** + **PostgreSQL `pgvector` pg16** + **Redis**.
 São serviços do próprio Chatwoot — independentes do PostgreSQL do n8n/Central.
 
 ## Arquivos desta pasta
-- `docker-compose.yaml` — compose de produção (imagem fixada em `chatwoot/chatwoot:v4.14.2`).
+- `docker-compose.yaml` — compose de produção (imagem fixada em `chatwoot/chatwoot:v4.15.1`).
 - `.env.example` — lista das variáveis a preencher na UI do Coolify.
 
 ## 1. Gerar os segredos (no seu terminal)
@@ -60,7 +60,7 @@ SuperAdmin.create!(email: u.email, password: 'TroqueEstaSenhaForte!1') rescue ni
 > (habilitando `ENABLE_ACCOUNT_SIGNUP=true` temporariamente) e depois voltar para `false`.
 
 ## 6. Validação (fim da Etapa 1)
-- `https://<seu-dominio>/` abre o login do Chatwoot; rodapé/Settings mostram **v4.14.2**.
+- `https://<seu-dominio>/` abre o login do Chatwoot; rodapé/Settings mostram **v4.15.1**.
 - Login com o super admin; criar uma **Inbox** de teste.
 - Reinicie o serviço `rails` e confirme que os dados persistem (volumes OK).
 - `sidekiq` saudável e processando jobs.

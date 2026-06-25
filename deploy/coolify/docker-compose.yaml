@@ -1,7 +1,7 @@
 # ============================================================
-# Inovoxachat (Chatwoot v4.14.2) — deploy no Coolify via "Docker Compose Empty"
+# Inovoxachat (Chatwoot v4.15.1) — deploy no Coolify via "Docker Compose Empty"
 # Cole este YAML no campo de compose do recurso e preencha as Environment Variables
-# (ver .env.example desta pasta). Usa a imagem OFICIAL pré-construída v4.14.2 — sem build.
+# (ver .env.example desta pasta). Usa a imagem OFICIAL pré-construída v4.15.1 — sem build.
 #
 # O Coolify roteia o domínio público pela variável mágica SERVICE_FQDN_RAILS_3000
 # (serviço `rails`, porta 3000). Defina o domínio na aba do serviço e use o MESMO
@@ -41,7 +41,7 @@ x-app-env: &app-env
   LOG_LEVEL: ${LOG_LEVEL:-info}
 
 x-base: &base
-  image: chatwoot/chatwoot:v4.14.2
+  image: chatwoot/chatwoot:v4.15.1
   pull_policy: always
   restart: always
   volumes:
