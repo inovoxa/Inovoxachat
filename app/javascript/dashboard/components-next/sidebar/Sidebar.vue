@@ -435,6 +435,34 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'GLPI',
+      icon: 'i-lucide-ticket',
+      label: 'GLPI',
+      activeOn: ['glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_config'],
+      children: [
+        {
+          name: 'GLPI Chamados',
+          label: 'Chamados',
+          to: accountScopedRoute('glpi_chamados'),
+        },
+        {
+          name: 'GLPI Kanban',
+          label: 'Kanban',
+          to: accountScopedRoute('glpi_kanban'),
+        },
+        {
+          name: 'GLPI Agente',
+          label: 'Agente IA',
+          to: accountScopedRoute('glpi_agente'),
+        },
+        {
+          name: 'GLPI Config',
+          label: 'Configuração',
+          to: accountScopedRoute('glpi_config'),
+        },
+      ],
+    },
+    {
       name: 'Captain',
       icon: 'i-woot-captain',
       label: t('SIDEBAR.CAPTAIN'),
