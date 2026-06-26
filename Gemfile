@@ -64,6 +64,8 @@ gem 'aws-actionmailbox-ses', '~> 0'
 ##-- gems for database --#
 gem 'groupdate'
 gem 'pg'
+# Integração GLPI (Inovoxa): acesso direto ao MySQL do GLPI por empresa.
+gem 'mysql2', '~> 0.5'
 gem 'redis'
 gem 'redis-namespace'
 # super fast record imports in bulk

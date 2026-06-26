@@ -31,6 +31,7 @@ RUN apk update && apk add --no-cache \
   tzdata \
   postgresql-dev \
   postgresql-client \
+  mariadb-connector-c-dev \
   git \
   curl \
   xz \
@@ -125,6 +126,7 @@ RUN apk update && apk add --no-cache \
   openssl \
   tzdata \
   postgresql-client \
+  mariadb-connector-c \
   imagemagick \
   git \
   vips \

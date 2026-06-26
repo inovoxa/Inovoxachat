@@ -1,10 +1,135 @@
-# Chamados e Kanban: conexão direta ao MySQL do GLPI (requer gem mysql2 — próxima fase).
+# Chamados e Kanban: leitura DIRETA do MySQL do GLPI (+ enriquecimento por chamados_log
+# no PostgreSQL) e write-back de status via API v1. Porta tickets.js/ticketQueries.js da Central.
 class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::BaseController
+  DAYS = { '7d' => 7, '30d' => 30, '90d' => 90, '180d' => 180 }.freeze
+  STLABEL = {
+    'aberto' => 'Aberto', 'aguardando_aprovacao' => 'Aguardando aprovação',
+    'em_execucao' => 'Em execução', 'resolvido' => 'Resolvido', 'violou_sla' => 'Violou SLA'
+  }.freeze
+
+  # GET /api/v1/accounts/:account_id/glpi/tickets?period=180d&search=
   def index
-    not_implemented_yet(tickets: [], total: 0)
+    period = DAYS.key?(params[:period]) ? params[:period] : '180d'
+    desde = (Time.current - DAYS[period].days).strftime('%Y-%m-%d %H:%M:%S')
+    search = params[:search].to_s.strip[0, 80].to_s
+    limit = params[:limit].present? ? [[params[:limit].to_i, 1].max, 500].min : 300
+
+    my = Glpi::MysqlClient.new(glpi_config)
+    rows = begin
+      list_tickets(my, desde, search, limit)
+    ensure
+      my.close
+    end
+
+    enrich = enrich_from_log(rows.map { |r| r['id'] })
+    render json: { tickets: rows.map { |r| shape(r, enrich) }, total: rows.size }
+  rescue Mysql2::Error => e
+    render json: { error: 'falha ao consultar o MySQL do GLPI', detail: e.message }, status: :bad_gateway
   end
 
+  # PATCH /api/v1/accounts/:account_id/glpi/tickets/:id/status
   def status
-    not_implemented_yet
+    glpi_status = Glpi::TicketMap.column_to_status(params[:status])
+    return render(json: { error: 'coluna não gravável' }, status: :unprocessable_entity) unless glpi_status
+
+    pg = Glpi::PgClient.new(glpi_config)
+    begin
+      Glpi::V1Client.new(glpi_config, pg).update_ticket_status(params[:id], glpi_status)
+    ensure
+      pg.close
+    end
+    render json: { ok: true, id: params[:id].to_i, status: params[:status] }
+  rescue StandardError => e
+    render json: { error: 'não foi possível atualizar o chamado no GLPI', detail: e.message }, status: :bad_gateway
+  end
+
+  private
+
+  def list_tickets(my, desde, search, limit)
+    where = ['t.is_deleted = 0', "t.date >= '#{my.escape(desde)}'"]
+    if search.present?
+      q = my.escape(search)
+      qid = search.match?(/\A\d+\z/) ? search.to_i : -1
+      where << "(t.name LIKE '%#{q}%' OR t.id = #{qid})"
+    end
+
+    sql = <<~SQL
+      SELECT t.id, t.name AS titulo, t.date AS date, t.status AS glpi_status,
+             t.priority AS priority, t.time_to_resolve AS ttr, t.solvedate AS solvedate,
+             c.completename AS categoria, e.name AS entidade, l.completename AS local_,
+             (SELECT g.name FROM glpi_groups_tickets gt JOIN glpi_groups g ON g.id = gt.groups_id
+               WHERE gt.tickets_id = t.id AND gt.type = 2 ORDER BY gt.id LIMIT 1) AS grupo_tecnico,
+             (SELECT COALESCE(NULLIF(TRIM(CONCAT_WS(' ', us.firstname, us.realname)), ''), us.name)
+               FROM glpi_tickets_users tu JOIN glpi_users us ON us.id = tu.users_id
+               WHERE tu.tickets_id = t.id AND tu.type = 1 ORDER BY tu.id LIMIT 1) AS solicitante,
+             (SELECT COALESCE(NULLIF(TRIM(CONCAT_WS(' ', ua.firstname, ua.realname)), ''), ua.name)
+               FROM glpi_tickets_users tu2 JOIN glpi_users ua ON ua.id = tu2.users_id
+               WHERE tu2.tickets_id = t.id AND tu2.type = 2 ORDER BY tu2.id LIMIT 1) AS assignee
+        FROM glpi_tickets t
+        LEFT JOIN glpi_itilcategories c ON c.id = t.itilcategories_id
+        LEFT JOIN glpi_entities e ON e.id = t.entities_id
+        LEFT JOIN glpi_locations l ON l.id = t.locations_id
+       WHERE #{where.join(' AND ')}
+       ORDER BY t.date DESC
+       LIMIT #{limit}
+    SQL
+    my.query(sql)
+  end
+
+  def enrich_from_log(ids)
+    ids = ids.map(&:to_i).reject(&:zero?)
+    return {} if ids.empty?
+
+    pg = Glpi::PgClient.new(glpi_config)
+    rows = begin
+      pg.query("SELECT glpi_ticket_id, secretaria, conversa_id FROM {s}.chamados_log WHERE glpi_ticket_id IN (#{ids.join(',')})")
+    ensure
+      pg.close
+    end
+
+    rows.each_with_object({}) do |r, map|
+      map[r['glpi_ticket_id'].to_i] = {
+        secretaria: r['secretaria'],
+        canal: r['conversa_id'].to_s.present? ? 'WhatsApp' : 'Formulário'
+      }
+    end
+  end
+
+  def shape(row, enrich)
+    log = enrich[row['id'].to_i] || {}
+    breached = Glpi::TicketMap.breached?(glpi_status: row['glpi_status'], ttr: row['ttr'], solvedate: row['solvedate'])
+    status = breached ? 'violou_sla' : Glpi::TicketMap.status_to_column(row['glpi_status'])
+    {
+      id: row['id'],
+      sol: row['solicitante'].presence || '—',
+      sector: log[:secretaria].presence || '—',
+      cat: row['categoria'].presence || 'Sem categoria',
+      canal: log[:canal].presence || 'Manual',
+      status: status,
+      statusLabel: STLABEL[status],
+      sla: Glpi::TicketMap.sla_percent(date: row['date'], ttr: row['ttr'], solvedate: row['solvedate']),
+      assignee: row['assignee'].presence || '—',
+      prio: Glpi::TicketMap.priority_label(row['priority']),
+      entidade: row['entidade'].presence || '—',
+      local: row['local_'].presence || '—',
+      grupoTecnico: row['grupo_tecnico'].presence || '—',
+      abertoRel: rel_time(row['date'])
+    }
+  end
+
+  def rel_time(date)
+    return '' if date.nil?
+
+    t = date.is_a?(Time) ? date : (Time.parse(date.to_s) rescue nil)
+    return '' unless t
+
+    m = ((Time.now - t) / 60).round
+    return 'agora' if m < 1
+    return "há #{m} min" if m < 60
+
+    h = (m / 60.0).round
+    return "há #{h}h" if h < 24
+
+    "há #{(h / 24.0).round}d"
   end
 end
