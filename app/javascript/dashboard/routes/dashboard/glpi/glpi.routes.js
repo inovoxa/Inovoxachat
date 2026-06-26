@@ -3,6 +3,7 @@ import { frontendURL } from '../../../helper/URLHelper';
 import ChamadosIndex from './pages/ChamadosIndex.vue';
 import KanbanBoard from './pages/KanbanBoard.vue';
 import AgenteIA from './pages/AgenteIA.vue';
+import AprovadoresChamado from './pages/AprovadoresChamado.vue';
 import GlpiConfig from './pages/GlpiConfig.vue';
 
 const meta = { permissions: ['administrator', 'agent'] };
@@ -25,6 +26,12 @@ export const routes = [
     path: frontendURL('accounts/:accountId/glpi/agente'),
     name: 'glpi_agente',
     component: AgenteIA,
+    meta,
+  },
+  {
+    path: frontendURL('accounts/:accountId/glpi/aprovadores'),
+    name: 'glpi_aprovadores',
+    component: AprovadoresChamado,
     meta,
   },
   {

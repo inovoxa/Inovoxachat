@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import GlpiAPI from 'dashboard/api/glpi';
 
 const data = ref(null);
-const period = ref('7d');
+const period = ref('180d');
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');
@@ -38,6 +38,7 @@ onMounted(load);
         <option value="7d">Últimos 7 dias</option>
         <option value="30d">Últimos 30 dias</option>
         <option value="90d">Últimos 90 dias</option>
+        <option value="180d">Últimos 180 dias</option>
       </select>
     </div>
 

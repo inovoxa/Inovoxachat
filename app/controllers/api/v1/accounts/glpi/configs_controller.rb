@@ -1,6 +1,7 @@
 # Configuração da integração GLPI por conta (multi-empresa).
-# show/status: qualquer usuário autenticado da conta. update: somente admin.
-# O service_token NUNCA é devolvido (apenas se está presente).
+# show/status: usuário autenticado. update: somente admin.
+# settings = não-secretos (jsonb, pré-preenchidos por DEFAULT_SETTINGS).
+# secrets  = senhas (cifradas; nunca devolvidas — só a flag de presença).
 class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseController
   before_action :check_admin_authorization?, only: [:update]
 
@@ -12,9 +13,16 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
   # PATCH /api/v1/accounts/:account_id/glpi/config
   def update
     cfg = find_or_build
-    attrs = config_params.to_h
-    attrs.delete('service_token') if attrs['service_token'].blank? # não apagar token ao salvar sem alterá-lo
-    cfg.assign_attributes(attrs)
+    cfg.enabled = ActiveModel::Type::Boolean.new.cast(config_params[:enabled]) unless config_params[:enabled].nil?
+
+    incoming = (config_params[:settings] || {}).to_h.slice(*GlpiAccountConfig::DEFAULT_SETTINGS.keys)
+    cfg.settings = (cfg.settings || {}).merge(incoming)
+
+    sec_in = (config_params[:secrets] || {}).to_h
+    merged = cfg.secrets || {}
+    GlpiAccountConfig::SECRET_KEYS.each { |k| merged[k] = sec_in[k] if sec_in[k].present? }
+    cfg.secrets = merged
+
     cfg.save!
     render json: serialize(cfg)
   end
@@ -32,14 +40,15 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
   end
 
   def config_params
-    params.require(:config).permit(:enabled, :central_url, :service_token)
+    params.require(:config).permit(:enabled, settings: {}, secrets: {})
   end
 
   def serialize(cfg)
     {
       enabled: cfg.enabled,
-      central_url: cfg.central_url,
-      has_token: cfg.service_token.present?
+      settings: cfg.effective_settings,
+      secret_keys: GlpiAccountConfig::SECRET_KEYS,
+      secrets_present: GlpiAccountConfig::SECRET_KEYS.index_with { |k| cfg.secret_present?(k) },
     }
   end
 end

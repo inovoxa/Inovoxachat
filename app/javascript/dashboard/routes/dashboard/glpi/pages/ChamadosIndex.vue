@@ -4,7 +4,7 @@ import GlpiAPI from 'dashboard/api/glpi';
 
 const tickets = ref([]);
 const total = ref(0);
-const period = ref('30d');
+const period = ref('180d');
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');

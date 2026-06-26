@@ -11,7 +11,7 @@ const COLUMNS = [
 ];
 
 const tickets = ref([]);
-const period = ref('30d');
+const period = ref('180d');
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');
@@ -54,6 +54,7 @@ onMounted(load);
         <option value="7d">Últimos 7 dias</option>
         <option value="30d">Últimos 30 dias</option>
         <option value="90d">Últimos 90 dias</option>
+        <option value="180d">Últimos 180 dias</option>
       </select>
     </div>
 

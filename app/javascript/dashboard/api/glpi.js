@@ -31,6 +31,18 @@ class GlpiAPI extends ApiClient {
   getAgente(params = {}) {
     return axios.get(`${this.url}/agente`, { params });
   }
+
+  getAprovadores() {
+    return axios.get(`${this.url}/aprovadores`);
+  }
+
+  addAprovador(login) {
+    return axios.post(`${this.url}/aprovadores`, { login });
+  }
+
+  removeAprovador(login) {
+    return axios.delete(`${this.url}/aprovadores/${encodeURIComponent(login)}`);
+  }
 }
 
 export default new GlpiAPI();
