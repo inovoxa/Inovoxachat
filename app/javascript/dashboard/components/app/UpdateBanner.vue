@@ -34,13 +34,8 @@ export default {
       });
     },
     shouldShowBanner() {
-      return (
-        !this.userDismissedBanner &&
-        this.globalConfig.displayManifest &&
-        this.updateAvailable &&
-        !this.isVersionNotificationDismissed(this.latestChatwootVersion) &&
-        this.isAdmin
-      );
+      // White-label Inovoxa: nunca exibir o banner de upgrade do Chatwoot.
+      return false;
     },
   },
   methods: {

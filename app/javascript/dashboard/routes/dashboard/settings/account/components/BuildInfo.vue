@@ -35,7 +35,8 @@ const copyGitSha = () => {
 
 <template>
   <div class="p-4 text-sm text-center">
-    <div v-if="hasAnUpdateAvailable && globalConfig.displayManifest">
+    <!-- White-label Inovoxa: aviso de upgrade do Chatwoot suprimido. -->
+    <div v-if="false">
       {{
         t('GENERAL_SETTINGS.UPDATE_CHATWOOT', {
           latestChatwootVersion: latestChatwootVersion,
