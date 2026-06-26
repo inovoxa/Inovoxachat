@@ -66,6 +66,8 @@ gem 'groupdate'
 gem 'pg'
 # Integração GLPI (Inovoxa): acesso direto ao MySQL do GLPI por empresa.
 gem 'mysql2', '~> 0.5'
+# Integração GLPI (Inovoxa): SSH ao AD para gerenciar aprovadores (Ruby puro).
+gem 'net-ssh', '~> 7.2'
 gem 'redis'
 gem 'redis-namespace'
 # super fast record imports in bulk

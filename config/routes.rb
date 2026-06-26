@@ -103,7 +103,8 @@ Rails.application.routes.draw do
               end
             end
             resource :agente, only: [:show], controller: 'agente'
-            resources :aprovadores, only: [:index, :create, :destroy], param: :login
+            resources :aprovadores, only: [:index, :create, :destroy], param: :login,
+                                    constraints: { login: %r{[^/]+} }
           end
           resource :saml_settings, only: [:show, :create, :update, :destroy]
           resources :agent_bots, only: [:index, :create, :show, :update, :destroy] do
