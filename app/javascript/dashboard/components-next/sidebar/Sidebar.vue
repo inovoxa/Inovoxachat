@@ -449,46 +449,50 @@ const menuItems = computed(() => {
         },
       ],
     },
-    ...(glpiEnabled.value
-      ? [{
+    {
       name: 'GLPI',
       icon: 'i-lucide-ticket',
       label: 'GLPI',
       activeOn: ['glpi_overview', 'glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_aprovadores', 'glpi_config'],
       children: [
-        {
-          name: 'GLPI Visão Geral',
-          label: 'Visão Geral',
-          to: accountScopedRoute('glpi_overview'),
-        },
-        {
-          name: 'GLPI Chamados',
-          label: 'Chamados',
-          to: accountScopedRoute('glpi_chamados'),
-        },
-        {
-          name: 'GLPI Kanban',
-          label: 'Kanban',
-          to: accountScopedRoute('glpi_kanban'),
-        },
-        {
-          name: 'GLPI Agente',
-          label: 'Agente IA',
-          to: accountScopedRoute('glpi_agente'),
-        },
-        {
-          name: 'GLPI Aprovadores',
-          label: 'Aprovadores',
-          to: accountScopedRoute('glpi_aprovadores'),
-        },
+        // Telas de dados só quando a integração está habilitada.
+        ...(glpiEnabled.value
+          ? [
+              {
+                name: 'GLPI Visão Geral',
+                label: 'Visão Geral',
+                to: accountScopedRoute('glpi_overview'),
+              },
+              {
+                name: 'GLPI Chamados',
+                label: 'Chamados',
+                to: accountScopedRoute('glpi_chamados'),
+              },
+              {
+                name: 'GLPI Kanban',
+                label: 'Kanban',
+                to: accountScopedRoute('glpi_kanban'),
+              },
+              {
+                name: 'GLPI Agente',
+                label: 'Agente IA',
+                to: accountScopedRoute('glpi_agente'),
+              },
+              {
+                name: 'GLPI Aprovadores',
+                label: 'Aprovadores',
+                to: accountScopedRoute('glpi_aprovadores'),
+              },
+            ]
+          : []),
+        // Configuração sempre acessível (para habilitar a integração).
         {
           name: 'GLPI Config',
           label: 'Configuração',
           to: accountScopedRoute('glpi_config'),
         },
       ],
-    }]
-      : []),
+    },
     {
       name: 'Captain',
       icon: 'i-woot-captain',
