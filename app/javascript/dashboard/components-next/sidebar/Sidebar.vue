@@ -27,6 +27,7 @@ import {
   resolveSidebarSort,
   sortSidebarItems,
 } from 'dashboard/helper/sidebarSort';
+import GlpiAPI from 'dashboard/api/glpi';
 
 const props = defineProps({
   isMobileSidebarOpen: {
@@ -313,6 +314,20 @@ const newReportRoutes = () => [
 
 const reportRoutes = computed(() => newReportRoutes());
 
+// Integração GLPI: o grupo só aparece se a empresa tem a integração habilitada.
+const glpiEnabled = ref(false);
+const refreshGlpiStatus = () => {
+  GlpiAPI.getStatus()
+    .then(({ data }) => {
+      glpiEnabled.value = !!data.enabled;
+    })
+    .catch(() => {
+      glpiEnabled.value = false;
+    });
+};
+refreshGlpiStatus();
+onMounted(refreshGlpiStatus);
+
 const menuItems = computed(() => {
   return [
     {
@@ -434,7 +449,8 @@ const menuItems = computed(() => {
         },
       ],
     },
-    {
+    ...(glpiEnabled.value
+      ? [{
       name: 'GLPI',
       icon: 'i-lucide-ticket',
       label: 'GLPI',
@@ -471,7 +487,8 @@ const menuItems = computed(() => {
           to: accountScopedRoute('glpi_config'),
         },
       ],
-    },
+    }]
+      : []),
     {
       name: 'Captain',
       icon: 'i-woot-captain',
