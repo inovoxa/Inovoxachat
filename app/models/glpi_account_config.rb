@@ -47,14 +47,30 @@ class GlpiAccountConfig < ApplicationRecord
   # Segredos: nunca no código/Git. Pré-preenchem via ENV do deploy ou digitados na tela.
   SECRET_KEYS = %w[GLPI_DB_PASSWORD PG_PASSWORD AD_SSH_PASSWORD].freeze
 
-  # Defaults sobrepostos pelos valores salvos da empresa.
-  def effective_settings
-    DEFAULT_SETTINGS.merge(settings || {})
+  # Conta "modelo" (Prefeitura) que recebe os DEFAULT_SETTINGS pré-preenchidos, definida por
+  # ENV GLPI_DEFAULT_ACCOUNT_ID. ISOLAMENTO: qualquer outra empresa NÃO herda nada da Prefeitura.
+  def self.default_account_id
+    ENV['GLPI_DEFAULT_ACCOUNT_ID'].presence
   end
 
-  # Valor efetivo de um segredo: salvo (cifrado) tem prioridade; senão, ENV do deploy.
+  def default_account?
+    self.class.default_account_id.present? && account_id.to_s == self.class.default_account_id.to_s
+  end
+
+  # Settings efetivos: SÓ os valores salvos desta empresa. Os DEFAULT_SETTINGS entram apenas
+  # para a conta-modelo (Prefeitura) — nunca vazam para outras empresas.
+  def effective_settings
+    base = default_account? ? DEFAULT_SETTINGS : {}
+    base.merge(settings || {})
+  end
+
+  # Segredo: salvo (cifrado) desta empresa; fallback de ENV só para a conta-modelo.
   def secret(key)
-    (secrets && secrets[key].presence) || ENV["GLPI_DEFAULT_#{key}"].presence
+    saved = secrets && secrets[key].presence
+    return saved if saved
+    return ENV["GLPI_DEFAULT_#{key}"].presence if default_account?
+
+    nil
   end
 
   def secret_present?(key)
