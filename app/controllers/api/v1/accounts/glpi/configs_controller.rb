@@ -12,8 +12,8 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
 
   # PATCH /api/v1/accounts/:account_id/glpi/config
   def update
+    # enabled é controlado pelo super admin (/super_admin/accounts) — não pela empresa.
     cfg = find_or_build
-    cfg.enabled = ActiveModel::Type::Boolean.new.cast(config_params[:enabled]) unless config_params[:enabled].nil?
 
     incoming = (config_params[:settings] || {}).to_h.slice(*GlpiAccountConfig::DEFAULT_SETTINGS.keys)
     cfg.settings = (cfg.settings || {}).merge(incoming)
@@ -40,7 +40,7 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
   end
 
   def config_params
-    params.require(:config).permit(:enabled, settings: {}, secrets: {})
+    params.require(:config).permit(settings: {}, secrets: {})
   end
 
   def serialize(cfg)

@@ -1,0 +1,15 @@
+<section class="main-content__body">
+  <hr/>
+  <% sd_enabled = GlpiAccountConfig.find_by(account_id: page.resource.id)&.enabled %>
+  <%= form_for([:toggle_service_desk, namespace, page.resource], method: :post, html: { class: "form" }) do |f| %>
+    <div class="form-actions">
+      <p class="pb-3">
+        Módulo <strong>Service Desk</strong> (GLPI) desta conta:
+        <strong><%= sd_enabled ? 'HABILITADO' : 'desabilitado' %></strong>.
+        <br>As telas (Visão Geral, Chamados, Kanban, Agente IA, Aprovadores) só aparecem quando habilitado.
+        As credenciais de conexão são configuradas pela própria empresa, em GLPI &rarr; Configuração.
+      </p>
+      <%= f.submit(sd_enabled ? 'Desabilitar Service Desk' : 'Habilitar Service Desk') %>
+    </div>
+  <% end %>
+</section>

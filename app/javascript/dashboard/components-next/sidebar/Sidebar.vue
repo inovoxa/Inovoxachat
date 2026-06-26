@@ -452,7 +452,7 @@ const menuItems = computed(() => {
     {
       name: 'GLPI',
       icon: 'i-lucide-ticket',
-      label: 'GLPI',
+      label: 'Service Desk',
       activeOn: ['glpi_overview', 'glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_aprovadores', 'glpi_config'],
       children: [
         // Telas de dados só quando a integração está habilitada.

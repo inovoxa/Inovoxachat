@@ -57,6 +57,16 @@ class SuperAdmin::AccountsController < SuperAdmin::ApplicationController
     # rubocop:enable Rails/I18nLocaleTexts
   end
 
+  # Liga/desliga o módulo Service Desk (GLPI) desta conta.
+  def toggle_service_desk
+    cfg = GlpiAccountConfig.find_or_initialize_by(account_id: requested_resource.id)
+    cfg.update!(enabled: !cfg.enabled)
+    # rubocop:disable Rails/I18nLocaleTexts
+    msg = cfg.enabled ? 'Service Desk habilitado' : 'Service Desk desabilitado'
+    redirect_back(fallback_location: [namespace, requested_resource], notice: msg)
+    # rubocop:enable Rails/I18nLocaleTexts
+  end
+
   def destroy
     account = Account.find(params[:id])
 

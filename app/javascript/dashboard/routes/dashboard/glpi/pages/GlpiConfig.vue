@@ -83,10 +83,10 @@ async function save() {
       if (secretsInput[s.key]) secrets[s.key] = secretsInput[s.key];
     });
     const { data } = await GlpiAPI.updateConfig({
-      enabled: enabled.value,
       settings: { ...settings },
       secrets,
     });
+    enabled.value = data.enabled;
     Object.assign(secretsPresent, data.secrets_present || {});
     SECRETS.forEach(s => {
       secretsInput[s.key] = '';
@@ -116,10 +116,11 @@ onMounted(load);
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>
 
     <form v-else class="flex flex-col gap-6" @submit.prevent="save">
-      <label class="flex items-center gap-2 text-sm text-n-slate-12">
-        <input v-model="enabled" type="checkbox" />
-        Integração habilitada
-      </label>
+      <div class="text-sm text-n-slate-12 rounded-lg bg-n-alpha-black2 px-3 py-2">
+        Status do módulo:
+        <strong>{{ enabled ? 'Habilitado' : 'Desabilitado' }}</strong>
+        <span class="text-n-slate-11">— controlado pelo super administrador.</span>
+      </div>
 
       <div v-for="group in GROUPS" :key="group.title" class="flex flex-col gap-3">
         <h2 class="text-sm font-semibold text-n-slate-12 border-b border-n-weak pb-1">
