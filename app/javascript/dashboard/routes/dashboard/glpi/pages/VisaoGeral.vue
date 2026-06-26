@@ -21,16 +21,19 @@ const notConfigured = ref(false);
 const error = ref('');
 
 const chartData = computed(() => {
-  const h = data.value?.horasMensais || { labels: [], data: [] };
+  const s = data.value?.semanal || { labels: [], whatsapp: [], formulario: [] };
   return {
-    labels: h.labels,
-    datasets: [{ label: 'Horas economizadas', data: h.data, backgroundColor: '#4a9704' }],
+    labels: s.labels,
+    datasets: [
+      { label: 'WhatsApp', data: s.whatsapp, backgroundColor: '#4a9704' },
+      { label: 'Formulário', data: s.formulario, backgroundColor: '#baa500' },
+    ],
   };
 });
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
+  plugins: { legend: { position: 'bottom' } },
 };
 
 async function load() {
@@ -38,7 +41,7 @@ async function load() {
   error.value = '';
   notConfigured.value = false;
   try {
-    const resp = await GlpiAPI.getAgente({ period: period.value });
+    const resp = await GlpiAPI.getOverview({ period: period.value });
     data.value = resp.data;
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
@@ -54,7 +57,7 @@ onMounted(load);
 <template>
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-xl font-medium text-n-slate-12">Agente IA (GLPI)</h1>
+      <h1 class="text-xl font-medium text-n-slate-12">Visão Geral (GLPI)</h1>
       <select
         v-model="period"
         class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1 text-n-slate-12"
@@ -81,16 +84,16 @@ onMounted(load);
     <template v-else-if="data">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Conversas</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.conversas }}</p>
+          <p class="text-xs text-n-slate-11">Total de chamados</p>
+          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.total }}</p>
         </div>
         <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Sem intervenção humana</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.semHumanoPct ?? '—' }}%</p>
+          <p class="text-xs text-n-slate-11">Abertos</p>
+          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.abertos }}</p>
         </div>
         <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Tempo médio de execução</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.tempoMedio }}</p>
+          <p class="text-xs text-n-slate-11">Resolvidos</p>
+          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.resolvidos }}</p>
         </div>
         <div class="rounded-xl bg-n-alpha-black2 p-4">
           <p class="text-xs text-n-slate-11">Execuções no AD</p>
@@ -98,32 +101,11 @@ onMounted(load);
         </div>
       </div>
 
-      <div class="rounded-xl bg-n-alpha-black2 p-4">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">ROI estimado</p>
-        <p class="text-sm text-n-slate-11">
-          {{ data.roi.horas }} h economizadas ·
-          R$ {{ data.roi.economia }} ({{ data.roi.minPorOp }} min/op · R$ {{ data.roi.custoHora }}/h)
-        </p>
-      </div>
-
-      <div class="rounded-xl bg-n-alpha-black2 p-4 h-72">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">Horas economizadas por dia</p>
-        <div class="h-56">
+      <div class="rounded-xl bg-n-alpha-black2 p-4 h-80">
+        <p class="text-sm font-medium text-n-slate-12 mb-2">Chamados por canal (últimas 4 semanas)</p>
+        <div class="h-64">
           <Bar :data="chartData" :options="chartOptions" />
         </div>
-      </div>
-
-      <div class="rounded-xl bg-n-alpha-black2 p-4">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">Operações por tipo</p>
-        <div
-          v-for="op in data.operacoes"
-          :key="op.nome"
-          class="flex justify-between text-sm py-1 border-b border-n-weak/40"
-        >
-          <span class="text-n-slate-11">{{ op.nome }}</span>
-          <span class="text-n-slate-12">{{ op.total }}</span>
-        </div>
-        <p v-if="!data.operacoes.length" class="text-sm text-n-slate-11">Sem dados no período.</p>
       </div>
     </template>
   </div>

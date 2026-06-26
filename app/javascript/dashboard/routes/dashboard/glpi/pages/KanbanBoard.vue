@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
+import Draggable from 'vuedraggable';
 import GlpiAPI from 'dashboard/api/glpi';
 
 const COLUMNS = [
@@ -9,20 +10,17 @@ const COLUMNS = [
   { key: 'resolvido', label: 'Resolvido' },
   { key: 'violou_sla', label: 'Violou SLA' },
 ];
+const GRAVAVEL = ['aberto', 'aguardando_aprovacao', 'em_execucao', 'resolvido'];
 
-const tickets = ref([]);
+const columns = reactive({});
+COLUMNS.forEach(c => {
+  columns[c.key] = [];
+});
 const period = ref('180d');
 const loading = ref(true);
+const saving = ref(false);
 const notConfigured = ref(false);
 const error = ref('');
-
-const grouped = computed(() => {
-  const map = Object.fromEntries(COLUMNS.map(c => [c.key, []]));
-  tickets.value.forEach(t => {
-    (map[t.status] ||= []).push(t);
-  });
-  return map;
-});
 
 async function load() {
   loading.value = true;
@@ -30,12 +28,37 @@ async function load() {
   notConfigured.value = false;
   try {
     const { data } = await GlpiAPI.getTickets({ period: period.value });
-    tickets.value = data.tickets || [];
+    COLUMNS.forEach(c => {
+      columns[c.key] = [];
+    });
+    (data.tickets || []).forEach(t => {
+      (columns[t.status] || columns.aberto).push(t);
+    });
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
     else error.value = e.response?.data?.error || e.message;
   } finally {
     loading.value = false;
+  }
+}
+
+async function onChange(colKey, evt) {
+  if (!evt.added) return;
+  const card = evt.added.element;
+  if (!GRAVAVEL.includes(colKey)) {
+    error.value = 'A coluna "Violou SLA" é derivada e não pode receber cards.';
+    await load();
+    return;
+  }
+  saving.value = true;
+  error.value = '';
+  try {
+    await GlpiAPI.updateTicketStatus(card.id, colKey);
+  } catch (e) {
+    error.value = e.response?.data?.error || e.message;
+    await load(); // reverte visualmente
+  } finally {
+    saving.value = false;
   }
 }
 
@@ -45,7 +68,10 @@ onMounted(load);
 <template>
   <div class="flex flex-col w-full h-full overflow-hidden p-6 gap-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-xl font-medium text-n-slate-12">Kanban (GLPI)</h1>
+      <h1 class="text-xl font-medium text-n-slate-12">
+        Kanban (GLPI)
+        <span v-if="saving" class="text-xs text-n-slate-11">· salvando…</span>
+      </h1>
       <select
         v-model="period"
         class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1 text-n-slate-12"
@@ -58,6 +84,7 @@ onMounted(load);
       </select>
     </div>
 
+    <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>
 
     <div v-else-if="notConfigured" class="text-n-slate-11">
@@ -67,8 +94,6 @@ onMounted(load);
       </router-link>
     </div>
 
-    <p v-else-if="error" class="text-red-500">{{ error }}</p>
-
     <div v-else class="flex gap-4 overflow-x-auto h-full pb-2">
       <div
         v-for="col in COLUMNS"
@@ -77,20 +102,23 @@ onMounted(load);
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-n-slate-12">{{ col.label }}</span>
-          <span class="text-xs text-n-slate-11">{{ grouped[col.key].length }}</span>
+          <span class="text-xs text-n-slate-11">{{ columns[col.key].length }}</span>
         </div>
-        <div class="flex flex-col gap-2 overflow-y-auto">
-          <div
-            v-for="card in grouped[col.key]"
-            :key="card.id"
-            class="rounded-lg bg-n-solid-2 border border-n-weak p-3"
-          >
-            <p class="text-xs text-n-slate-11">#{{ card.id }} · {{ card.prio }}</p>
-            <p class="text-sm text-n-slate-12">{{ card.cat }}</p>
-            <p class="text-xs text-n-slate-11 mt-1">{{ card.sol }} · {{ card.sector }}</p>
-          </div>
-          <p v-if="!grouped[col.key].length" class="text-xs text-n-slate-10 py-2">—</p>
-        </div>
+        <Draggable
+          v-model="columns[col.key]"
+          group="kanban"
+          item-key="id"
+          class="flex flex-col gap-2 flex-1 min-h-8 overflow-y-auto"
+          @change="e => onChange(col.key, e)"
+        >
+          <template #item="{ element }">
+            <div class="rounded-lg bg-n-solid-2 border border-n-weak p-3 cursor-grab">
+              <p class="text-xs text-n-slate-11">#{{ element.id }} · {{ element.prio }}</p>
+              <p class="text-sm text-n-slate-12">{{ element.cat }}</p>
+              <p class="text-xs text-n-slate-11 mt-1">{{ element.sol }} · {{ element.sector }}</p>
+            </div>
+          </template>
+        </Draggable>
       </div>
     </div>
   </div>

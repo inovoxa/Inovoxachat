@@ -97,6 +97,7 @@ Rails.application.routes.draw do
             resource :config, only: [:show, :update], controller: 'configs' do
               get :status
             end
+            resource :overview, only: [:show], controller: 'overview'
             resources :tickets, only: [:index] do
               member do
                 patch :status

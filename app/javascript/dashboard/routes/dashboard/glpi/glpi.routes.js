@@ -1,5 +1,6 @@
 import { frontendURL } from '../../../helper/URLHelper';
 
+import VisaoGeral from './pages/VisaoGeral.vue';
 import ChamadosIndex from './pages/ChamadosIndex.vue';
 import KanbanBoard from './pages/KanbanBoard.vue';
 import AgenteIA from './pages/AgenteIA.vue';
@@ -10,6 +11,12 @@ const meta = { permissions: ['administrator', 'agent'] };
 const adminMeta = { permissions: ['administrator'] };
 
 export const routes = [
+  {
+    path: frontendURL('accounts/:accountId/glpi/visao-geral'),
+    name: 'glpi_overview',
+    component: VisaoGeral,
+    meta,
+  },
   {
     path: frontendURL('accounts/:accountId/glpi/chamados'),
     name: 'glpi_chamados',

@@ -438,8 +438,13 @@ const menuItems = computed(() => {
       name: 'GLPI',
       icon: 'i-lucide-ticket',
       label: 'GLPI',
-      activeOn: ['glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_aprovadores', 'glpi_config'],
+      activeOn: ['glpi_overview', 'glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_aprovadores', 'glpi_config'],
       children: [
+        {
+          name: 'GLPI Visão Geral',
+          label: 'Visão Geral',
+          to: accountScopedRoute('glpi_overview'),
+        },
         {
           name: 'GLPI Chamados',
           label: 'Chamados',
