@@ -28,6 +28,10 @@ class GlpiAPI extends ApiClient {
     return axios.get(`${this.url}/tickets`, { params });
   }
 
+  getTicket(id) {
+    return axios.get(`${this.url}/tickets/${id}`);
+  }
+
   updateTicketStatus(id, status) {
     return axios.patch(`${this.url}/tickets/${id}/status`, { status });
   }
