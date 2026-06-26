@@ -92,6 +92,18 @@ Rails.application.routes.draw do
               post :follow_up
             end
           end
+          # Integração GLPI (multi-empresa): proxy para a Central da conta.
+          namespace :glpi do
+            resource :config, only: [:show, :update], controller: 'configs' do
+              get :status
+            end
+            resources :tickets, only: [:index] do
+              member do
+                patch :status
+              end
+            end
+            resource :agente, only: [:show], controller: 'agente'
+          end
           resource :saml_settings, only: [:show, :create, :update, :destroy]
           resources :agent_bots, only: [:index, :create, :show, :update, :destroy] do
             delete :avatar, on: :member
