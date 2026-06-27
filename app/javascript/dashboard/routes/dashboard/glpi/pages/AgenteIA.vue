@@ -38,7 +38,7 @@ const horasData = computed(() => {
     datasets: [{ label: 'Horas', data: h.data, backgroundColor: '#4a9704', borderRadius: 4 }],
   };
 });
-const hasHoras = computed(() => (data.value?.horasMensais?.data || []).some(v => v > 0));
+const hasHoras = computed(() => (data.value?.horasMensais?.labels || []).length > 0);
 
 const opsData = computed(() => {
   const ops = data.value?.operacoes || [];

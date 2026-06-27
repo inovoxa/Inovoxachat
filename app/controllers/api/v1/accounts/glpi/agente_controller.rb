@@ -35,7 +35,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
       roi: { horas: horas, economia: horas * custo_h, minPorOp: min_op, custoHora: custo_h },
       horasMensais: {
         labels: diario.map { |d| ddmm(d['dia']) },
-        data: diario.map { |d| ((d['total'].to_i * min_op) / 60.0).round },
+        data: diario.map { |d| ((d['total'].to_i * min_op) / 60.0).round(1) },
       },
       glpiKpis: kpis,
       generatedAt: Time.current.iso8601,
