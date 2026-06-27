@@ -96,6 +96,7 @@ Rails.application.routes.draw do
           namespace :glpi do
             resource :config, only: [:show, :update], controller: 'configs' do
               get :status
+              get :test
             end
             resource :overview, only: [:show], controller: 'overview'
             resources :tickets, only: [:index, :show] do

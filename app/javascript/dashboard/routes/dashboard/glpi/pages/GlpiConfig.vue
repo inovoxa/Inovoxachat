@@ -55,6 +55,8 @@ const secretsInput = reactive({});
 const secretsPresent = reactive({});
 const loading = ref(true);
 const saving = ref(false);
+const testing = ref(false);
+const testResult = ref(null);
 const message = ref('');
 const isError = ref(false);
 
@@ -97,6 +99,21 @@ async function save() {
     message.value = e.response?.data?.error || e.message;
   } finally {
     saving.value = false;
+  }
+}
+
+async function testConnections() {
+  testing.value = true;
+  testResult.value = null;
+  message.value = '';
+  try {
+    const { data } = await GlpiAPI.testConfig();
+    testResult.value = data;
+  } catch (e) {
+    isError.value = true;
+    message.value = e.response?.data?.error || e.message;
+  } finally {
+    testing.value = false;
   }
 }
 
@@ -156,7 +173,7 @@ onMounted(load);
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-wrap">
         <button
           type="submit"
           :disabled="saving"
@@ -164,9 +181,25 @@ onMounted(load);
         >
           {{ saving ? 'Salvando…' : 'Salvar' }}
         </button>
+        <button
+          type="button"
+          :disabled="testing"
+          class="rounded-lg border border-n-weak px-4 py-2 text-sm text-n-slate-12 disabled:opacity-60"
+          @click="testConnections"
+        >
+          {{ testing ? 'Testando…' : 'Testar conexões' }}
+        </button>
         <span v-if="message" :class="isError ? 'text-red-500' : 'text-green-600'" class="text-sm">
           {{ message }}
         </span>
+      </div>
+
+      <div v-if="testResult" class="rounded-lg bg-n-alpha-black2 p-3 text-sm flex flex-col gap-1">
+        <div v-for="(r, k) in testResult" :key="k" class="flex gap-2 items-center">
+          <span :class="r.ok ? 'text-green-600' : 'text-red-500'">{{ r.ok ? '✓' : '✗' }}</span>
+          <span class="text-n-slate-12 uppercase">{{ k }}</span>
+          <span v-if="!r.ok" class="text-n-slate-11">— {{ r.detail }}</span>
+        </div>
       </div>
     </form>
   </div>

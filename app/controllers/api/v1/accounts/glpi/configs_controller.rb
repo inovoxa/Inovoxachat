@@ -3,7 +3,7 @@
 # settings = não-secretos (jsonb, pré-preenchidos por DEFAULT_SETTINGS).
 # secrets  = senhas (cifradas; nunca devolvidas — só a flag de presença).
 class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseController
-  before_action :check_admin_authorization?, only: [:update]
+  before_action :check_admin_authorization?, only: [:update, :test]
 
   # GET /api/v1/accounts/:account_id/glpi/config
   def show
@@ -33,7 +33,24 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
     render json: { enabled: cfg&.usable? || false }
   end
 
+  # GET /api/v1/accounts/:account_id/glpi/config/test  (testa cada conexão)
+  def test
+    cfg = find_or_build
+    render json: {
+      postgres: probe { c = Glpi::PgClient.new(cfg); c.query('SELECT 1'); c.close },
+      mysql: probe { m = Glpi::MysqlClient.new(cfg); m.query('SELECT 1'); m.close },
+      ssh: probe { Glpi::SshClient.new(cfg).run('echo ok') }
+    }
+  end
+
   private
+
+  def probe
+    yield
+    { ok: true }
+  rescue StandardError => e
+    { ok: false, detail: e.message }
+  end
 
   def find_or_build
     GlpiAccountConfig.find_or_initialize_by(account_id: current_account.id)
