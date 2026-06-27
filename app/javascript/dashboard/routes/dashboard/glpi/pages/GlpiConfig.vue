@@ -47,6 +47,8 @@ const SECRETS = [
   { key: 'GLPI_DB_PASSWORD', label: 'Senha do banco GLPI' },
   { key: 'PG_PASSWORD', label: 'Senha do PostgreSQL' },
   { key: 'AD_SSH_PASSWORD', label: 'Senha do AD (SSH)' },
+  { key: 'GLPI_APP_TOKEN', label: 'App-Token (API v1 GLPI)' },
+  { key: 'GLPI_USER_TOKEN', label: 'User-Token (API v1 GLPI)' },
 ];
 
 const enabled = ref(false);

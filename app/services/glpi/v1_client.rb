@@ -7,13 +7,19 @@ module Glpi
   class V1Client
     def initialize(cfg, pg)
       @base = cfg.effective_settings['GLPI_API_V1_URL'].to_s.gsub(%r{/+\z}, '')
-      row = pg.query('SELECT app_token, user_token FROM {s}.glpi_token_cache WHERE id = 1').first
-      unless row && row['app_token'].present? && row['user_token'].present?
-        raise 'tokens da API v1 ausentes em glpi_token_cache'
-      end
+      app = cfg.secret('GLPI_APP_TOKEN')
+      user = cfg.secret('GLPI_USER_TOKEN')
 
-      @app_token = row['app_token']
-      @user_token = row['user_token']
+      if app.blank? || user.blank?
+        # Fallback: tokens do glpi_token_cache (compatível com a Central/n8n).
+        row = pg.query('SELECT app_token, user_token FROM {s}.glpi_token_cache WHERE id = 1').first
+        app = app.presence || (row && row['app_token'])
+        user = user.presence || (row && row['user_token'])
+      end
+      raise 'tokens da API v1 ausentes (defina App-Token/User-Token na Configuração ou no glpi_token_cache)' if app.blank? || user.blank?
+
+      @app_token = app
+      @user_token = user
     end
 
     def update_ticket_status(ticket_id, status)
