@@ -21,6 +21,7 @@ let searchTimer = null;
 
 const COLS = [
   { key: 'id', label: '#' },
+  { key: 'local', label: 'Local' },
   { key: 'cat', label: 'Categoria' },
   { key: 'sol', label: 'Solicitante' },
   { key: 'assignee', label: 'Responsável' },
@@ -84,12 +85,12 @@ onMounted(load);
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-4">
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <h1 class="text-xl font-medium text-n-slate-12">Chamados (GLPI)</h1>
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center gap-2">
         <input
           v-model="search"
           type="search"
-          placeholder="Buscar por título ou #"
-          class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-56"
+          placeholder="Buscar título, solicitante, local ou #"
+          class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-64"
           @input="onSearch"
         />
         <PeriodFilter @change="onFilter" />
@@ -129,6 +130,7 @@ onMounted(load);
             @click="selectedId = row.id"
           >
             <td class="py-2 pr-3 text-n-slate-11">{{ row.id }}</td>
+            <td class="py-2 pr-3 text-n-slate-11">{{ row.local }}</td>
             <td class="py-2 pr-3 text-n-slate-12">{{ row.cat }}</td>
             <td class="py-2 pr-3 text-n-slate-11">{{ row.sol }}</td>
             <td class="py-2 pr-3 text-n-slate-11">{{ row.assignee }}</td>

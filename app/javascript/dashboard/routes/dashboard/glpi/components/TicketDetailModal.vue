@@ -31,7 +31,8 @@ watch(
       const { data } = await GlpiAPI.getTicket(id);
       detail.value = data;
     } catch (e) {
-      error.value = e.response?.data?.error || e.message;
+      const d = e.response?.data;
+      error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
     } finally {
       loading.value = false;
     }

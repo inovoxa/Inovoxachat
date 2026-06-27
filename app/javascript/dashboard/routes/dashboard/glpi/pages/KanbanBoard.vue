@@ -88,12 +88,12 @@ onMounted(load);
         Kanban (GLPI)
         <span v-if="saving" class="text-xs text-n-slate-11">· salvando…</span>
       </h1>
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex items-center gap-2">
         <input
           v-model="search"
           type="search"
-          placeholder="Buscar por título ou #"
-          class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-56"
+          placeholder="Buscar título, solicitante, local ou #"
+          class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-64"
           @input="onSearch"
         />
         <PeriodFilter @change="onFilter" />

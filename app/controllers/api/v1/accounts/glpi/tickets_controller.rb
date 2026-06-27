@@ -46,10 +46,11 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
       d = ticket_detail(my, id)
       return render(json: { error: 'chamado não encontrado' }, status: :not_found) unless d
 
-      fups = ticket_followups(my, id)
-      tasks = ticket_tasks(my, id)
-      sols = ticket_solution(my, id)
-      docs = ticket_documents(my, id)
+      # Partes da timeline são opcionais: se uma falhar, mostra o resto.
+      fups = safe { ticket_followups(my, id) }
+      tasks = safe { ticket_tasks(my, id) }
+      sols = safe { ticket_solution(my, id) }
+      docs = safe { ticket_documents(my, id) }
     ensure
       my.close
     end
@@ -96,12 +97,22 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
 
   private
 
+  def safe(default = [])
+    yield
+  rescue StandardError
+    default
+  end
+
   def list_tickets(my, from_my, to_my, search, limit)
     where = ['t.is_deleted = 0', "t.date >= '#{my.escape(from_my)}'", "t.date <= '#{my.escape(to_my)}'"]
     if search.present?
       q = my.escape(search)
       qid = search.match?(/\A\d+\z/) ? search.to_i : -1
-      where << "(t.name LIKE '%#{q}%' OR t.id = #{qid})"
+      # Busca por título, #, local ou nome do solicitante.
+      where << "(t.name LIKE '%#{q}%' OR t.id = #{qid} OR l.completename LIKE '%#{q}%' " \
+               "OR EXISTS (SELECT 1 FROM glpi_tickets_users tus JOIN glpi_users uss ON uss.id = tus.users_id " \
+               "WHERE tus.tickets_id = t.id AND tus.type = 1 AND " \
+               "(uss.name LIKE '%#{q}%' OR CONCAT_WS(' ', uss.firstname, uss.realname) LIKE '%#{q}%')))"
     end
 
     my.query(<<~SQL)
