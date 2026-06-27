@@ -20,18 +20,20 @@ COLUMNS.forEach(c => {
   columns[c.key] = [];
 });
 const filterParams = ref({ period: '180d' });
+const search = ref('');
 const loading = ref(true);
 const saving = ref(false);
 const notConfigured = ref(false);
 const error = ref('');
 const selectedId = ref(null);
+let searchTimer = null;
 
 async function load() {
   loading.value = true;
   error.value = '';
   notConfigured.value = false;
   try {
-    const { data } = await GlpiAPI.getTickets({ ...filterParams.value });
+    const { data } = await GlpiAPI.getTickets({ ...filterParams.value, search: search.value || undefined });
     COLUMNS.forEach(c => {
       columns[c.key] = [];
     });
@@ -49,6 +51,11 @@ async function load() {
 function onFilter(params) {
   filterParams.value = params;
   load();
+}
+
+function onSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(load, 400);
 }
 
 async function onChange(colKey, evt) {
@@ -81,7 +88,16 @@ onMounted(load);
         Kanban (GLPI)
         <span v-if="saving" class="text-xs text-n-slate-11">· salvando…</span>
       </h1>
-      <PeriodFilter @change="onFilter" />
+      <div class="flex items-center gap-2 flex-wrap">
+        <input
+          v-model="search"
+          type="search"
+          placeholder="Buscar por título ou #"
+          class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-56"
+          @input="onSearch"
+        />
+        <PeriodFilter @change="onFilter" />
+      </div>
     </div>
 
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
