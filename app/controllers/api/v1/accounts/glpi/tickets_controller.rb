@@ -1,7 +1,6 @@
 # Chamados e Kanban: leitura DIRETA do MySQL do GLPI (+ enriquecimento por chamados_log
 # no PostgreSQL) e write-back de status via API v1. Porta tickets.js/ticketQueries.js da Central.
 class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::BaseController
-  DAYS = { '7d' => 7, '30d' => 30, '90d' => 90, '180d' => 180 }.freeze
   STLABEL = {
     'aberto' => 'Aberto', 'aguardando_aprovacao' => 'Aguardando aprovação',
     'em_execucao' => 'Em execução', 'resolvido' => 'Resolvido', 'violou_sla' => 'Violou SLA'
@@ -19,14 +18,15 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
 
   # GET /api/v1/accounts/:account_id/glpi/tickets?period=180d&search=
   def index
-    period = DAYS.key?(params[:period]) ? params[:period] : '180d'
-    desde = (Time.current - DAYS[period].days).strftime('%Y-%m-%d %H:%M:%S')
+    from, to = date_range
+    from_my = from.strftime('%Y-%m-%d %H:%M:%S')
+    to_my = to.strftime('%Y-%m-%d %H:%M:%S')
     search = params[:search].to_s.strip[0, 80].to_s
     limit = params[:limit].present? ? [[params[:limit].to_i, 1].max, 500].min : 300
 
     my = Glpi::MysqlClient.new(glpi_config)
     rows = begin
-      list_tickets(my, desde, search, limit)
+      list_tickets(my, from_my, to_my, search, limit)
     ensure
       my.close
     end
@@ -96,8 +96,8 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
 
   private
 
-  def list_tickets(my, desde, search, limit)
-    where = ['t.is_deleted = 0', "t.date >= '#{my.escape(desde)}'"]
+  def list_tickets(my, from_my, to_my, search, limit)
+    where = ['t.is_deleted = 0', "t.date >= '#{my.escape(from_my)}'", "t.date <= '#{my.escape(to_my)}'"]
     if search.present?
       q = my.escape(search)
       qid = search.match?(/\A\d+\z/) ? search.to_i : -1

@@ -2,7 +2,9 @@
 import { reactive, ref, onMounted } from 'vue';
 import Draggable from 'vuedraggable';
 import GlpiAPI from 'dashboard/api/glpi';
-import { PRIO_COLOR, slaBarColor, COL_ACCENT } from '../helpers';
+import { PRIO_COLOR, slaBarColor, KANBAN_COLOR } from '../helpers';
+import PeriodFilter from '../components/PeriodFilter.vue';
+import TicketDetailModal from '../components/TicketDetailModal.vue';
 
 const COLUMNS = [
   { key: 'aberto', label: 'Aberto' },
@@ -17,18 +19,19 @@ const columns = reactive({});
 COLUMNS.forEach(c => {
   columns[c.key] = [];
 });
-const period = ref('180d');
+const filterParams = ref({ period: '180d' });
 const loading = ref(true);
 const saving = ref(false);
 const notConfigured = ref(false);
 const error = ref('');
+const selectedId = ref(null);
 
 async function load() {
   loading.value = true;
   error.value = '';
   notConfigured.value = false;
   try {
-    const { data } = await GlpiAPI.getTickets({ period: period.value });
+    const { data } = await GlpiAPI.getTickets({ ...filterParams.value });
     COLUMNS.forEach(c => {
       columns[c.key] = [];
     });
@@ -41,6 +44,11 @@ async function load() {
   } finally {
     loading.value = false;
   }
+}
+
+function onFilter(params) {
+  filterParams.value = params;
+  load();
 }
 
 async function onChange(colKey, evt) {
@@ -57,7 +65,7 @@ async function onChange(colKey, evt) {
     await GlpiAPI.updateTicketStatus(card.id, colKey);
   } catch (e) {
     error.value = e.response?.data?.error || e.message;
-    await load(); // reverte visualmente
+    await load();
   } finally {
     saving.value = false;
   }
@@ -68,21 +76,12 @@ onMounted(load);
 
 <template>
   <div class="flex flex-col w-full h-full overflow-hidden p-6 gap-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
       <h1 class="text-xl font-medium text-n-slate-12">
         Kanban (GLPI)
         <span v-if="saving" class="text-xs text-n-slate-11">· salvando…</span>
       </h1>
-      <select
-        v-model="period"
-        class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1 text-n-slate-12"
-        @change="load"
-      >
-        <option value="7d">Últimos 7 dias</option>
-        <option value="30d">Últimos 30 dias</option>
-        <option value="90d">Últimos 90 dias</option>
-        <option value="180d">Últimos 180 dias</option>
-      </select>
+      <PeriodFilter @change="onFilter" />
     </div>
 
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
@@ -90,21 +89,27 @@ onMounted(load);
 
     <div v-else-if="notConfigured" class="text-n-slate-11">
       A integração GLPI ainda não foi configurada para esta empresa.
-      <router-link :to="{ name: 'glpi_config' }" class="text-woot-500 underline">
-        Configurar agora
-      </router-link>
+      <router-link :to="{ name: 'glpi_config' }" class="text-woot-500 underline">Configurar agora</router-link>
     </div>
 
     <div v-else class="flex gap-4 overflow-x-auto h-full pb-2">
       <div
         v-for="col in COLUMNS"
         :key="col.key"
-        class="flex flex-col w-72 shrink-0 rounded-xl bg-n-alpha-black2 p-3 gap-2 border-t-2"
-        :class="COL_ACCENT[col.key]"
+        class="flex flex-col w-72 shrink-0 rounded-xl bg-n-alpha-black2 p-3 gap-2 border-t-4"
+        :style="{ borderTopColor: KANBAN_COLOR[col.key] }"
       >
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-n-slate-12">{{ col.label }}</span>
-          <span class="text-xs text-n-slate-11">{{ columns[col.key].length }}</span>
+          <span class="text-sm font-semibold flex items-center gap-2" :style="{ color: KANBAN_COLOR[col.key] }">
+            <span class="w-2 h-2 rounded-full" :style="{ backgroundColor: KANBAN_COLOR[col.key] }" />
+            {{ col.label }}
+          </span>
+          <span
+            class="text-xs px-1.5 rounded-full"
+            :style="{ color: KANBAN_COLOR[col.key], backgroundColor: KANBAN_COLOR[col.key] + '22' }"
+          >
+            {{ columns[col.key].length }}
+          </span>
         </div>
         <Draggable
           v-model="columns[col.key]"
@@ -114,7 +119,10 @@ onMounted(load);
           @change="e => onChange(col.key, e)"
         >
           <template #item="{ element }">
-            <div class="rounded-lg bg-n-solid-2 border border-n-weak p-3 cursor-grab flex flex-col gap-1">
+            <div
+              class="rounded-lg bg-n-solid-2 border border-n-weak p-3 cursor-grab flex flex-col gap-1 hover:border-n-slate-7"
+              @click="selectedId = element.id"
+            >
               <div class="flex items-center justify-between">
                 <span class="text-xs text-n-slate-11">#{{ element.id }}</span>
                 <span class="text-xs font-medium" :class="PRIO_COLOR[element.prio]">{{ element.prio }}</span>
@@ -129,5 +137,7 @@ onMounted(load);
         </Draggable>
       </div>
     </div>
+
+    <TicketDetailModal v-if="selectedId" :ticket-id="selectedId" @close="selectedId = null" />
   </div>
 </template>

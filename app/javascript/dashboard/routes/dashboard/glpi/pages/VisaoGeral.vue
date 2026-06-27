@@ -11,11 +11,12 @@ import {
   LinearScale,
 } from 'chart.js';
 import GlpiAPI from 'dashboard/api/glpi';
+import PeriodFilter from '../components/PeriodFilter.vue';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const data = ref(null);
-const period = ref('180d');
+const filterParams = ref({ period: '180d' });
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');
@@ -55,7 +56,7 @@ async function load() {
   error.value = '';
   notConfigured.value = false;
   try {
-    const resp = await GlpiAPI.getOverview({ period: period.value });
+    const resp = await GlpiAPI.getOverview({ ...filterParams.value });
     data.value = resp.data;
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
@@ -65,6 +66,11 @@ async function load() {
   }
 }
 
+function onFilter(params) {
+  filterParams.value = params;
+  load();
+}
+
 onMounted(load);
 </script>
 
@@ -72,16 +78,7 @@ onMounted(load);
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-4">
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-medium text-n-slate-12">Visão Geral (GLPI)</h1>
-      <select
-        v-model="period"
-        class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1 text-n-slate-12"
-        @change="load"
-      >
-        <option value="7d">Últimos 7 dias</option>
-        <option value="30d">Últimos 30 dias</option>
-        <option value="90d">Últimos 90 dias</option>
-        <option value="180d">Últimos 180 dias</option>
-      </select>
+      <PeriodFilter @change="onFilter" />
     </div>
 
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>

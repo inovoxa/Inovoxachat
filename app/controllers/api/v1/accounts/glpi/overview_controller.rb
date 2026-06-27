@@ -1,20 +1,19 @@
 # Visão Geral: KPIs de chamados (MySQL GLPI) + execuções/canais (PostgreSQL n8n).
 # Sem auditoria de usuário (logon/bloqueio do AD) — escopo definido pelo produto.
 class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::BaseController
-  DAYS = { '7d' => 7, '30d' => 30, '90d' => 90, '180d' => 180 }.freeze
-
-  # GET /api/v1/accounts/:account_id/glpi/overview?period=180d
+  # GET /api/v1/accounts/:account_id/glpi/overview?period=180d  (ou ?from=&to=)
   def show
-    period = DAYS.key?(params[:period]) ? params[:period] : '180d'
-    desde_my = (Time.current - DAYS[period].days).strftime('%Y-%m-%d %H:%M:%S')
-    start_iso = (Time.current - DAYS[period].days).utc.iso8601
+    from, to = date_range
+    from_my = from.strftime('%Y-%m-%d %H:%M:%S')
+    to_my = to.strftime('%Y-%m-%d %H:%M:%S')
+    from_iso = from.utc.iso8601
+    to_iso = to.utc.iso8601
 
-    mysql = ticket_mysql(desde_my)
-    exec_ad, semanal = pg_metrics(start_iso)
+    mysql = ticket_mysql(from_my, to_my)
+    exec_ad, semanal = pg_metrics(from_iso, to_iso)
     counts = mysql[:counts]
 
     render json: {
-      period: period,
       cards: {
         total: counts['total'].to_i,
         abertos: counts['abertos'].to_i,
@@ -31,21 +30,22 @@ class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::Bas
 
   private
 
-  def ticket_mysql(desde_my)
+  def ticket_mysql(from_my, to_my)
     my = Glpi::MysqlClient.new(glpi_config)
-    desde = my.escape(desde_my)
+    f_esc = my.escape(from_my)
+    t_esc = my.escape(to_my)
     counts = my.query(<<~SQL).first || {}
       SELECT COUNT(*) AS total,
              SUM(status IN (1, 2, 3, 4)) AS abertos,
              SUM(status IN (5, 6)) AS resolvidos
         FROM glpi_tickets
-       WHERE is_deleted = 0 AND date >= '#{desde}'
+       WHERE is_deleted = 0 AND date >= '#{f_esc}' AND date <= '#{t_esc}'
     SQL
     cats = my.query(<<~SQL)
       SELECT COALESCE(c.completename, 'Sem categoria') AS cat, COUNT(*) AS total
         FROM glpi_tickets t
         LEFT JOIN glpi_itilcategories c ON c.id = t.itilcategories_id
-       WHERE t.is_deleted = 0 AND t.date >= '#{desde}'
+       WHERE t.is_deleted = 0 AND t.date >= '#{f_esc}' AND t.date <= '#{t_esc}'
        GROUP BY cat ORDER BY total DESC LIMIT 6
     SQL
     {
@@ -60,9 +60,9 @@ class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::Bas
     cat.to_s.split('>').last.to_s.strip.presence || 'Sem categoria'
   end
 
-  def pg_metrics(start_iso)
+  def pg_metrics(from_iso, to_iso)
     pg = Glpi::PgClient.new(glpi_config)
-    e = pg.query('SELECT COUNT(*)::int AS c FROM {s}.chamados_log WHERE ad_executado AND ad_executado_em >= $1', [start_iso]).first
+    e = pg.query('SELECT COUNT(*)::int AS c FROM {s}.chamados_log WHERE ad_executado AND ad_executado_em >= $1 AND ad_executado_em <= $2', [from_iso, to_iso]).first
     [e['c'].to_i, weekly_channel(pg)]
   ensure
     pg&.close

@@ -1,18 +1,17 @@
 # Agente IA: conexão DIRETA ao PostgreSQL do n8n (chamados_log + glpi_categorias).
 # Porta a lógica de backend/src/db/agenteQueries.js + ROI de routes/agente.js.
 class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseController
-  DAYS = { '7d' => 7, '30d' => 30, '90d' => 90, '180d' => 180 }.freeze
-
-  # GET /api/v1/accounts/:account_id/glpi/agente?period=180d
+  # GET /api/v1/accounts/:account_id/glpi/agente?period=180d  (ou ?from=&to=)
   def show
-    period = DAYS.key?(params[:period]) ? params[:period] : '180d'
-    start_iso = (Time.current - DAYS[period].days).utc.iso8601
+    from, to = date_range
+    from_iso = from.utc.iso8601
+    to_iso = to.utc.iso8601
 
     pg = Glpi::PgClient.new(glpi_config)
     begin
-      ms = period_stats(pg, start_iso)
-      ops = operacoes(pg, start_iso)
-      diario = exec_diario(pg, start_iso)
+      ms = period_stats(pg, from_iso, to_iso)
+      ops = operacoes(pg, from_iso, to_iso)
+      diario = exec_diario(pg, from_iso, to_iso)
     ensure
       pg.close
     end
@@ -24,7 +23,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
     sem_humano = ms[:total].positive? ? (ms[:automated] * 100.0 / ms[:total]).round : nil
 
     render json: {
-      period: period,
+      period: params[:period],
       cards: {
         conversas: ms[:conversas],
         semHumanoPct: sem_humano,
@@ -45,7 +44,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
 
   private
 
-  def period_stats(pg, start_iso)
+  def period_stats(pg, from_iso, to_iso)
     sql = <<~SQL
       SELECT COUNT(*)::int AS total,
              COUNT(DISTINCT conversa_id)::int AS conversas,
@@ -53,9 +52,9 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
              AVG(EXTRACT(EPOCH FROM (ad_executado_em - created_at)))
                FILTER (WHERE ad_executado AND ad_executado_em IS NOT NULL AND created_at IS NOT NULL) AS avg_seg
         FROM {s}.chamados_log
-       WHERE created_at >= $1
+       WHERE created_at >= $1 AND created_at <= $2
     SQL
-    r = pg.query(sql, [start_iso]).first || {}
+    r = pg.query(sql, [from_iso, to_iso]).first || {}
     {
       total: r['total'].to_i,
       conversas: r['conversas'].to_i,
@@ -64,25 +63,25 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
     }
   end
 
-  def operacoes(pg, start_iso)
+  def operacoes(pg, from_iso, to_iso)
     sql = <<~SQL
       SELECT COALESCE(cat.nome, 'Categoria ' || cl.glpi_category_id) AS nome, COUNT(*)::int AS total
         FROM {s}.chamados_log cl
         LEFT JOIN {s}.glpi_categorias cat ON cat.glpi_category_id = cl.glpi_category_id
-       WHERE cl.created_at >= $1
+       WHERE cl.created_at >= $1 AND cl.created_at <= $2
        GROUP BY 1 ORDER BY total DESC LIMIT 10
     SQL
-    pg.query(sql, [start_iso]).map { |x| { nome: x['nome'], total: x['total'].to_i } }
+    pg.query(sql, [from_iso, to_iso]).map { |x| { nome: x['nome'], total: x['total'].to_i } }
   end
 
-  def exec_diario(pg, start_iso)
+  def exec_diario(pg, from_iso, to_iso)
     sql = <<~SQL
       SELECT to_char(date_trunc('day', ad_executado_em), 'YYYY-MM-DD') AS dia, COUNT(*)::int AS total
         FROM {s}.chamados_log
-       WHERE ad_executado AND ad_executado_em >= $1
+       WHERE ad_executado AND ad_executado_em >= $1 AND ad_executado_em <= $2
        GROUP BY dia ORDER BY dia
     SQL
-    pg.query(sql, [start_iso])
+    pg.query(sql, [from_iso, to_iso])
   end
 
   def fmt_dur(seg)

@@ -9,13 +9,13 @@ export const STATUS_BADGE = {
   violou_sla: 'bg-red-100 text-red-700',
 };
 
-// Cor de destaque (topo) da coluna do Kanban por status.
-export const COL_ACCENT = {
-  aberto: 'border-t-slate-400',
-  aguardando_aprovacao: 'border-t-yellow-500',
-  em_execucao: 'border-t-woot-500',
-  resolvido: 'border-t-green-500',
-  violou_sla: 'border-t-red-500',
+// Cor (hex) da coluna do Kanban por status — paleta vibrante (igual à Central).
+export const KANBAN_COLOR = {
+  aberto: '#5B7FDE',
+  aguardando_aprovacao: '#FFB454',
+  em_execucao: '#00D9C0',
+  resolvido: '#3ddc97',
+  violou_sla: '#ff6b81',
 };
 
 // Cor do texto por rótulo de prioridade.
