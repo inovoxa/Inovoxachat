@@ -26,7 +26,7 @@ class Api::V1::Accounts::Glpi::BaseController < Api::V1::Accounts::BaseControlle
       to = ((Time.zone.parse(params[:to].to_s) rescue nil) || Time.current).end_of_day
       from <= to ? [from, to] : [to.beginning_of_day, from.end_of_day]
     else
-      n = PERIOD_DAYS[params[:period]] || 180
+      n = PERIOD_DAYS[params[:period]] || 90
       [n.days.ago, Time.current]
     end
   end

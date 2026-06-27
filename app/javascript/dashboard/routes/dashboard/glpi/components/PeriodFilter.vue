@@ -4,7 +4,7 @@ import { PERIOD_OPTIONS } from '../helpers';
 
 const emit = defineEmits(['change']);
 
-const mode = ref('180d'); // preset ('7d'...) ou 'custom'
+const mode = ref('90d'); // preset ('7d'...) ou 'custom'
 const from = ref('');
 const to = ref('');
 

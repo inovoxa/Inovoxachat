@@ -26,6 +26,13 @@ export const PRIO_COLOR = {
   Crítica: 'text-red-600',
 };
 
+// Indicador de validação/aprovação do chamado (ícone + texto + cor).
+export const VALIDACAO = {
+  aguardando: { label: 'Esperando validação', cls: 'text-yellow-600', icon: '⏳' },
+  concedida: { label: 'Concedida', cls: 'text-green-600', icon: '✓' },
+  recusada: { label: 'Recusada', cls: 'text-red-600', icon: '✕' },
+};
+
 // Cor da barra de SLA conforme o percentual restante.
 export function slaBarColor(pct) {
   if (pct == null) return 'bg-slate-300';

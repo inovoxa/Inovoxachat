@@ -16,7 +16,7 @@ import PeriodFilter from '../components/PeriodFilter.vue';
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const data = ref(null);
-const filterParams = ref({ period: '180d' });
+const filterParams = ref({ period: '90d' });
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');

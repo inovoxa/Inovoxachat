@@ -16,37 +16,41 @@ import PeriodFilter from '../components/PeriodFilter.vue';
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 const data = ref(null);
-const filterParams = ref({ period: '180d' });
+const filterParams = ref({ period: '90d' });
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');
 
-const chartData = computed(() => {
+const cards = computed(() => {
+  const c = data.value?.cards || {};
+  return [
+    { label: 'Conversas', value: c.conversas ?? 0 },
+    { label: 'Sem intervenção humana', value: c.semHumanoPct != null ? `${c.semHumanoPct}%` : '—' },
+    { label: 'Tempo médio de execução', value: c.tempoMedio || '—' },
+    { label: 'Execuções no AD', value: c.execucoesAD ?? 0 },
+  ];
+});
+
+const horasData = computed(() => {
   const h = data.value?.horasMensais || { labels: [], data: [] };
   return {
     labels: h.labels,
-    datasets: [{ label: 'Horas economizadas', data: h.data, backgroundColor: '#4a9704' }],
+    datasets: [{ label: 'Horas', data: h.data, backgroundColor: '#4a9704', borderRadius: 4 }],
   };
 });
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-};
+const hasHoras = computed(() => (data.value?.horasMensais?.data || []).some(v => v > 0));
 
 const opsData = computed(() => {
   const ops = data.value?.operacoes || [];
   return {
     labels: ops.map(o => o.nome),
-    datasets: [{ label: 'Operações', data: ops.map(o => o.total), backgroundColor: '#4a9704' }],
+    datasets: [{ label: 'Operações', data: ops.map(o => o.total), backgroundColor: '#5B7FDE', borderRadius: 4 }],
   };
 });
-const opsOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  indexAxis: 'y',
-  plugins: { legend: { display: false } },
-};
+const hasOps = computed(() => (data.value?.operacoes || []).length > 0);
+
+const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+const barOptsH = { ...barOpts, indexAxis: 'y' };
 
 async function load() {
   loading.value = true;
@@ -72,8 +76,8 @@ onMounted(load);
 </script>
 
 <template>
-  <div class="flex flex-col w-full h-full overflow-auto p-6 gap-4">
-    <div class="flex items-center justify-between">
+  <div class="flex flex-col w-full h-full overflow-auto p-6 gap-5">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
       <h1 class="text-xl font-medium text-n-slate-12">Agente IA (GLPI)</h1>
       <PeriodFilter @change="onFilter" />
     </div>
@@ -82,62 +86,56 @@ onMounted(load);
 
     <div v-else-if="notConfigured" class="text-n-slate-11">
       A integração GLPI ainda não foi configurada para esta empresa.
-      <router-link :to="{ name: 'glpi_config' }" class="text-woot-500 underline">
-        Configurar agora
-      </router-link>
+      <router-link :to="{ name: 'glpi_config' }" class="text-woot-500 underline">Configurar agora</router-link>
     </div>
 
     <p v-else-if="error" class="text-red-500">{{ error }}</p>
 
     <template v-else-if="data">
+      <!-- KPIs -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Conversas</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.conversas }}</p>
-        </div>
-        <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Sem intervenção humana</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.semHumanoPct ?? '—' }}%</p>
-        </div>
-        <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Tempo médio de execução</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.tempoMedio }}</p>
-        </div>
-        <div class="rounded-xl bg-n-alpha-black2 p-4">
-          <p class="text-xs text-n-slate-11">Execuções no AD</p>
-          <p class="text-2xl font-semibold text-n-slate-12">{{ data.cards.execucoesAD }}</p>
+        <div v-for="c in cards" :key="c.label" class="rounded-xl bg-n-alpha-black2 p-4 flex flex-col gap-1">
+          <p class="text-xs text-n-slate-11">{{ c.label }}</p>
+          <p class="text-2xl font-semibold text-n-slate-12">{{ c.value }}</p>
         </div>
       </div>
 
-      <div class="rounded-xl bg-n-alpha-black2 p-4">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">ROI estimado</p>
-        <p class="text-sm text-n-slate-11">
-          {{ data.roi.horas }} h economizadas ·
-          R$ {{ data.roi.economia }} ({{ data.roi.minPorOp }} min/op · R$ {{ data.roi.custoHora }}/h)
+      <!-- ROI -->
+      <div class="rounded-xl p-5 flex flex-wrap items-center gap-6 bg-woot-50 border border-woot-100">
+        <div>
+          <p class="text-xs text-n-slate-11">Horas economizadas</p>
+          <p class="text-3xl font-bold text-woot-700">{{ data.roi.horas }} h</p>
+        </div>
+        <div>
+          <p class="text-xs text-n-slate-11">Economia estimada</p>
+          <p class="text-3xl font-bold text-woot-700">R$ {{ data.roi.economia }}</p>
+        </div>
+        <p class="text-xs text-n-slate-11 ml-auto">
+          Base: {{ data.roi.minPorOp }} min por operação · R$ {{ data.roi.custoHora }}/hora
         </p>
       </div>
 
-      <div class="rounded-xl bg-n-alpha-black2 p-4 h-72">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">Horas economizadas por dia</p>
-        <div class="h-56">
-          <Bar :data="chartData" :options="chartOptions" />
+      <!-- Gráficos -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="rounded-xl bg-n-alpha-black2 p-4 h-80 flex flex-col">
+          <p class="text-sm font-medium text-n-slate-12 mb-2">Horas economizadas por dia</p>
+          <div v-if="hasHoras" class="flex-1 min-h-0">
+            <Bar :data="horasData" :options="barOpts" />
+          </div>
+          <p v-else class="flex-1 grid place-items-center text-sm text-n-slate-11">
+            Sem execuções de AD no período.
+          </p>
         </div>
-      </div>
 
-      <div class="rounded-xl bg-n-alpha-black2 p-4">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">Operações por tipo</p>
-        <div v-if="data.operacoes.length" class="h-56 mb-3">
-          <Bar :data="opsData" :options="opsOptions" />
+        <div class="rounded-xl bg-n-alpha-black2 p-4 h-80 flex flex-col">
+          <p class="text-sm font-medium text-n-slate-12 mb-2">Operações por tipo</p>
+          <div v-if="hasOps" class="flex-1 min-h-0">
+            <Bar :data="opsData" :options="barOptsH" />
+          </div>
+          <p v-else class="flex-1 grid place-items-center text-sm text-n-slate-11">
+            Sem operações no período.
+          </p>
         </div>
-        <div
-          v-for="op in data.operacoes"
-          :key="op.nome"
-          class="flex justify-between text-sm py-1 border-b border-n-weak/40"
-        >
-          <span class="text-n-slate-11">{{ op.nome }}</span>
-          <span class="text-n-slate-12">{{ op.total }}</span>
-        </div>
-        <p v-if="!data.operacoes.length" class="text-sm text-n-slate-11">Sem dados no período.</p>
       </div>
     </template>
   </div>

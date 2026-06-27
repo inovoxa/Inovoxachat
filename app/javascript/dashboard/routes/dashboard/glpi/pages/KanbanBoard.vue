@@ -2,15 +2,15 @@
 import { reactive, ref, onMounted } from 'vue';
 import Draggable from 'vuedraggable';
 import GlpiAPI from 'dashboard/api/glpi';
-import { PRIO_COLOR, slaBarColor, KANBAN_COLOR } from '../helpers';
+import { PRIO_COLOR, slaBarColor, KANBAN_COLOR, VALIDACAO } from '../helpers';
 import PeriodFilter from '../components/PeriodFilter.vue';
 import TicketDetailModal from '../components/TicketDetailModal.vue';
 
 const COLUMNS = [
   { key: 'aberto', label: 'Aberto' },
-  { key: 'aguardando_aprovacao', label: 'Aguardando aprovação' },
+  { key: 'aguardando_aprovacao', label: 'Pendente' },
   { key: 'em_execucao', label: 'Em execução' },
-  { key: 'resolvido', label: 'Resolvido' },
+  { key: 'resolvido', label: 'Fechado' },
   { key: 'violou_sla', label: 'Violou SLA' },
 ];
 const GRAVAVEL = ['aberto', 'aguardando_aprovacao', 'em_execucao', 'resolvido'];
@@ -19,7 +19,7 @@ const columns = reactive({});
 COLUMNS.forEach(c => {
   columns[c.key] = [];
 });
-const filterParams = ref({ period: '180d' });
+const filterParams = ref({ period: '90d' });
 const search = ref('');
 const loading = ref(true);
 const saving = ref(false);
@@ -146,6 +146,14 @@ onMounted(load);
               </div>
               <p class="text-sm text-n-slate-12">{{ element.cat }}</p>
               <p class="text-xs text-n-slate-11">{{ element.sol }} · {{ element.sector }}</p>
+              <span
+                v-if="element.validacao"
+                class="text-xs flex items-center gap-1 font-medium"
+                :class="VALIDACAO[element.validacao].cls"
+              >
+                <span>{{ VALIDACAO[element.validacao].icon }}</span>
+                {{ VALIDACAO[element.validacao].label }}
+              </span>
               <div v-if="element.sla != null" class="w-full h-1 rounded-full bg-n-slate-4 mt-1">
                 <div class="h-1 rounded-full" :class="slaBarColor(element.sla)" :style="{ width: element.sla + '%' }" />
               </div>

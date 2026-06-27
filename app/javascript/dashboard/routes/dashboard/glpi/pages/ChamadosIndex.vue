@@ -7,7 +7,7 @@ import TicketDetailModal from '../components/TicketDetailModal.vue';
 
 const tickets = ref([]);
 const total = ref(0);
-const filterParams = ref({ period: '180d' });
+const filterParams = ref({ period: '90d' });
 const search = ref('');
 const loading = ref(true);
 const notConfigured = ref(false);

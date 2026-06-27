@@ -2,8 +2,8 @@
 # no PostgreSQL) e write-back de status via API v1. Porta tickets.js/ticketQueries.js da Central.
 class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::BaseController
   STLABEL = {
-    'aberto' => 'Aberto', 'aguardando_aprovacao' => 'Aguardando aprovação',
-    'em_execucao' => 'Em execução', 'resolvido' => 'Resolvido', 'violou_sla' => 'Violou SLA'
+    'aberto' => 'Aberto', 'aguardando_aprovacao' => 'Pendente',
+    'em_execucao' => 'Em execução', 'resolvido' => 'Fechado', 'violou_sla' => 'Violou SLA'
   }.freeze
   NIVEL = { 1 => 'Muito baixa', 2 => 'Baixa', 3 => 'Média', 4 => 'Alta', 5 => 'Muito alta', 6 => 'Crítica' }.freeze
 
@@ -127,7 +127,8 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
       SELECT t.id, t.name AS titulo, t.date AS date, t.status AS glpi_status,
              t.priority AS priority, t.time_to_resolve AS ttr, t.solvedate AS solvedate,
              c.completename AS categoria, e.name AS entidade, l.completename AS local_,
-             #{SUB_TECHGROUP} AS grupo_tecnico, #{SUB_REQUESTER} AS solicitante, #{SUB_ASSIGNEE} AS assignee
+             #{SUB_TECHGROUP} AS grupo_tecnico, #{SUB_REQUESTER} AS solicitante, #{SUB_ASSIGNEE} AS assignee,
+             (SELECT tv.status FROM glpi_ticketvalidations tv WHERE tv.tickets_id = t.id ORDER BY tv.id DESC LIMIT 1) AS validacao_status
         FROM glpi_tickets t
         LEFT JOIN glpi_itilcategories c ON c.id = t.itilcategories_id
         LEFT JOIN glpi_entities e ON e.id = t.entities_id
@@ -224,8 +225,18 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
       sla: Glpi::TicketMap.sla_percent(date: row['date'], ttr: row['ttr'], solvedate: row['solvedate']),
       assignee: row['assignee'].presence || '—', prio: Glpi::TicketMap.priority_label(row['priority']),
       entidade: row['entidade'].presence || '—', local: row['local_'].presence || '—',
-      grupoTecnico: row['grupo_tecnico'].presence || '—', abertoRel: rel_time(row['date'])
+      grupoTecnico: row['grupo_tecnico'].presence || '—', abertoRel: rel_time(row['date']),
+      validacao: validacao_key(row['validacao_status'])
     }
+  end
+
+  # Status de validação/aprovação do GLPI (CommonITILValidation): 2=aguardando, 3=aceito, 4=recusado.
+  def validacao_key(st)
+    case st.to_i
+    when 2 then 'aguardando'
+    when 3 then 'concedida'
+    when 4 then 'recusada'
+    end
   end
 
   def strip_html(str)
