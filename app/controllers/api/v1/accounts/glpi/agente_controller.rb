@@ -13,6 +13,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
       ops = operacoes(pg, from_iso, to_iso)
       diario = exec_diario(pg, from_iso, to_iso)
       kpis = glpi_kpis(pg, from_iso, to_iso)
+      top_cats = top_categorias(pg, from_iso, to_iso)
     ensure
       pg.close
     end
@@ -38,6 +39,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
         data: diario.map { |d| ((d['total'].to_i * min_op) / 60.0).round(1) },
       },
       glpiKpis: kpis,
+      topCategorias: top_cats,
       generatedAt: Time.current.iso8601,
     }
   rescue PG::Error => e
@@ -123,6 +125,37 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
 
   def empty_kpis
     { gerados: 0, resolvidos: 0, taxaResolucao: nil, tempoMedioResolucao: '—' }
+  end
+
+  # Top categorias automatizadas com % de sucesso (gerados x resolvidos no GLPI).
+  def top_categorias(pg, from_iso, to_iso)
+    rows = pg.query(<<~SQL, [from_iso, to_iso])
+      SELECT cl.glpi_ticket_id, COALESCE(cat.nome, 'Categoria ' || cl.glpi_category_id) AS nome
+        FROM {s}.chamados_log cl
+        LEFT JOIN {s}.glpi_categorias cat ON cat.glpi_category_id = cl.glpi_category_id
+       WHERE cl.glpi_ticket_id IS NOT NULL AND cl.created_at >= $1 AND cl.created_at <= $2
+    SQL
+    by_cat = {}
+    rows.each { |r| (by_cat[r['nome']] ||= []) << r['glpi_ticket_id'].to_i }
+    ids = by_cat.values.flatten.reject(&:zero?).uniq
+    return [] if ids.empty?
+
+    resolved = resolved_map(ids)
+    by_cat.map do |nome, cat_ids|
+      total = cat_ids.size
+      res = cat_ids.count { |id| resolved[id] }
+      { nome: nome, total: total, resolvidos: res, sucesso: total.positive? ? (res * 100.0 / total).round : 0 }
+    end.sort_by { |x| -x[:total] }.first(6)
+  rescue StandardError
+    []
+  end
+
+  def resolved_map(ids)
+    my = Glpi::MysqlClient.new(glpi_config)
+    rows = my.query("SELECT id, (status IN (5, 6)) AS resolvido FROM glpi_tickets WHERE is_deleted = 0 AND id IN (#{ids.join(',')})")
+    rows.each_with_object({}) { |x, h| h[x['id'].to_i] = (x['resolvido'].to_i == 1) }
+  ensure
+    my&.close
   end
 
   def fmt_min(min)

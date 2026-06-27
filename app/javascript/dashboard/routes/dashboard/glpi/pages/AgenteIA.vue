@@ -49,6 +49,7 @@ const opsData = computed(() => {
 });
 const hasOps = computed(() => (data.value?.operacoes || []).length > 0);
 const glpiKpis = computed(() => data.value?.glpiKpis || {});
+const topCategorias = computed(() => data.value?.topCategorias || []);
 
 const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 const barOptsH = { ...barOpts, indexAxis: 'y' };
@@ -102,14 +103,14 @@ onMounted(load);
       </div>
 
       <!-- ROI -->
-      <div class="rounded-xl p-5 flex flex-wrap items-center gap-6 bg-woot-50 border border-woot-100">
+      <div class="rounded-xl p-5 flex flex-wrap items-center gap-6 bg-n-alpha-black2">
         <div>
           <p class="text-xs text-n-slate-11">Horas economizadas</p>
-          <p class="text-3xl font-bold text-woot-700">{{ data.roi.horas }} h</p>
+          <p class="text-3xl font-bold text-woot-500">{{ data.roi.horas }} h</p>
         </div>
         <div>
           <p class="text-xs text-n-slate-11">Economia estimada</p>
-          <p class="text-3xl font-bold text-woot-700">R$ {{ data.roi.economia }}</p>
+          <p class="text-3xl font-bold text-woot-500">R$ {{ data.roi.economia }}</p>
         </div>
         <p class="text-xs text-n-slate-11 ml-auto">
           Base: {{ data.roi.minPorOp }} min por operação · R$ {{ data.roi.custoHora }}/hora
@@ -163,6 +164,20 @@ onMounted(load);
           <p v-else class="flex-1 grid place-items-center text-sm text-n-slate-11">
             Sem operações no período.
           </p>
+        </div>
+      </div>
+
+      <div v-if="topCategorias.length" class="rounded-xl bg-n-alpha-black2 p-4">
+        <p class="text-sm font-medium text-n-slate-12 mb-3">Top categorias automatizadas — % de sucesso</p>
+        <div class="flex flex-col gap-2">
+          <div v-for="c in topCategorias" :key="c.nome" class="flex items-center gap-3 text-sm">
+            <span class="text-n-slate-12 flex-1 truncate">{{ c.nome }}</span>
+            <span class="text-n-slate-11 text-xs whitespace-nowrap">{{ c.resolvidos }}/{{ c.total }}</span>
+            <div class="w-24 h-1.5 rounded-full bg-n-slate-4">
+              <div class="h-1.5 rounded-full bg-woot-500" :style="{ width: c.sucesso + '%' }" />
+            </div>
+            <span class="text-n-slate-12 w-10 text-right">{{ c.sucesso }}%</span>
+          </div>
         </div>
       </div>
     </template>
