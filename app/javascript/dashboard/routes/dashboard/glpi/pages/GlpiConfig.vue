@@ -49,6 +49,8 @@ const SECRETS = [
   { key: 'AD_SSH_PASSWORD', label: 'Senha do AD (SSH)' },
   { key: 'GLPI_APP_TOKEN', label: 'App-Token (API v1 GLPI)' },
   { key: 'GLPI_USER_TOKEN', label: 'User-Token (API v1 GLPI)' },
+  { key: 'GLPI_OAUTH_CLIENT_ID', label: 'Client ID (OAuth API v2)' },
+  { key: 'GLPI_OAUTH_CLIENT_SECRET', label: 'Client Secret (OAuth API v2)' },
 ];
 
 const enabled = ref(false);

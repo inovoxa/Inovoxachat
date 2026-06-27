@@ -45,7 +45,11 @@ class GlpiAccountConfig < ApplicationRecord
   }.freeze
 
   # Segredos: nunca no código/Git. Pré-preenchem via ENV do deploy ou digitados na tela.
-  SECRET_KEYS = %w[GLPI_DB_PASSWORD PG_PASSWORD AD_SSH_PASSWORD GLPI_APP_TOKEN GLPI_USER_TOKEN].freeze
+  SECRET_KEYS = %w[
+    GLPI_DB_PASSWORD PG_PASSWORD AD_SSH_PASSWORD
+    GLPI_APP_TOKEN GLPI_USER_TOKEN
+    GLPI_OAUTH_CLIENT_ID GLPI_OAUTH_CLIENT_SECRET
+  ].freeze
 
   # Conta "modelo" (Prefeitura) que recebe os DEFAULT_SETTINGS pré-preenchidos, definida por
   # ENV GLPI_DEFAULT_ACCOUNT_ID. ISOLAMENTO: qualquer outra empresa NÃO herda nada da Prefeitura.
