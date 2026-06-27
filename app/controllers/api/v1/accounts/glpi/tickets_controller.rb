@@ -181,18 +181,17 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
     return {} if ids.empty?
 
     pg = Glpi::PgClient.new(glpi_config)
-    rows = begin
-      pg.query("SELECT glpi_ticket_id, secretaria, conversa_id FROM {s}.chamados_log WHERE glpi_ticket_id IN (#{ids.join(',')})")
-    ensure
-      pg.close
-    end
-
+    rows = pg.query("SELECT glpi_ticket_id, secretaria, conversa_id FROM {s}.chamados_log WHERE glpi_ticket_id IN (#{ids.join(',')})")
     rows.each_with_object({}) do |r, map|
       map[r['glpi_ticket_id'].to_i] = {
         secretaria: r['secretaria'],
         canal: r['conversa_id'].to_s.present? ? 'WhatsApp' : 'Formulário'
       }
     end
+  rescue StandardError
+    {} # enriquecimento é opcional: se o PostgreSQL falhar, mostra os chamados sem setor/canal
+  ensure
+    pg&.close
   end
 
   def shape(row, enrich)
