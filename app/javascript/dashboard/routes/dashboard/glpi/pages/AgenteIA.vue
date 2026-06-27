@@ -48,6 +48,7 @@ const opsData = computed(() => {
   };
 });
 const hasOps = computed(() => (data.value?.operacoes || []).length > 0);
+const glpiKpis = computed(() => data.value?.glpiKpis || {});
 
 const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 const barOptsH = { ...barOpts, indexAxis: 'y' };
@@ -113,6 +114,33 @@ onMounted(load);
         <p class="text-xs text-n-slate-11 ml-auto">
           Base: {{ data.roi.minPorOp }} min por operação · R$ {{ data.roi.custoHora }}/hora
         </p>
+      </div>
+
+      <!-- Resultados no GLPI -->
+      <div class="rounded-xl bg-n-alpha-black2 p-4">
+        <p class="text-sm font-medium text-n-slate-12 mb-3">
+          Resultados no GLPI — chamados gerados pela automação
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <p class="text-xs text-n-slate-11">Chamados gerados</p>
+            <p class="text-xl font-semibold text-n-slate-12">{{ glpiKpis.gerados ?? 0 }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-n-slate-11">Resolvidos</p>
+            <p class="text-xl font-semibold text-n-slate-12">{{ glpiKpis.resolvidos ?? 0 }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-n-slate-11">Taxa de resolução</p>
+            <p class="text-xl font-semibold text-woot-700">
+              {{ glpiKpis.taxaResolucao != null ? glpiKpis.taxaResolucao + '%' : '—' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-n-slate-11">Tempo médio de resolução</p>
+            <p class="text-xl font-semibold text-n-slate-12">{{ glpiKpis.tempoMedioResolucao || '—' }}</p>
+          </div>
+        </div>
       </div>
 
       <!-- Gráficos -->

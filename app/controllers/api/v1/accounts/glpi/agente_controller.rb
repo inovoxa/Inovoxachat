@@ -12,6 +12,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
       ms = period_stats(pg, from_iso, to_iso)
       ops = operacoes(pg, from_iso, to_iso)
       diario = exec_diario(pg, from_iso, to_iso)
+      kpis = glpi_kpis(pg, from_iso, to_iso)
     ensure
       pg.close
     end
@@ -36,6 +37,7 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
         labels: diario.map { |d| ddmm(d['dia']) },
         data: diario.map { |d| ((d['total'].to_i * min_op) / 60.0).round },
       },
+      glpiKpis: kpis,
       generatedAt: Time.current.iso8601,
     }
   rescue PG::Error => e
@@ -82,6 +84,55 @@ class Api::V1::Accounts::Glpi::AgenteController < Api::V1::Accounts::Glpi::BaseC
        GROUP BY dia ORDER BY dia
     SQL
     pg.query(sql, [from_iso, to_iso])
+  end
+
+  # Cruza os chamados gerados pela automação (chamados_log) com o status real no GLPI (MySQL).
+  def glpi_kpis(pg, from_iso, to_iso)
+    rows = pg.query(
+      'SELECT glpi_ticket_id FROM {s}.chamados_log ' \
+      'WHERE glpi_ticket_id IS NOT NULL AND created_at >= $1 AND created_at <= $2',
+      [from_iso, to_iso]
+    )
+    ids = rows.map { |r| r['glpi_ticket_id'].to_i }.reject(&:zero?).uniq
+    return empty_kpis if ids.empty?
+
+    my = Glpi::MysqlClient.new(glpi_config)
+    r = begin
+      my.query(<<~SQL).first || {}
+        SELECT COUNT(*) AS total,
+               SUM(status IN (5, 6)) AS resolvidos,
+               AVG(CASE WHEN status IN (5, 6) AND solvedate IS NOT NULL
+                        THEN TIMESTAMPDIFF(MINUTE, date, solvedate) END) AS avg_min
+          FROM glpi_tickets
+         WHERE is_deleted = 0 AND id IN (#{ids.join(',')})
+      SQL
+    ensure
+      my&.close
+    end
+    total = r['total'].to_i
+    resolvidos = r['resolvidos'].to_i
+    {
+      gerados: total,
+      resolvidos: resolvidos,
+      taxaResolucao: total.positive? ? (resolvidos * 100.0 / total).round : nil,
+      tempoMedioResolucao: fmt_min(r['avg_min'])
+    }
+  rescue StandardError
+    empty_kpis
+  end
+
+  def empty_kpis
+    { gerados: 0, resolvidos: 0, taxaResolucao: nil, tempoMedioResolucao: '—' }
+  end
+
+  def fmt_min(min)
+    return '—' if min.nil?
+
+    m = min.to_f.round
+    return "#{m} min" if m < 60
+    return "#{(m / 60.0).round(1)} h" if m < 1440
+
+    "#{(m / 1440.0).round(1)} d"
   end
 
   def fmt_dur(seg)
