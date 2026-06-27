@@ -71,7 +71,8 @@ async function onChange(colKey, evt) {
   try {
     await GlpiAPI.updateTicketStatus(card.id, colKey);
   } catch (e) {
-    error.value = e.response?.data?.error || e.message;
+    const d = e.response?.data;
+    error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
     await load();
   } finally {
     saving.value = false;
