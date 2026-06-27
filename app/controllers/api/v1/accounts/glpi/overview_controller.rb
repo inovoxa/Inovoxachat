@@ -9,8 +9,9 @@ class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::Bas
     desde_my = (Time.current - DAYS[period].days).strftime('%Y-%m-%d %H:%M:%S')
     start_iso = (Time.current - DAYS[period].days).utc.iso8601
 
-    counts = ticket_counts(desde_my)
+    mysql = ticket_mysql(desde_my)
     exec_ad, semanal = pg_metrics(start_iso)
+    counts = mysql[:counts]
 
     render json: {
       period: period,
@@ -21,6 +22,7 @@ class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::Bas
         execucoesAD: exec_ad
       },
       semanal: semanal,
+      categorias: mysql[:categorias],
       generatedAt: Time.current.iso8601
     }
   rescue Mysql2::Error, PG::Error => e
@@ -29,17 +31,33 @@ class Api::V1::Accounts::Glpi::OverviewController < Api::V1::Accounts::Glpi::Bas
 
   private
 
-  def ticket_counts(desde_my)
+  def ticket_mysql(desde_my)
     my = Glpi::MysqlClient.new(glpi_config)
-    my.query(<<~SQL).first || {}
+    desde = my.escape(desde_my)
+    counts = my.query(<<~SQL).first || {}
       SELECT COUNT(*) AS total,
              SUM(status IN (1, 2, 3, 4)) AS abertos,
              SUM(status IN (5, 6)) AS resolvidos
         FROM glpi_tickets
-       WHERE is_deleted = 0 AND date >= '#{my.escape(desde_my)}'
+       WHERE is_deleted = 0 AND date >= '#{desde}'
     SQL
+    cats = my.query(<<~SQL)
+      SELECT COALESCE(c.completename, 'Sem categoria') AS cat, COUNT(*) AS total
+        FROM glpi_tickets t
+        LEFT JOIN glpi_itilcategories c ON c.id = t.itilcategories_id
+       WHERE t.is_deleted = 0 AND t.date >= '#{desde}'
+       GROUP BY cat ORDER BY total DESC LIMIT 6
+    SQL
+    {
+      counts: counts,
+      categorias: { labels: cats.map { |x| short_cat(x['cat']) }, data: cats.map { |x| x['total'].to_i } }
+    }
   ensure
     my&.close
+  end
+
+  def short_cat(cat)
+    cat.to_s.split('>').last.to_s.strip.presence || 'Sem categoria'
   end
 
   def pg_metrics(start_iso)

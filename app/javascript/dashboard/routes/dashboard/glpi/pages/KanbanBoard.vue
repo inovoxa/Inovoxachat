@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import Draggable from 'vuedraggable';
 import GlpiAPI from 'dashboard/api/glpi';
+import { PRIO_COLOR, slaBarColor, COL_ACCENT } from '../helpers';
 
 const COLUMNS = [
   { key: 'aberto', label: 'Aberto' },
@@ -98,7 +99,8 @@ onMounted(load);
       <div
         v-for="col in COLUMNS"
         :key="col.key"
-        class="flex flex-col w-72 shrink-0 rounded-xl bg-n-alpha-black2 p-3 gap-2"
+        class="flex flex-col w-72 shrink-0 rounded-xl bg-n-alpha-black2 p-3 gap-2 border-t-2"
+        :class="COL_ACCENT[col.key]"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-n-slate-12">{{ col.label }}</span>
@@ -112,10 +114,16 @@ onMounted(load);
           @change="e => onChange(col.key, e)"
         >
           <template #item="{ element }">
-            <div class="rounded-lg bg-n-solid-2 border border-n-weak p-3 cursor-grab">
-              <p class="text-xs text-n-slate-11">#{{ element.id }} · {{ element.prio }}</p>
+            <div class="rounded-lg bg-n-solid-2 border border-n-weak p-3 cursor-grab flex flex-col gap-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-n-slate-11">#{{ element.id }}</span>
+                <span class="text-xs font-medium" :class="PRIO_COLOR[element.prio]">{{ element.prio }}</span>
+              </div>
               <p class="text-sm text-n-slate-12">{{ element.cat }}</p>
-              <p class="text-xs text-n-slate-11 mt-1">{{ element.sol }} · {{ element.sector }}</p>
+              <p class="text-xs text-n-slate-11">{{ element.sol }} · {{ element.sector }}</p>
+              <div v-if="element.sla != null" class="w-full h-1 rounded-full bg-n-slate-4 mt-1">
+                <div class="h-1 rounded-full" :class="slaBarColor(element.sla)" :style="{ width: element.sla + '%' }" />
+              </div>
             </div>
           </template>
         </Draggable>

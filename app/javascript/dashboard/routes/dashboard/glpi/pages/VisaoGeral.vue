@@ -36,6 +36,20 @@ const chartOptions = {
   plugins: { legend: { position: 'bottom' } },
 };
 
+const catData = computed(() => {
+  const c = data.value?.categorias || { labels: [], data: [] };
+  return {
+    labels: c.labels,
+    datasets: [{ label: 'Chamados', data: c.data, backgroundColor: '#baa500' }],
+  };
+});
+const catOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  plugins: { legend: { display: false } },
+};
+
 async function load() {
   loading.value = true;
   error.value = '';
@@ -101,10 +115,18 @@ onMounted(load);
         </div>
       </div>
 
-      <div class="rounded-xl bg-n-alpha-black2 p-4 h-80">
-        <p class="text-sm font-medium text-n-slate-12 mb-2">Chamados por canal (últimas 4 semanas)</p>
-        <div class="h-64">
-          <Bar :data="chartData" :options="chartOptions" />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="rounded-xl bg-n-alpha-black2 p-4 h-80">
+          <p class="text-sm font-medium text-n-slate-12 mb-2">Chamados por canal (últimas 4 semanas)</p>
+          <div class="h-64">
+            <Bar :data="chartData" :options="chartOptions" />
+          </div>
+        </div>
+        <div class="rounded-xl bg-n-alpha-black2 p-4 h-80">
+          <p class="text-sm font-medium text-n-slate-12 mb-2">Chamados por categoria</p>
+          <div class="h-64">
+            <Bar :data="catData" :options="catOptions" />
+          </div>
         </div>
       </div>
     </template>

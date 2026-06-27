@@ -33,6 +33,20 @@ const chartOptions = {
   plugins: { legend: { display: false } },
 };
 
+const opsData = computed(() => {
+  const ops = data.value?.operacoes || [];
+  return {
+    labels: ops.map(o => o.nome),
+    datasets: [{ label: 'Operações', data: ops.map(o => o.total), backgroundColor: '#4a9704' }],
+  };
+});
+const opsOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  indexAxis: 'y',
+  plugins: { legend: { display: false } },
+};
+
 async function load() {
   loading.value = true;
   error.value = '';
@@ -115,6 +129,9 @@ onMounted(load);
 
       <div class="rounded-xl bg-n-alpha-black2 p-4">
         <p class="text-sm font-medium text-n-slate-12 mb-2">Operações por tipo</p>
+        <div v-if="data.operacoes.length" class="h-56 mb-3">
+          <Bar :data="opsData" :options="opsOptions" />
+        </div>
         <div
           v-for="op in data.operacoes"
           :key="op.nome"
