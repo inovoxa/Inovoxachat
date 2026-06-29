@@ -72,8 +72,9 @@ async function onChange(colKey, evt) {
     await GlpiAPI.updateTicketStatus(card.id, colKey);
   } catch (e) {
     const d = e.response?.data;
-    error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
-    await load();
+    const msg = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
+    await load(); // reverte o card para a posição original
+    error.value = msg; // mantém o motivo visível após recarregar
   } finally {
     saving.value = false;
   }
