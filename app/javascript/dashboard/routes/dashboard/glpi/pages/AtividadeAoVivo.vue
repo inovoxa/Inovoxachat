@@ -31,7 +31,8 @@ let highlightTimer = null;
 const evKey = ev => `${ev.ticketId}-${ev.at}`;
 
 // Bip curto via Web Audio (sem arquivo) ao chegar execução nova.
-function bip() {
+// 'sucesso' = tom limpo e agudo; 'falha' = tom de alerta grave e descendente.
+function bip(tipo = 'sucesso') {
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
@@ -40,13 +41,25 @@ function bip() {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.26);
+    const t = ctx.currentTime;
+    if (tipo === 'falha') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(440, t);
+      osc.frequency.setValueAtTime(330, t + 0.16); // dois tons descendentes = alerta
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.48);
+      osc.start(t);
+      osc.stop(t + 0.5);
+    } else {
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.2, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      osc.start(t);
+      osc.stop(t + 0.26);
+    }
     osc.onended = () => ctx.close();
   } catch (e) {
     /* áudio indisponível — ignora */
@@ -71,8 +84,12 @@ function detectarNovos(lista, silent) {
   const recem = chaves.filter(k => !vistos.has(k));
   chaves.forEach(k => vistos.add(k));
   if (!recem.length) return;
+  const recemSet = new Set(recem);
   novos.value = new Set([...novos.value, ...recem]);
-  if (somAtivo.value) bip();
+  if (somAtivo.value) {
+    const temFalha = lista.some(e => recemSet.has(evKey(e)) && !e.sucesso);
+    bip(temFalha ? 'falha' : 'sucesso');
+  }
   clearTimeout(highlightTimer);
   highlightTimer = setTimeout(() => {
     novos.value = new Set();
