@@ -104,11 +104,16 @@ class Api::V1::Accounts::Glpi::TicketsController < Api::V1::Accounts::Glpi::Base
   end
 
   # Write-back de status: tenta a API v2 (OAuth, Cliente OAuth); se falhar, usa a v1 (comprovada).
+  # Se ambas falharem, expõe os dois motivos para diagnóstico.
   def write_status(pg, id, glpi_status)
     Glpi::V2Client.new(glpi_config, pg).update_ticket_status(id, glpi_status)
-  rescue StandardError => e
-    Rails.logger.warn("[glpi] write-back v2 (OAuth) falhou (#{e.message}); usando v1")
-    Glpi::V1Client.new(glpi_config, pg).update_ticket_status(id, glpi_status)
+  rescue StandardError => e_v2
+    Rails.logger.warn("[glpi] write-back v2 (OAuth) falhou (#{e_v2.message}); usando v1")
+    begin
+      Glpi::V1Client.new(glpi_config, pg).update_ticket_status(id, glpi_status)
+    rescue StandardError => e_v1
+      raise "v2: #{e_v2.message} | v1: #{e_v1.message}"
+    end
   end
 
   def list_tickets(my, from_my, to_my, search, limit)

@@ -7,6 +7,11 @@ module Glpi
   class V1Client
     def initialize(cfg, pg)
       @base = cfg.effective_settings['GLPI_API_V1_URL'].to_s.gsub(%r{/+\z}, '')
+      unless @base.match?(%r{\Ahttps?://}i)
+        raise 'URL da API v1 não configurada — preencha "URL da API v1" na tela de ' \
+              'Configuração (ou defina GLPI_DEFAULT_ACCOUNT_ID no deploy para a conta-modelo)'
+      end
+
       app = cfg.secret('GLPI_APP_TOKEN')
       user = cfg.secret('GLPI_USER_TOKEN')
 

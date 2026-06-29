@@ -11,7 +11,9 @@ module Glpi
       @creds = oauth_creds(cfg, pg)
       raise 'Cliente OAuth ausente (client_id/secret) e sem token_url' if @creds[:client_id].blank? || @creds[:token_url].blank?
 
-      @token_url = @creds[:token_url]
+      @token_url = @creds[:token_url].to_s
+      raise "token_url OAuth inválida (#{@token_url.presence || 'vazia'})" unless @token_url.match?(%r{\Ahttps?://}i)
+
       @base = @token_url.sub(%r{/token/?\z}, '') # .../api.php/v2.3
     end
 
