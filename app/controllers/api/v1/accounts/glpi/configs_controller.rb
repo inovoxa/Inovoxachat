@@ -1,6 +1,6 @@
 # Configuração da integração GLPI por conta (multi-empresa).
 # show/status: usuário autenticado. update: somente admin.
-# settings = não-secretos (jsonb, pré-preenchidos por DEFAULT_SETTINGS).
+# settings = não-secretos (jsonb). SUGGESTED_SETTINGS vai à tela só como placeholder.
 # secrets  = senhas (cifradas; nunca devolvidas — só a flag de presença).
 class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseController
   before_action :check_admin_authorization?, only: [:update, :test]
@@ -15,7 +15,7 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
     # enabled é controlado pelo super admin (/super_admin/accounts) — não pela empresa.
     cfg = find_or_build
 
-    incoming = (config_params[:settings] || {}).to_h.slice(*GlpiAccountConfig::DEFAULT_SETTINGS.keys)
+    incoming = (config_params[:settings] || {}).to_h.slice(*GlpiAccountConfig::SUGGESTED_SETTINGS.keys)
     cfg.settings = (cfg.settings || {}).merge(incoming)
 
     sec_in = (config_params[:secrets] || {}).to_h
@@ -64,6 +64,7 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
     {
       enabled: cfg.enabled,
       settings: cfg.effective_settings,
+      suggestions: GlpiAccountConfig::SUGGESTED_SETTINGS,
       secret_keys: GlpiAccountConfig::SECRET_KEYS,
       secrets_present: GlpiAccountConfig::SECRET_KEYS.index_with { |k| cfg.secret_present?(k) },
     }

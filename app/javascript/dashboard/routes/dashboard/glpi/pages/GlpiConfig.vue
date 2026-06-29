@@ -55,6 +55,7 @@ const SECRETS = [
 
 const enabled = ref(false);
 const settings = reactive({});
+const suggestions = reactive({});
 const secretsInput = reactive({});
 const secretsPresent = reactive({});
 const loading = ref(true);
@@ -70,6 +71,7 @@ async function load() {
     const { data } = await GlpiAPI.getConfig();
     enabled.value = data.enabled;
     Object.assign(settings, data.settings || {});
+    Object.assign(suggestions, data.suggestions || {});
     Object.assign(secretsPresent, data.secrets_present || {});
   } catch (e) {
     isError.value = true;
@@ -104,6 +106,13 @@ async function save() {
   } finally {
     saving.value = false;
   }
+}
+
+// Copia as sugestões para os campos ainda vazios (não sobrescreve o que já foi preenchido).
+function aplicarSugestoes() {
+  Object.keys(suggestions).forEach(k => {
+    if (!settings[k]) settings[k] = suggestions[k];
+  });
 }
 
 async function testConnections() {
@@ -153,7 +162,8 @@ onMounted(load);
             <input
               v-model="settings[f.key]"
               type="text"
-              class="rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-sm text-n-slate-12"
+              :placeholder="suggestions[f.key] || ''"
+              class="rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-sm text-n-slate-12 placeholder:text-n-slate-9"
             />
           </label>
         </div>
@@ -184,6 +194,14 @@ onMounted(load);
           class="rounded-lg bg-woot-500 px-4 py-2 text-sm text-white disabled:opacity-60"
         >
           {{ saving ? 'Salvando…' : 'Salvar' }}
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-n-weak px-4 py-2 text-sm text-n-slate-12"
+          title="Copia os valores sugeridos (Prefeitura) para os campos ainda vazios"
+          @click="aplicarSugestoes"
+        >
+          Preencher com sugestões
         </button>
         <button
           type="button"

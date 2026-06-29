@@ -22,8 +22,9 @@ class GlpiAccountConfig < ApplicationRecord
 
   validates :account_id, uniqueness: true
 
-  # Valores não-secretos pré-preenchidos (Prefeitura de Araraquara). Editáveis na tela.
-  DEFAULT_SETTINGS = {
+  # Sugestões de preenchimento (apenas placeholder na tela). NÃO são herdadas: cada empresa
+  # salva seus próprios valores. Servem só para facilitar o cadastro da Prefeitura.
+  SUGGESTED_SETTINGS = {
     'GLPI_DB_HOST' => '187.32.171.151',
     'GLPI_DB_PORT' => '3306',
     'GLPI_DB_USER' => 'qtszs1qRYvTW5lKR',
@@ -44,37 +45,21 @@ class GlpiAccountConfig < ApplicationRecord
     'AGENTE_CUSTO_HORA' => '30',
   }.freeze
 
-  # Segredos: nunca no código/Git. Pré-preenchem via ENV do deploy ou digitados na tela.
+  # Segredos: nunca no código/Git. Digitados na tela (cifrados em repouso).
   SECRET_KEYS = %w[
     GLPI_DB_PASSWORD PG_PASSWORD AD_SSH_PASSWORD
     GLPI_APP_TOKEN GLPI_USER_TOKEN
     GLPI_OAUTH_CLIENT_ID GLPI_OAUTH_CLIENT_SECRET
   ].freeze
 
-  # Conta "modelo" (Prefeitura) que recebe os DEFAULT_SETTINGS pré-preenchidos, definida por
-  # ENV GLPI_DEFAULT_ACCOUNT_ID. ISOLAMENTO: qualquer outra empresa NÃO herda nada da Prefeitura.
-  def self.default_account_id
-    ENV['GLPI_DEFAULT_ACCOUNT_ID'].presence
-  end
-
-  def default_account?
-    self.class.default_account_id.present? && account_id.to_s == self.class.default_account_id.to_s
-  end
-
-  # Settings efetivos: SÓ os valores salvos desta empresa. Os DEFAULT_SETTINGS entram apenas
-  # para a conta-modelo (Prefeitura) — nunca vazam para outras empresas.
+  # Settings efetivos: SÓ os valores salvos desta empresa (sem herança entre contas).
   def effective_settings
-    base = default_account? ? DEFAULT_SETTINGS : {}
-    base.merge(settings || {})
+    settings || {}
   end
 
-  # Segredo: salvo (cifrado) desta empresa; fallback de ENV só para a conta-modelo.
+  # Segredo: apenas o salvo (cifrado) desta empresa.
   def secret(key)
-    saved = secrets && secrets[key].presence
-    return saved if saved
-    return ENV["GLPI_DEFAULT_#{key}"].presence if default_account?
-
-    nil
+    secrets && secrets[key].presence
   end
 
   def secret_present?(key)
