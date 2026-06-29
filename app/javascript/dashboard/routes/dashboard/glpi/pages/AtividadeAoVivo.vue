@@ -20,8 +20,66 @@ const error = ref('');
 const selectedId = ref(null);
 const atualizadoEm = ref(null);
 const expandidos = ref({});
+const falhasAberto = ref(true);
+const somAtivo = ref(localStorage.getItem('glpi_atividade_som') === '1');
+const novos = ref(new Set()); // chaves destacadas (execuções recém-chegadas)
 let searchTimer = null;
 let pollTimer = null;
+let vistos = null; // Set de chaves já conhecidas (null = ainda não carregou)
+let highlightTimer = null;
+
+const evKey = ev => `${ev.ticketId}-${ev.at}`;
+
+// Bip curto via Web Audio (sem arquivo) ao chegar execução nova.
+function bip() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.26);
+    osc.onended = () => ctx.close();
+  } catch (e) {
+    /* áudio indisponível — ignora */
+  }
+}
+
+function toggleSom() {
+  somAtivo.value = !somAtivo.value;
+  localStorage.setItem('glpi_atividade_som', somAtivo.value ? '1' : '0');
+  if (somAtivo.value) bip(); // confirma e destrava o áudio (gesto do usuário)
+}
+
+// Detecta execuções novas comparando com o que já era conhecido.
+// Só alerta em recargas do polling (silent); carga inicial/troca de filtro só sincroniza.
+function detectarNovos(lista, silent) {
+  const chaves = lista.map(evKey);
+  if (!silent || vistos === null) {
+    vistos = new Set(chaves);
+    novos.value = new Set();
+    return;
+  }
+  const recem = chaves.filter(k => !vistos.has(k));
+  chaves.forEach(k => vistos.add(k));
+  if (!recem.length) return;
+  novos.value = new Set([...novos.value, ...recem]);
+  if (somAtivo.value) bip();
+  clearTimeout(highlightTimer);
+  highlightTimer = setTimeout(() => {
+    novos.value = new Set();
+  }, 8000);
+}
+
+const falhas = computed(() => (eventos.value || []).filter(e => !e.sucesso));
 
 const kpiCards = computed(() => {
   const k = kpis.value || {};
@@ -84,6 +142,7 @@ async function load(silent = false) {
     kpis.value = data.kpis || {};
     tipos.value = data.tipos || [];
     atualizadoEm.value = data.generatedAt;
+    detectarNovos(eventos.value, silent);
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
     else if (!silent) error.value = e.response?.data?.error || e.message;
@@ -110,7 +169,10 @@ onMounted(() => {
   load();
   pollTimer = setInterval(() => load(true), POLL_MS);
 });
-onBeforeUnmount(() => clearInterval(pollTimer));
+onBeforeUnmount(() => {
+  clearInterval(pollTimer);
+  clearTimeout(highlightTimer);
+});
 </script>
 
 <template>
@@ -128,6 +190,14 @@ onBeforeUnmount(() => clearInterval(pollTimer));
           ao vivo
           <span v-if="atualizadoEm">· {{ tempoRelativo(atualizadoEm) }}</span>
         </span>
+        <button
+          type="button"
+          class="text-base leading-none p-1 rounded-md hover:bg-n-alpha-black2 text-n-slate-11"
+          :title="somAtivo ? 'Som de alerta ligado' : 'Som de alerta desligado'"
+          @click="toggleSom"
+        >
+          {{ somAtivo ? '🔔' : '🔕' }}
+        </button>
       </h1>
       <div class="flex items-center gap-2 flex-wrap">
         <input
@@ -175,6 +245,43 @@ onBeforeUnmount(() => clearInterval(pollTimer));
       </div>
     </div>
 
+    <!-- Falhas em destaque -->
+    <div
+      v-if="falhas.length"
+      class="rounded-xl border border-red-500/40 bg-red-500/10 overflow-hidden shrink-0"
+    >
+      <button
+        type="button"
+        class="w-full flex items-center gap-2 px-4 py-2.5 text-left"
+        @click="falhasAberto = !falhasAberto"
+      >
+        <span class="text-red-600">⚠</span>
+        <span class="text-sm font-medium text-red-600">
+          {{ falhas.length }}
+          {{ falhas.length === 1 ? 'execução falhou' : 'execuções falharam' }}
+          no período
+        </span>
+        <span class="ml-auto text-xs text-red-600/80">
+          {{ falhasAberto ? 'ocultar' : 'mostrar' }}
+        </span>
+      </button>
+      <div v-if="falhasAberto" class="px-4 pb-3 flex flex-col gap-1.5">
+        <button
+          v-for="f in falhas"
+          :key="evKey(f)"
+          type="button"
+          class="flex items-start gap-2 text-left text-xs hover:bg-red-500/10 rounded-md px-2 py-1 -mx-2"
+          @click="selectedId = f.ticketId"
+        >
+          <span class="shrink-0">{{ adIcon(f.categoriaId, f.acao) }}</span>
+          <span class="text-n-slate-12 font-medium shrink-0">#{{ f.ticketId }}</span>
+          <span class="text-n-slate-11 shrink-0">{{ f.acao || f.categoria }}</span>
+          <span v-if="f.erro" class="text-red-600 truncate">— {{ f.erro }}</span>
+          <span class="ml-auto text-n-slate-10 shrink-0">{{ horaCurta(f.at) }}</span>
+        </button>
+      </div>
+    </div>
+
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>
 
@@ -202,8 +309,13 @@ onBeforeUnmount(() => clearInterval(pollTimer));
         </p>
         <div
           v-for="ev in g.itens"
-          :key="ev.id"
-          class="rounded-lg bg-n-alpha-black2 border border-n-weak hover:border-n-slate-7 transition-colors"
+          :key="evKey(ev)"
+          class="rounded-lg bg-n-alpha-black2 border transition-colors"
+          :class="
+            novos.has(evKey(ev))
+              ? 'border-woot-500 ring-1 ring-woot-500/40 animate-pulse'
+              : 'border-n-weak hover:border-n-slate-7'
+          "
         >
           <div class="flex items-start gap-3 p-3 cursor-pointer" @click="toggle(ev.id)">
             <span
@@ -226,6 +338,12 @@ onBeforeUnmount(() => clearInterval(pollTimer));
                   "
                 >
                   {{ ev.sucesso ? 'Sucesso' : 'Falha' }}
+                </span>
+                <span
+                  v-if="novos.has(evKey(ev))"
+                  class="text-[10px] px-1.5 py-0.5 rounded-full bg-woot-500 text-white font-medium"
+                >
+                  novo
                 </span>
               </div>
               <p class="text-xs text-n-slate-11 truncate">

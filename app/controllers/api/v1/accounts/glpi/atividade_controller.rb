@@ -86,6 +86,7 @@ class Api::V1::Accounts::Glpi::AtividadeController < Api::V1::Accounts::Glpi::Ba
       sucesso: sucesso?(res),
       acao: res['acao_real'].presence || r['categoria'],
       login: res['login'],
+      erro: res['erro'].presence || res['mensagem'].presence,
       detalhes: detalhes_limpos(res, r['categoria']),
     }
   end
