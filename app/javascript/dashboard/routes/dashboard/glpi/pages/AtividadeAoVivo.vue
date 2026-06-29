@@ -162,7 +162,10 @@ async function load(silent = false) {
     detectarNovos(eventos.value, silent);
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
-    else if (!silent) error.value = e.response?.data?.error || e.message;
+    else if (!silent) {
+      const d = e.response?.data;
+      error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
+    }
   } finally {
     loading.value = false;
   }
