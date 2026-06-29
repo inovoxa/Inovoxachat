@@ -4,6 +4,7 @@ import VisaoGeral from './pages/VisaoGeral.vue';
 import ChamadosIndex from './pages/ChamadosIndex.vue';
 import KanbanBoard from './pages/KanbanBoard.vue';
 import AgenteIA from './pages/AgenteIA.vue';
+import AtividadeAoVivo from './pages/AtividadeAoVivo.vue';
 import AprovadoresChamado from './pages/AprovadoresChamado.vue';
 import GlpiConfig from './pages/GlpiConfig.vue';
 
@@ -33,6 +34,12 @@ export const routes = [
     path: frontendURL('accounts/:accountId/glpi/agente'),
     name: 'glpi_agente',
     component: AgenteIA,
+    meta,
+  },
+  {
+    path: frontendURL('accounts/:accountId/glpi/atividade'),
+    name: 'glpi_atividade',
+    component: AtividadeAoVivo,
     meta,
   },
   {

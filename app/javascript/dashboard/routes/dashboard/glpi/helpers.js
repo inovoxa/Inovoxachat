@@ -47,3 +47,55 @@ export const PERIOD_OPTIONS = [
   { value: '90d', label: 'Últimos 90 dias' },
   { value: '180d', label: 'Últimos 180 dias' },
 ];
+
+// Ícone (emoji) da ação executada no AD, por ID de categoria GLPI.
+// Fallback por palavra-chave da ação quando a categoria é desconhecida.
+const AD_ICON_CAT = {
+  15: '👤', // Criar usuário
+  16: '🔑', // Reset de senha
+  17: '♻️', // Reativar usuário
+  18: '🚫', // Desativar usuário
+  19: '📁', // Acesso a pasta
+  20: '📧', // Criar e-mail
+  22: '🔀', // Transferência de setor
+};
+export function adIcon(catId, acao = '') {
+  if (AD_ICON_CAT[catId]) return AD_ICON_CAT[catId];
+  const a = (acao || '').toLowerCase();
+  if (a.includes('senha') || a.includes('reset')) return '🔑';
+  if (a.includes('criar') || a.includes('cria')) return '👤';
+  if (a.includes('desativ')) return '🚫';
+  if (a.includes('reativ')) return '♻️';
+  if (a.includes('pasta') || a.includes('acesso')) return '📁';
+  if (a.includes('email') || a.includes('e-mail') || a.includes('mail')) return '📧';
+  if (a.includes('setor') || a.includes('transf')) return '🔀';
+  return '⚙️';
+}
+
+// Tempo relativo curto em pt-BR a partir de uma data ISO ("há 5 min", "agora").
+export function tempoRelativo(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  const seg = Math.round((Date.now() - d.getTime()) / 1000);
+  if (seg < 45) return 'agora';
+  if (seg < 90) return 'há 1 min';
+  const min = Math.round(seg / 60);
+  if (min < 60) return `há ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `há ${h} h`;
+  const dias = Math.round(h / 24);
+  if (dias < 30) return `há ${dias} d`;
+  return d.toLocaleDateString('pt-BR');
+}
+
+// Duração legível (segundos → "5 min", "2,3 h", "1,5 d").
+export function fmtDuracao(seg) {
+  if (seg == null) return '—';
+  if (seg < 60) return `${Math.round(seg)} s`;
+  const min = seg / 60;
+  if (min < 60) return `${Math.round(min)} min`;
+  const h = min / 60;
+  if (h < 24) return `${h.toFixed(1).replace('.', ',')} h`;
+  return `${(h / 24).toFixed(1).replace('.', ',')} d`;
+}
