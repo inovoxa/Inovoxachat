@@ -47,16 +47,20 @@ class Api::V1::Accounts::Glpi::AtividadeController < Api::V1::Accounts::Glpi::Ba
       where << (res == 'sucesso' ? ok : "NOT (#{ok})")
     end
 
+    lcol = local_col(pg) # coluna de "local" disponível neste schema (pode ser nil)
+
     if params[:search].present?
       args << "%#{params[:search].to_s.strip}%"
       i = args.size
-      where << "(cl.titulo ILIKE $#{i} OR cl.solicitante_nome ILIKE $#{i} " \
-               "OR cl.setor ILIKE $#{i} OR (cl.ad_resultado->>'login') ILIKE $#{i} " \
-               "OR cl.glpi_ticket_id::text ILIKE $#{i})"
+      campos = ["cl.titulo ILIKE $#{i}", "cl.solicitante_nome ILIKE $#{i}",
+                "(cl.ad_resultado->>'login') ILIKE $#{i}", "cl.glpi_ticket_id::text ILIKE $#{i}"]
+      campos << "cl.#{lcol} ILIKE $#{i}" if lcol
+      where << "(#{campos.join(' OR ')})"
     end
 
+    local_sel = lcol ? "cl.#{lcol}" : 'NULL'
     sql = <<~SQL
-      SELECT cl.glpi_ticket_id, cl.titulo, cl.solicitante_nome, cl.setor, cl.secretaria,
+      SELECT cl.glpi_ticket_id, cl.titulo, cl.solicitante_nome, #{local_sel} AS local_setor,
              cl.glpi_category_id, cl.ad_executado_em, cl.created_at,
              COALESCE(cat.nome, 'Categoria ' || cl.glpi_category_id) AS categoria,
              cl.ad_resultado::text AS resultado_json
@@ -68,6 +72,19 @@ class Api::V1::Accounts::Glpi::AtividadeController < Api::V1::Accounts::Glpi::Ba
     SQL
 
     pg.query(sql, args).map { |r| montar_evento(r) }
+  end
+
+  # Primeira coluna de "local/lotação" que existir no chamados_log desta empresa.
+  # Schemas variam entre instâncias do GLPI/n8n — daí a detecção dinâmica.
+  LOCAL_COLS = %w[coordenadoria setor departamento lotacao secretaria unidade].freeze
+  def local_col(pg)
+    return @local_col if defined?(@local_col)
+
+    existentes = pg.query(
+      "SELECT column_name FROM information_schema.columns " \
+      "WHERE table_schema = '{s}' AND table_name = 'chamados_log'"
+    ).map { |r| r['column_name'] }
+    @local_col = LOCAL_COLS.find { |c| existentes.include?(c) }
   end
 
   def montar_evento(r)
@@ -82,7 +99,7 @@ class Api::V1::Accounts::Glpi::AtividadeController < Api::V1::Accounts::Glpi::Ba
       categoriaId: r['glpi_category_id'].to_i,
       titulo: r['titulo'],
       solicitante: r['solicitante_nome'],
-      setor: r['setor'].presence || r['secretaria'],
+      setor: r['local_setor'].presence,
       sucesso: sucesso?(res),
       acao: res['acao_real'].presence || r['categoria'],
       login: res['login'],
