@@ -7,7 +7,7 @@ Stack que sobe: **Rails (web)** + **Sidekiq (jobs)** + **PostgreSQL `pgvector` p
 São serviços do próprio Chatwoot — independentes do PostgreSQL do n8n/Central.
 
 ## Arquivos desta pasta
-- `docker-compose.yaml` — compose de produção (imagem `ghcr.io/inovoxa/inovoxachat:4.15.1`).
+- `docker-compose.yaml` — compose de produção (imagem `ghcr.io/inovoxa/inovoxachat:latest`).
 - `.env.example` — lista das variáveis a preencher na UI do Coolify.
 
 ## 0. Imagem própria da Inovoxa (GitHub Actions → GHCR)
@@ -79,6 +79,21 @@ SuperAdmin.create!(email: u.email, password: 'TroqueEstaSenhaForte!1') rescue ni
 - Login com o super admin; criar uma **Inbox** de teste.
 - Reinicie o serviço `rails` e confirme que os dados persistem (volumes OK).
 - `sidekiq` saudável e processando jobs.
+
+## 7. CD automático (commit → deploy)
+O workflow `.github/workflows/inovoxa-build.yml` builda a imagem e, ao final, dispara o redeploy
+no Coolify (passo *Redeploy no Coolify*). Como o recurso é um compose único, **um** webhook
+redeploya tudo (rails+sidekiq+postgres+redis).
+1. No Coolify, no recurso, pegue o **endpoint de deploy da API**:
+   `https://<seu-coolify>/api/v1/deploy?uuid=<uuid-do-recurso>` e gere um **API token**
+   (Coolify → *Keys & Tokens / API Tokens*).
+2. No **GitHub → repo → Settings → Secrets and variables → Actions**, crie:
+   - `COOLIFY_WEBHOOK` = a URL de deploy acima.
+   - `COOLIFY_TOKEN` = o API token (Bearer). *(opcional se a URL já autenticar)*
+3. (Opcional) Remova os secrets `PORTAINER_WEBHOOK_*` se não for mais usar o Swarm — os dois
+   passos são independentes e cada um só roda se seu secret existir.
+> A imagem usa a tag `:latest` com `pull_policy: always`, então o redeploy puxa sempre a build
+> mais recente. Para builds imutáveis, fixe uma tag/sha no `docker-compose.yaml`.
 
 ## Pontos de atenção
 - **pgvector obrigatório** — a imagem do Postgres é `pgvector/pgvector:pg16` (já no compose).

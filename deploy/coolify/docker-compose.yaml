@@ -44,7 +44,9 @@ x-app-env: &app-env
   LOG_LEVEL: ${LOG_LEVEL:-info}
 
 x-base: &base
-  image: ghcr.io/inovoxa/inovoxachat:4.15.1
+  # :latest = última imagem publicada pelo Actions (pega features novas como OCS/Captain).
+  # Fixe numa tag (ex.: :4.15.1 ou a sha) se preferir builds imutáveis.
+  image: ghcr.io/inovoxa/inovoxachat:latest
   pull_policy: always
   restart: always
   volumes:

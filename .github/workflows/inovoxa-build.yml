@@ -77,3 +77,21 @@ jobs:
           if [ -n "$HOOK_SIDEKIQ" ]; then
             echo "Disparando redeploy do sidekiq..."; curl -fsSL -X POST "$HOOK_SIDEKIQ" && echo " ok"
           else echo "PORTAINER_WEBHOOK_SIDEKIQ não definido — pulando."; fi
+
+      # CD alternativo: redeploy no Coolify. O recurso (compose) é único, então um webhook
+      # redeploya rails+sidekiq+pg+redis. Use o endpoint de deploy da API do Coolify:
+      #   COOLIFY_WEBHOOK = https://<coolify>/api/v1/deploy?uuid=<uuid-do-recurso>
+      #   COOLIFY_TOKEN   = API token do Coolify (Bearer). Opcional se a URL já autentica.
+      # Sem o secret COOLIFY_WEBHOOK, o step é ignorado (não falha).
+      - name: Redeploy no Coolify (webhook)
+        env:
+          HOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "COOLIFY_WEBHOOK não definido — pulando."; exit 0; fi
+          echo "Disparando redeploy no Coolify..."
+          if [ -n "$TOKEN" ]; then
+            curl -fsSL -X POST -H "Authorization: Bearer $TOKEN" "$HOOK" && echo " ok"
+          else
+            curl -fsSL -X POST "$HOOK" && echo " ok"
+          fi
