@@ -92,10 +92,24 @@ class Captain::Assistant < ApplicationRecord
   end
 
   def agent_tools
-    [
+    tools = [
       self.class.resolve_tool_class('faq_lookup').new(self),
       self.class.resolve_tool_class('handoff').new(self)
     ]
+    # Tools de Service Desk (GLPI/OCS) só quando a conta tem a integração habilitada.
+    if glpi_integration_enabled?
+      %w[glpi_inventory_lookup glpi_tickets_lookup].each do |tool_id|
+        klass = self.class.resolve_tool_class(tool_id)
+        tools << klass.new(self) if klass
+      end
+    end
+    tools
+  end
+
+  def glpi_integration_enabled?
+    GlpiAccountConfig.find_by(account_id: account_id)&.usable?
+  rescue StandardError
+    false
   end
 
   def prompt_context

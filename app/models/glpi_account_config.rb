@@ -43,6 +43,10 @@ class GlpiAccountConfig < ApplicationRecord
     'AD_COLLECTOR_CRON' => '*/5 * * * *',
     'AGENTE_MIN_POR_OP' => '25',
     'AGENTE_CUSTO_HORA' => '30',
+    'OCS_DB_HOST' => '',
+    'OCS_DB_PORT' => '3306',
+    'OCS_DB_USER' => '',
+    'OCS_DB_DATABASE' => 'ocsweb',
   }.freeze
 
   # Segredos: nunca no código/Git. Digitados na tela (cifrados em repouso).
@@ -50,6 +54,7 @@ class GlpiAccountConfig < ApplicationRecord
     GLPI_DB_PASSWORD PG_PASSWORD AD_SSH_PASSWORD
     GLPI_APP_TOKEN GLPI_USER_TOKEN
     GLPI_OAUTH_CLIENT_ID GLPI_OAUTH_CLIENT_SECRET
+    OCS_DB_PASSWORD
   ].freeze
 
   # Settings efetivos: SÓ os valores salvos desta empresa (sem herança entre contas).

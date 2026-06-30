@@ -106,6 +106,7 @@ Rails.application.routes.draw do
             end
             resource :agente, only: [:show], controller: 'agente'
             resource :atividade, only: [:show], controller: 'atividade'
+            resources :inventario, only: [:index, :show]
             resources :aprovadores, only: [:index, :create, :destroy], param: :login,
                                     constraints: { login: %r{[^/]+} }
           end

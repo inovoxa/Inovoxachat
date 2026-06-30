@@ -39,3 +39,13 @@
   title: 'Handoff to Human'
   description: 'Hand off the conversation to a human agent'
   icon: 'user-switch'
+
+- id: glpi_inventory_lookup
+  title: 'Inventário (OCS)'
+  description: 'Consulta o inventário de TI (OCS Inventory) da empresa'
+  icon: 'search'
+
+- id: glpi_tickets_lookup
+  title: 'Chamados (GLPI)'
+  description: 'Consulta status e lista de chamados do GLPI da empresa'
+  icon: 'search'

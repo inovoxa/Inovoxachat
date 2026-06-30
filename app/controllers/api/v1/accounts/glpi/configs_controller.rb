@@ -39,6 +39,7 @@ class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseContro
     render json: {
       postgres: probe { c = Glpi::PgClient.new(cfg); c.query('SELECT 1'); c.close },
       mysql: probe { m = Glpi::MysqlClient.new(cfg); m.query('SELECT 1'); m.close },
+      ocs: probe { o = Glpi::MysqlClient.new(cfg, prefix: 'OCS_DB'); o.query('SELECT 1'); o.close },
       ssh: probe { Glpi::SshClient.new(cfg).run('echo ok') }
     }
   end

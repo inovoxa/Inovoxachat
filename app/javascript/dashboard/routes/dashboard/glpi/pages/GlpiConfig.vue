@@ -24,6 +24,15 @@ const GROUPS = [
     ],
   },
   {
+    title: 'OCS Inventory (MySQL)',
+    fields: [
+      { key: 'OCS_DB_HOST', label: 'Host do banco OCS' },
+      { key: 'OCS_DB_PORT', label: 'Porta' },
+      { key: 'OCS_DB_USER', label: 'Usuário' },
+      { key: 'OCS_DB_DATABASE', label: 'Database (ocsweb)' },
+    ],
+  },
+  {
     title: 'Active Directory (SSH)',
     fields: [
       { key: 'AD_SSH_HOST', label: 'Host SSH' },
@@ -47,6 +56,7 @@ const SECRETS = [
   { key: 'GLPI_DB_PASSWORD', label: 'Senha do banco GLPI' },
   { key: 'PG_PASSWORD', label: 'Senha do PostgreSQL' },
   { key: 'AD_SSH_PASSWORD', label: 'Senha do AD (SSH)' },
+  { key: 'OCS_DB_PASSWORD', label: 'Senha do banco OCS' },
   { key: 'GLPI_APP_TOKEN', label: 'App-Token (API v1 GLPI)' },
   { key: 'GLPI_USER_TOKEN', label: 'User-Token (API v1 GLPI)' },
   { key: 'GLPI_OAUTH_CLIENT_ID', label: 'Client ID (OAuth API v2)' },

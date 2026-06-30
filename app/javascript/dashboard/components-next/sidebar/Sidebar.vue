@@ -453,7 +453,7 @@ const menuItems = computed(() => {
       name: 'GLPI',
       icon: 'i-lucide-ticket',
       label: 'Service Desk',
-      activeOn: ['glpi_overview', 'glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_atividade', 'glpi_aprovadores', 'glpi_config'],
+      activeOn: ['glpi_overview', 'glpi_chamados', 'glpi_kanban', 'glpi_agente', 'glpi_atividade', 'glpi_aprovadores', 'glpi_inventario', 'glpi_config'],
       children: [
         // Telas de dados só quando a integração está habilitada.
         ...(glpiEnabled.value
@@ -487,6 +487,11 @@ const menuItems = computed(() => {
                 name: 'GLPI Aprovadores',
                 label: 'Aprovadores',
                 to: accountScopedRoute('glpi_aprovadores'),
+              },
+              {
+                name: 'GLPI Inventário',
+                label: 'Inventário',
+                to: accountScopedRoute('glpi_inventario'),
               },
             ]
           : []),

@@ -48,6 +48,14 @@ class GlpiAPI extends ApiClient {
     return axios.get(`${this.url}/atividade`, { params });
   }
 
+  getInventario(params = {}) {
+    return axios.get(`${this.url}/inventario`, { params });
+  }
+
+  getInventarioItem(id) {
+    return axios.get(`${this.url}/inventario/${id}`);
+  }
+
   getAprovadores() {
     return axios.get(`${this.url}/aprovadores`);
   }

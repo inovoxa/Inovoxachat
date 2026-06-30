@@ -6,6 +6,7 @@ import KanbanBoard from './pages/KanbanBoard.vue';
 import AgenteIA from './pages/AgenteIA.vue';
 import AtividadeAoVivo from './pages/AtividadeAoVivo.vue';
 import AprovadoresChamado from './pages/AprovadoresChamado.vue';
+import Inventario from './pages/Inventario.vue';
 import GlpiConfig from './pages/GlpiConfig.vue';
 
 const meta = { permissions: ['administrator', 'agent'] };
@@ -46,6 +47,12 @@ export const routes = [
     path: frontendURL('accounts/:accountId/glpi/aprovadores'),
     name: 'glpi_aprovadores',
     component: AprovadoresChamado,
+    meta,
+  },
+  {
+    path: frontendURL('accounts/:accountId/glpi/inventario'),
+    name: 'glpi_inventario',
+    component: Inventario,
     meta,
   },
   {

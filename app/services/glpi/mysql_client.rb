@@ -1,17 +1,18 @@
 require 'mysql2'
 
 module Glpi
-  # Conexão de leitura ao MySQL do GLPI da empresa. Credenciais de GlpiAccountConfig.
+  # Conexão de leitura a um MySQL da empresa. Credenciais de GlpiAccountConfig.
+  # `prefix` escolhe o conjunto de variáveis: 'GLPI_DB' (padrão) ou 'OCS_DB' (OCS Inventory).
   # Use e feche por request.
   class MysqlClient
-    def initialize(cfg)
+    def initialize(cfg, prefix: 'GLPI_DB')
       s = cfg.effective_settings
       @client = Mysql2::Client.new(
-        host: s['GLPI_DB_HOST'],
-        port: (s['GLPI_DB_PORT'].presence || 3306).to_i,
-        username: s['GLPI_DB_USER'],
-        password: cfg.secret('GLPI_DB_PASSWORD'),
-        database: s['GLPI_DB_DATABASE'],
+        host: s["#{prefix}_HOST"],
+        port: (s["#{prefix}_PORT"].presence || 3306).to_i,
+        username: s["#{prefix}_USER"],
+        password: cfg.secret("#{prefix}_PASSWORD"),
+        database: s["#{prefix}_DATABASE"],
         connect_timeout: 6,
         reconnect: false
       )
