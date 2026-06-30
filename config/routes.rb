@@ -108,7 +108,12 @@ Rails.application.routes.draw do
             resource :atividade, only: [:show], controller: 'atividade'
             resources :inventario, only: [:index, :show]
             resources :aprovadores, only: [:index, :create, :destroy], param: :login,
-                                    constraints: { login: %r{[^/]+} }
+                                    constraints: { login: %r{[^/]+} } do
+              collection do
+                post :sync
+                get :import
+              end
+            end
           end
           resource :saml_settings, only: [:show, :create, :update, :destroy]
           resources :agent_bots, only: [:index, :create, :show, :update, :destroy] do

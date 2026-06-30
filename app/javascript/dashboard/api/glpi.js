@@ -60,12 +60,20 @@ class GlpiAPI extends ApiClient {
     return axios.get(`${this.url}/aprovadores`);
   }
 
-  addAprovador(login) {
-    return axios.post(`${this.url}/aprovadores`, { login });
+  addAprovador(login, nome) {
+    return axios.post(`${this.url}/aprovadores`, { login, nome });
   }
 
   removeAprovador(login) {
     return axios.delete(`${this.url}/aprovadores/${encodeURIComponent(login)}`);
+  }
+
+  syncAprovadores() {
+    return axios.post(`${this.url}/aprovadores/sync`);
+  }
+
+  importAprovadores() {
+    return axios.get(`${this.url}/aprovadores/import`);
   }
 }
 
