@@ -97,9 +97,13 @@ async function sincronizar() {
     const { data } = await GlpiAPI.syncAprovadores();
     membros.value = data.membros || membros.value;
     const falhas = (data.resultados || []).filter(r => !r.ok);
-    aviso.value = falhas.length
-      ? `Sincronizado com ${falhas.length} falha(s): ${falhas.map(f => `${f.login} (${f.erro})`).join('; ')}`
-      : 'Sincronizado com o AD com sucesso.';
+    if (falhas.length) {
+      aviso.value = `Sincronizado com ${falhas.length} falha(s): ${falhas.map(f => `${f.login} (${f.erro})`).join('; ')}`;
+    } else {
+      // Sucesso total: recarrega a página para refletir o estado atual do AD.
+      window.location.reload();
+      return;
+    }
   } catch (e) {
     const d = e.response?.data;
     error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
