@@ -47,27 +47,29 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
     render json: { ok: true, membros: atual }
   end
 
-  # POST /aprovadores/sync — aplica as pendências no AD (add/remove) e, em seguida,
-  # RECARREGA a lista a partir do grupo do AD (mesma lógica do Importar) — a lista final
-  # sempre reflete o AD, com dados atualizados. Erros por login vão em "resultados".
+  # POST /aprovadores/sync — aplica TODAS as pendências (add/remove) numa ÚNICA chamada SSH
+  # (modo -Action Sync do script: um só Import-Module, cabe no timeout HTTP) e devolve a lista
+  # atual do grupo já com os dados. Erros por login vão em "resultados".
   def sync
-    resultados = []
-    lista.each do |item|
-      case item['status']
-      when 'pending_add'    then resultados << aplicar_ad('Add', item['login'])
-      when 'pending_remove' then resultados << aplicar_ad('Remove', item['login'])
-      end
-    end
-    membros = importar_do_ad
+    atual = lista
+    add = logins_por_status(atual, 'pending_add')
+    remove = logins_por_status(atual, 'pending_remove')
+
+    args = +'-Action Sync'
+    args << %( -AddList "#{join_logins(add)}") if add.any?
+    args << %( -RemoveList "#{join_logins(remove)}") if remove.any?
+
+    data = run_script(args)
+    membros = membros_do_ad(data['membros'])
     salvar(membros)
-    render json: { membros: membros, resultados: resultados }
+    render json: { membros: membros, resultados: data['resultados'] || [] }
   rescue StandardError => e
     render json: { error: 'falha ao sincronizar com o AD', detail: e.message }, status: :bad_gateway
   end
 
   # GET /aprovadores/import — SUBSTITUI a lista pelos membros atuais do grupo no AD.
   def import
-    membros = importar_do_ad
+    membros = membros_do_ad(run_script('-Action List')['membros'])
     salvar(membros)
     render json: { grupo: GRUPO, membros: membros }
   rescue StandardError => e
@@ -76,20 +78,22 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
 
   private
 
-  # Aplica uma ação (Add/Remove) para um login no AD; nunca levanta — devolve o resultado.
-  def aplicar_ad(action, login)
-    run_script(%(-Action #{action} -Login "#{sanitize(login)}"))
-    { login: login, acao: action.downcase, ok: true }
-  rescue StandardError => e
-    { login: login, acao: action.downcase, ok: false, erro: e.message }
+  def logins_por_status(itens, status)
+    itens.select { |i| i['status'] == status }
+         .map { |i| i['login'].to_s }
+         .select { |l| l.match?(SAFE_LOGIN) }
   end
 
-  # Reconstrói a lista a partir do grupo do AD (fonte da verdade); todos status synced.
-  def importar_do_ad
-    data = run_script('-Action List')
+  # Junta logins para o parâmetro do script (separador ';'), sem aspas que quebrem o comando.
+  def join_logins(logins)
+    logins.map { |l| l.delete('"') }.join(';')
+  end
+
+  # Normaliza a lista de membros vinda do AD em itens {login,nome,...,status:synced}.
+  def membros_do_ad(raw)
     vistos = {}
     nova = []
-    (data['membros'] || []).each do |m|
+    (raw || []).each do |m|
       login = (m.is_a?(Hash) ? m['login'] : m).to_s.strip
       key = login.downcase
       next if login.blank? || vistos[key]
@@ -149,12 +153,6 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
 
   def same_login?(a, b)
     a.to_s.strip.casecmp?(b.to_s.strip)
-  end
-
-  def sanitize(login)
-    raise 'login inválido' unless login.to_s.match?(SAFE_LOGIN)
-
-    login.to_s.delete('"')
   end
 
   def run_script(args)
