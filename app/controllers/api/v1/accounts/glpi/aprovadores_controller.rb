@@ -65,20 +65,24 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
     render json: { membros: nova, resultados: resultados }
   end
 
-  # GET /aprovadores/import — puxa os membros atuais do AD e mescla na lista (status synced).
+  # GET /aprovadores/import — SUBSTITUI a lista pelos membros atuais do grupo no AD.
+  # Limpa os registros locais (inclusive pendências) e recria a partir do AD (status synced).
   # O script retorna membros como objetos { login, nome, departamento, email, habilitado }.
   def import
     data = run_script('-Action List')
-    atual = lista
+    vistos = {}
+    nova = []
     (data['membros'] || []).each do |m|
       login = (m.is_a?(Hash) ? m['login'] : m).to_s.strip
-      next if login.blank? || atual.any? { |i| same_login?(i['login'], login) }
+      key = login.downcase
+      next if login.blank? || vistos[key]
 
+      vistos[key] = true
       nome = m.is_a?(Hash) ? m['nome'].presence : nil
-      atual << { 'login' => login, 'nome' => nome, 'status' => 'synced' }
+      nova << { 'login' => login, 'nome' => nome, 'status' => 'synced' }
     end
-    salvar(atual)
-    render json: { grupo: data['grupo'] || GRUPO, membros: atual }
+    salvar(nova)
+    render json: { grupo: data['grupo'] || GRUPO, membros: nova }
   rescue StandardError => e
     render json: { error: 'falha ao importar do AD', detail: e.message }, status: :bad_gateway
   end

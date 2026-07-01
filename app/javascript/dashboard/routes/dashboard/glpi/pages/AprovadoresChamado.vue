@@ -99,6 +99,11 @@ async function sincronizar() {
 }
 
 async function importar() {
+  if (membros.value.length &&
+    // eslint-disable-next-line no-alert
+    !window.confirm('Isso substitui a lista atual pelos membros do grupo no AD (registros locais e pendências serão descartados). Continuar?')) {
+    return;
+  }
   importing.value = true;
   error.value = '';
   aviso.value = '';
@@ -183,7 +188,7 @@ onMounted(load);
           type="button"
           :disabled="importing"
           class="rounded-lg px-4 py-2 text-sm text-n-slate-11 hover:text-n-slate-12 disabled:opacity-50"
-          title="Puxa os membros atuais do grupo no AD para esta lista"
+          title="Substitui a lista pelos membros atuais do grupo no AD"
           @click="importar"
         >
           {{ importing ? 'Importando…' : 'Importar do AD' }}
