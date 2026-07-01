@@ -11,7 +11,6 @@ const STATUS = {
 const grupo = ref('Aprovadores GLPI');
 const membros = ref([]);
 const novoLogin = ref('');
-const novoNome = ref('');
 const loading = ref(true);
 const busy = ref(false);
 const syncing = ref(false);
@@ -57,10 +56,9 @@ async function adicionar() {
   error.value = '';
   aviso.value = '';
   try {
-    const { data } = await GlpiAPI.addAprovador(login, novoNome.value.trim() || undefined);
+    const { data } = await GlpiAPI.addAprovador(login);
     membros.value = data.membros || membros.value;
     novoLogin.value = '';
-    novoNome.value = '';
   } catch (e) {
     error.value = e.response?.data?.error || e.message;
   } finally {
@@ -170,16 +168,7 @@ onMounted(load);
           <input
             v-model="novoLogin"
             type="text"
-            placeholder="ex.: pma\\joao.silva"
-            class="rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-sm text-n-slate-12"
-          />
-        </label>
-        <label class="flex flex-col gap-1 flex-1 min-w-44">
-          <span class="text-xs text-n-slate-11">Nome (opcional)</span>
-          <input
-            v-model="novoNome"
-            type="text"
-            placeholder="ex.: João Silva"
+            placeholder="ex.: joao.silva"
             class="rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-sm text-n-slate-12"
           />
         </label>
