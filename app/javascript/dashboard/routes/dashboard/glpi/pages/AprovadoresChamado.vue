@@ -13,7 +13,6 @@ const membros = ref([]);
 const novoLogin = ref('');
 const loading = ref(true);
 const busy = ref(false);
-const syncing = ref(false);
 const importing = ref(false);
 const notConfigured = ref(false);
 const error = ref('');
@@ -89,38 +88,18 @@ async function remover(login) {
   }
 }
 
-async function sincronizar() {
-  syncing.value = true;
-  error.value = '';
-  aviso.value = '';
-  try {
-    const { data } = await GlpiAPI.syncAprovadores();
-    membros.value = data.membros || membros.value;
-    const falhas = (data.resultados || []).filter(r => !r.ok);
-    aviso.value = falhas.length
-      ? `Sincronizado com ${falhas.length} falha(s): ${falhas.map(f => `${f.login} (${f.erro})`).join('; ')}`
-      : 'Sincronizado com o AD com sucesso.';
-  } catch (e) {
-    const d = e.response?.data;
-    error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
-  } finally {
-    syncing.value = false;
-  }
-}
-
+// Aplica as pendências (add/remove) no AD e recarrega a lista a partir do grupo.
 async function importar() {
-  if (membros.value.length &&
-    // eslint-disable-next-line no-alert
-    !window.confirm('Isso substitui a lista atual pelos membros do grupo no AD (registros locais e pendências serão descartados). Continuar?')) {
-    return;
-  }
   importing.value = true;
   error.value = '';
   aviso.value = '';
   try {
-    const { data } = await GlpiAPI.importAprovadores();
-    membros.value = data.membros || membros.value;
-    aviso.value = 'Membros do AD importados.';
+    const { data } = await GlpiAPI.syncAprovadores();
+    membros.value = data.membros || [];
+    const falhas = (data.resultados || []).filter(r => !r.ok);
+    aviso.value = falhas.length
+      ? `Concluído com ${falhas.length} falha(s): ${falhas.map(f => `${f.login} (${f.erro})`).join('; ')}`
+      : 'Lista aplicada e importada do AD com sucesso.';
   } catch (e) {
     const d = e.response?.data;
     error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
@@ -134,26 +113,13 @@ onMounted(load);
 
 <template>
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-5 max-w-5xl">
-    <div class="flex items-start justify-between gap-3 flex-wrap">
-      <div>
-        <h1 class="text-xl font-medium text-n-slate-12">Aprovadores de chamado</h1>
-        <p class="text-sm text-n-slate-11 mt-1">
-          A lista fica salva aqui no Inovoxachat. As alterações só vão para o grupo
-          <strong>{{ grupo }}</strong> do AD quando você clicar em <strong>Sincronizar</strong>.
-        </p>
-      </div>
-      <button
-        :disabled="syncing || !pendentes.length"
-        class="rounded-lg bg-woot-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-woot-600 disabled:opacity-50 flex items-center gap-2"
-        @click="sincronizar"
-      >
-        <span v-if="syncing">Sincronizando…</span>
-        <span v-else>Sincronizar com o AD</span>
-        <span
-          v-if="pendentes.length"
-          class="bg-white/25 rounded-full px-1.5 text-xs"
-        >{{ pendentes.length }}</span>
-      </button>
+    <div>
+      <h1 class="text-xl font-medium text-n-slate-12">Aprovadores de chamado</h1>
+      <p class="text-sm text-n-slate-11 mt-1">
+        A lista fica salva aqui no Inovoxachat. As alterações só vão para o grupo
+        <strong>{{ grupo }}</strong> do AD quando você clicar em <strong>Importar do AD</strong>,
+        que aplica as pendências e recarrega a lista a partir do AD.
+      </p>
     </div>
 
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>
@@ -172,7 +138,7 @@ onMounted(load);
         <span>⚠</span>
         <span>
           {{ pendentes.length }} alteração(ões) pendente(s) — ainda não aplicada(s) no AD.
-          Clique em <strong>Sincronizar</strong> para confirmar.
+          Clique em <strong>Importar do AD</strong> para aplicar.
         </span>
       </div>
 
@@ -197,11 +163,15 @@ onMounted(load);
         <button
           type="button"
           :disabled="importing"
-          class="rounded-lg px-4 py-2 text-sm text-n-slate-11 hover:text-n-slate-12 disabled:opacity-50"
-          title="Substitui a lista pelos membros atuais do grupo no AD"
+          class="rounded-lg bg-woot-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-woot-600 disabled:opacity-50 flex items-center gap-2"
+          title="Aplica as pendências no AD e recarrega a lista a partir do grupo"
           @click="importar"
         >
-          {{ importing ? 'Importando…' : 'Importar do AD' }}
+          <span>{{ importing ? 'Processando…' : 'Importar do AD' }}</span>
+          <span
+            v-if="pendentes.length && !importing"
+            class="bg-white/25 rounded-full px-1.5 text-xs"
+          >{{ pendentes.length }}</span>
         </button>
       </form>
 
