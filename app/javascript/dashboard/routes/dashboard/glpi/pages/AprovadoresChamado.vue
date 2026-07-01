@@ -224,6 +224,12 @@ onMounted(load);
             <p v-if="m.departamento" class="text-xs text-n-slate-11 truncate" :title="m.departamento">
               🏢 {{ m.departamento }}
             </p>
+            <p v-if="m.office" class="text-xs text-n-slate-11 truncate" :title="m.office">
+              📍 {{ m.office }}
+            </p>
+            <p v-if="m.mobile" class="text-xs text-n-slate-11 truncate" :title="m.mobile">
+              📱 {{ m.mobile }}
+            </p>
             <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
               <span
                 class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium"

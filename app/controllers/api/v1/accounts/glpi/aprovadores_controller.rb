@@ -103,9 +103,10 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
     ((glpi_config.settings || {})[STORE_KEY] || []).map { |i| normalizar_item(i) }
   end
 
-  AD_FIELDS = %w[nome email departamento habilitado].freeze
+  AD_FIELDS = %w[nome email departamento office mobile habilitado].freeze
 
-  # Monta um item a partir de um membro do AD (objeto {login,nome,email,departamento,habilitado}).
+  # Monta um item a partir de um membro do AD
+  # (objeto {login,nome,email,departamento,office,mobile,habilitado}).
   def item_do_ad(m, login)
     base = { 'login' => login, 'status' => 'synced' }
     return base.merge('nome' => nil) unless m.is_a?(Hash)
@@ -114,6 +115,8 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       'nome' => m['nome'].presence,
       'email' => m['email'].presence,
       'departamento' => m['departamento'].presence,
+      'office' => m['office'].presence,
+      'mobile' => m['mobile'].presence,
       'habilitado' => m['habilitado']
     )
   end
@@ -130,6 +133,8 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       i['nome'] = ad['nome'].presence || i['nome']
       i['email'] = ad['email'].presence
       i['departamento'] = ad['departamento'].presence
+      i['office'] = ad['office'].presence
+      i['mobile'] = ad['mobile'].presence
       i['habilitado'] = ad['habilitado']
     end
     salvar(itens)
