@@ -47,29 +47,45 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
     render json: { ok: true, membros: atual }
   end
 
-  # POST /aprovadores/sync — aplica as pendências no AD (add/remove) via SSH.
+  # POST /aprovadores/sync — aplica as pendências no AD (add/remove) e, em seguida,
+  # RECARREGA a lista a partir do grupo do AD (mesma lógica do Importar) — a lista final
+  # sempre reflete o AD, com dados atualizados. Erros por login vão em "resultados".
   def sync
-    nova = []
     resultados = []
     lista.each do |item|
       case item['status']
-      when 'pending_add'
-        aplicar(item, nova, resultados, 'Add', 'add') { item['status'] = 'synced'; nova << item }
-      when 'pending_remove'
-        aplicar(item, nova, resultados, 'Remove', 'remove') { nil } # sucesso = sai da lista
-      else
-        nova << item
+      when 'pending_add'    then resultados << aplicar_ad('Add', item['login'])
+      when 'pending_remove' then resultados << aplicar_ad('Remove', item['login'])
       end
     end
-    salvar(nova)
-    enriquecer_do_ad!(nova) # busca nome/email/departamento/habilitado atualizados do grupo
-    render json: { membros: nova, resultados: resultados }
+    membros = importar_do_ad
+    salvar(membros)
+    render json: { membros: membros, resultados: resultados }
+  rescue StandardError => e
+    render json: { error: 'falha ao sincronizar com o AD', detail: e.message }, status: :bad_gateway
   end
 
   # GET /aprovadores/import — SUBSTITUI a lista pelos membros atuais do grupo no AD.
-  # Limpa os registros locais (inclusive pendências) e recria a partir do AD (status synced).
-  # O script retorna membros como objetos { login, nome, departamento, email, habilitado }.
   def import
+    membros = importar_do_ad
+    salvar(membros)
+    render json: { grupo: GRUPO, membros: membros }
+  rescue StandardError => e
+    render json: { error: 'falha ao importar do AD', detail: e.message }, status: :bad_gateway
+  end
+
+  private
+
+  # Aplica uma ação (Add/Remove) para um login no AD; nunca levanta — devolve o resultado.
+  def aplicar_ad(action, login)
+    run_script(%(-Action #{action} -Login "#{sanitize(login)}"))
+    { login: login, acao: action.downcase, ok: true }
+  rescue StandardError => e
+    { login: login, acao: action.downcase, ok: false, erro: e.message }
+  end
+
+  # Reconstrói a lista a partir do grupo do AD (fonte da verdade); todos status synced.
+  def importar_do_ad
     data = run_script('-Action List')
     vistos = {}
     nova = []
@@ -81,22 +97,7 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       vistos[key] = true
       nova << item_do_ad(m, login)
     end
-    salvar(nova)
-    render json: { grupo: data['grupo'] || GRUPO, membros: nova }
-  rescue StandardError => e
-    render json: { error: 'falha ao importar do AD', detail: e.message }, status: :bad_gateway
-  end
-
-  private
-
-  # Executa a ação no AD; em erro mantém o item pendente e registra o motivo.
-  def aplicar(item, nova, resultados, ps_action, label)
-    run_script(%(-Action #{ps_action} -Login "#{sanitize(item['login'])}"))
-    resultados << { login: item['login'], acao: label, ok: true }
-    yield
-  rescue StandardError => e
-    nova << item
-    resultados << { login: item['login'], acao: label, ok: false, erro: e.message }
+    nova
   end
 
   def lista
@@ -119,27 +120,6 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       'mobile' => m['mobile'].presence,
       'habilitado' => m['habilitado']
     )
-  end
-
-  # Atualiza os dados (nome/email/departamento/habilitado) dos itens a partir do grupo no AD.
-  def enriquecer_do_ad!(itens)
-    data = run_script('-Action List')
-    por_login = {}
-    (data['membros'] || []).each { |m| por_login[m['login'].to_s.downcase] = m if m.is_a?(Hash) }
-    itens.each do |i|
-      ad = por_login[i['login'].to_s.downcase]
-      next unless ad
-
-      i['nome'] = ad['nome'].presence || i['nome']
-      i['email'] = ad['email'].presence
-      i['departamento'] = ad['departamento'].presence
-      i['office'] = ad['office'].presence
-      i['mobile'] = ad['mobile'].presence
-      i['habilitado'] = ad['habilitado']
-    end
-    salvar(itens)
-  rescue StandardError
-    nil # enriquecimento é best-effort; não falha o sync por causa disso
   end
 
   # Conserta itens cujo 'login' virou o objeto inteiro do AD serializado (bug do import antigo):
