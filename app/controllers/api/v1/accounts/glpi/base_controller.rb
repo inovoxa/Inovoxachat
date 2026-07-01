@@ -3,8 +3,16 @@
 # filhos usando as variáveis de glpi_config.effective_settings / secret(...).
 class Api::V1::Accounts::Glpi::BaseController < Api::V1::Accounts::BaseController
   before_action :ensure_glpi_enabled
+  # Rede de segurança: qualquer exceção não tratada vira JSON (nunca "Internal Server Error" opaco).
+  rescue_from StandardError, with: :glpi_unhandled_error
 
   private
+
+  def glpi_unhandled_error(error)
+    Rails.logger.error("[glpi] #{error.class}: #{error.message}\n#{Array(error.backtrace).first(12).join("\n")}")
+    render json: { error: 'erro interno na integração GLPI', detail: error.message },
+           status: :internal_server_error
+  end
 
   def glpi_config
     @glpi_config ||= GlpiAccountConfig.find_by(account_id: current_account.id)

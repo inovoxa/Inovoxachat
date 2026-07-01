@@ -11,6 +11,7 @@ const STATUS = {
 const grupo = ref('Aprovadores GLPI');
 const membros = ref([]);
 const novoLogin = ref('');
+const busca = ref('');
 const loading = ref(true);
 const busy = ref(false);
 const syncing = ref(false);
@@ -19,7 +20,6 @@ const notConfigured = ref(false);
 const error = ref('');
 const aviso = ref('');
 
-const busca = ref('');
 const pendentes = computed(() => membros.value.filter(m => m.status !== 'synced'));
 const ordenados = computed(() =>
   [...membros.value].sort((a, b) => (a.nome || a.login).localeCompare(b.nome || b.login))
@@ -34,6 +34,11 @@ const filtrados = computed(() => {
   );
 });
 
+// Mensagem de erro consistente: usa error + detail da API quando houver.
+function msgErro(e) {
+  const d = e.response?.data;
+  return d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
+}
 function inicial(m) {
   return (m.nome || m.login || '?').trim().charAt(0).toUpperCase();
 }
@@ -53,7 +58,7 @@ async function load() {
     membros.value = data.membros || [];
   } catch (e) {
     if (e.response?.status === 404) notConfigured.value = true;
-    else error.value = e.response?.data?.error || e.message;
+    else error.value = msgErro(e);
   } finally {
     loading.value = false;
   }
@@ -70,7 +75,7 @@ async function adicionar() {
     membros.value = data.membros || membros.value;
     novoLogin.value = '';
   } catch (e) {
-    error.value = e.response?.data?.error || e.message;
+    error.value = msgErro(e);
   } finally {
     busy.value = false;
   }
@@ -79,16 +84,18 @@ async function adicionar() {
 async function remover(login) {
   busy.value = true;
   error.value = '';
+  aviso.value = '';
   try {
     const { data } = await GlpiAPI.removeAprovador(login);
     membros.value = data.membros || membros.value;
   } catch (e) {
-    error.value = e.response?.data?.error || e.message;
+    error.value = msgErro(e);
   } finally {
     busy.value = false;
   }
 }
 
+// Aplica as pendências (add/remove) no AD e recarrega a lista do grupo.
 async function sincronizar() {
   syncing.value = true;
   error.value = '';
@@ -98,24 +105,29 @@ async function sincronizar() {
     membros.value = data.membros || membros.value;
     const falhas = (data.resultados || []).filter(r => !r.ok);
     if (falhas.length) {
-      aviso.value = `Sincronizado com ${falhas.length} falha(s): ${falhas.map(f => `${f.login} (${f.erro})`).join('; ')}`;
+      aviso.value = `Sincronizado com ${falhas.length} falha(s): ${falhas
+        .map(f => `${f.login} (${f.erro})`)
+        .join('; ')}`;
     } else {
-      // Sucesso total: recarrega a página para refletir o estado atual do AD.
-      window.location.reload();
+      window.location.reload(); // sucesso total: reflete o estado atual do AD
       return;
     }
   } catch (e) {
-    const d = e.response?.data;
-    error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
+    error.value = msgErro(e);
   } finally {
     syncing.value = false;
   }
 }
 
+// Substitui a lista pelos membros atuais do grupo no AD (descarta pendências locais).
 async function importar() {
-  if (membros.value.length &&
+  if (
+    membros.value.length &&
     // eslint-disable-next-line no-alert
-    !window.confirm('Isso substitui a lista atual pelos membros do grupo no AD (registros locais e pendências serão descartados). Continuar?')) {
+    !window.confirm(
+      'Isso substitui a lista atual pelos membros do grupo no AD (registros locais e pendências serão descartados). Continuar?'
+    )
+  ) {
     return;
   }
   importing.value = true;
@@ -123,11 +135,10 @@ async function importar() {
   aviso.value = '';
   try {
     const { data } = await GlpiAPI.importAprovadores();
-    membros.value = data.membros || membros.value;
+    membros.value = data.membros || [];
     aviso.value = 'Membros do AD importados.';
   } catch (e) {
-    const d = e.response?.data;
-    error.value = d ? [d.error, d.detail].filter(Boolean).join(' — ') : e.message;
+    error.value = msgErro(e);
   } finally {
     importing.value = false;
   }
@@ -138,6 +149,7 @@ onMounted(load);
 
 <template>
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-5 max-w-5xl">
+    <!-- Cabeçalho -->
     <div class="flex items-start justify-between gap-3 flex-wrap">
       <div>
         <h1 class="text-xl font-medium text-n-slate-12">Aprovadores de chamado</h1>
@@ -148,15 +160,13 @@ onMounted(load);
       </div>
       <button
         :disabled="syncing || !pendentes.length"
-        class="rounded-lg bg-woot-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-woot-600 disabled:opacity-50 flex items-center gap-2"
+        class="rounded-lg bg-woot-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-woot-600 disabled:opacity-50 flex items-center gap-2 shrink-0"
         @click="sincronizar"
       >
-        <span v-if="syncing">Sincronizando…</span>
-        <span v-else>Sincronizar com o AD</span>
-        <span
-          v-if="pendentes.length"
-          class="bg-white/25 rounded-full px-1.5 text-xs"
-        >{{ pendentes.length }}</span>
+        <span>{{ syncing ? 'Sincronizando…' : 'Sincronizar com o AD' }}</span>
+        <span v-if="pendentes.length && !syncing" class="bg-white/25 rounded-full px-1.5 text-xs">
+          {{ pendentes.length }}
+        </span>
       </button>
     </div>
 
@@ -180,7 +190,7 @@ onMounted(load);
         </span>
       </div>
 
-      <!-- Adicionar -->
+      <!-- Adicionar / Importar -->
       <form class="flex gap-2 flex-wrap items-end" @submit.prevent="adicionar">
         <label class="flex flex-col gap-1 flex-1 min-w-44">
           <span class="text-xs text-n-slate-11">Login no AD</span>
@@ -226,10 +236,7 @@ onMounted(load);
       </div>
 
       <!-- Cards -->
-      <div
-        v-if="filtrados.length"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-      >
+      <div v-if="filtrados.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <div
           v-for="m in filtrados"
           :key="m.login"
@@ -293,7 +300,7 @@ onMounted(load);
         <p class="text-sm text-n-slate-11">Nenhum aprovador corresponde à busca.</p>
       </div>
 
-      <!-- Estado vazio -->
+      <!-- Lista vazia -->
       <div
         v-else
         class="rounded-xl border border-dashed border-n-weak py-12 grid place-items-center text-center gap-1"
