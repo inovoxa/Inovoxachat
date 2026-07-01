@@ -7,9 +7,12 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
   STORE_KEY = '_aprovadores'.freeze
   GRUPO = 'Aprovadores GLPI'.freeze
 
-  # GET /aprovadores — lê do Chatwoot, NÃO consulta o AD.
+  # GET /aprovadores — lê do Chatwoot, NÃO consulta o AD. Auto-corrige itens malformados.
   def index
-    render json: { grupo: GRUPO, membros: lista }
+    bruta = (glpi_config.settings || {})[STORE_KEY] || []
+    norm = bruta.map { |i| normalizar_item(i) }
+    salvar(norm) if norm != bruta
+    render json: { grupo: GRUPO, membros: norm }
   end
 
   # POST /aprovadores  { login, nome? } — só grava no Chatwoot (pendente de sync).
@@ -63,13 +66,16 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
   end
 
   # GET /aprovadores/import — puxa os membros atuais do AD e mescla na lista (status synced).
+  # O script retorna membros como objetos { login, nome, departamento, email, habilitado }.
   def import
     data = run_script('-Action List')
     atual = lista
-    (data['membros'] || []).each do |login|
-      next if atual.any? { |i| same_login?(i['login'], login) }
+    (data['membros'] || []).each do |m|
+      login = (m.is_a?(Hash) ? m['login'] : m).to_s.strip
+      next if login.blank? || atual.any? { |i| same_login?(i['login'], login) }
 
-      atual << { 'login' => login.to_s, 'nome' => nil, 'status' => 'synced' }
+      nome = m.is_a?(Hash) ? m['nome'].presence : nil
+      atual << { 'login' => login, 'nome' => nome, 'status' => 'synced' }
     end
     salvar(atual)
     render json: { grupo: data['grupo'] || GRUPO, membros: atual }
@@ -90,7 +96,22 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
   end
 
   def lista
-    (glpi_config.settings || {})[STORE_KEY] || []
+    ((glpi_config.settings || {})[STORE_KEY] || []).map { |i| normalizar_item(i) }
+  end
+
+  # Conserta itens cujo 'login' virou o objeto inteiro do AD serializado (bug do import antigo):
+  # extrai o login/nome reais de uma string tipo {"login" => "teste.ti", "nome" => "Teste TI", ...}.
+  def normalizar_item(item)
+    login = item['login'].to_s
+    nome = item['nome']
+    unless login.match?(SAFE_LOGIN)
+      extraido = login[/["']login["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
+      if extraido
+        nome ||= login[/["']nome["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
+        login = extraido
+      end
+    end
+    { 'login' => login, 'nome' => nome.presence, 'status' => item['status'].presence || 'synced' }
   end
 
   def salvar(novos)
