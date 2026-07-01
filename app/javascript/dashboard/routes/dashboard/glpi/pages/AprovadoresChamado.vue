@@ -19,10 +19,20 @@ const notConfigured = ref(false);
 const error = ref('');
 const aviso = ref('');
 
+const busca = ref('');
 const pendentes = computed(() => membros.value.filter(m => m.status !== 'synced'));
 const ordenados = computed(() =>
   [...membros.value].sort((a, b) => (a.nome || a.login).localeCompare(b.nome || b.login))
 );
+const filtrados = computed(() => {
+  const q = busca.value.trim().toLowerCase();
+  if (!q) return ordenados.value;
+  return ordenados.value.filter(m =>
+    [m.nome, m.login, m.email, m.departamento, m.office].some(v =>
+      (v || '').toString().toLowerCase().includes(q)
+    )
+  );
+});
 
 function inicial(m) {
   return (m.nome || m.login || '?').trim().charAt(0).toUpperCase();
@@ -198,13 +208,26 @@ onMounted(load);
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
       <p v-if="aviso" class="text-green-600 text-sm">{{ aviso }}</p>
 
+      <!-- Busca -->
+      <div v-if="ordenados.length" class="flex items-center gap-2">
+        <input
+          v-model="busca"
+          type="search"
+          placeholder="Filtrar por nome, departamento, office…"
+          class="flex-1 rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-sm text-n-slate-12"
+        />
+        <span class="text-xs text-n-slate-11 whitespace-nowrap">
+          {{ filtrados.length }} de {{ ordenados.length }}
+        </span>
+      </div>
+
       <!-- Cards -->
       <div
-        v-if="ordenados.length"
+        v-if="filtrados.length"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
       >
         <div
-          v-for="m in ordenados"
+          v-for="m in filtrados"
           :key="m.login"
           class="group relative rounded-xl border border-n-weak bg-n-alpha-black2 p-4 flex items-start gap-3 hover:border-n-slate-7 transition-colors"
           :class="{ 'opacity-70': m.status === 'pending_remove' }"
@@ -255,6 +278,15 @@ onMounted(load);
             ✕
           </button>
         </div>
+      </div>
+
+      <!-- Busca sem resultado -->
+      <div
+        v-else-if="ordenados.length"
+        class="rounded-xl border border-dashed border-n-weak py-10 grid place-items-center text-center gap-1"
+      >
+        <span class="text-2xl">🔍</span>
+        <p class="text-sm text-n-slate-11">Nenhum aprovador corresponde à busca.</p>
       </div>
 
       <!-- Estado vazio -->
