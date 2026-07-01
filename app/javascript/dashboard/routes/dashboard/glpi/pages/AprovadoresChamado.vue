@@ -206,7 +206,7 @@ onMounted(load);
         <div
           v-for="m in ordenados"
           :key="m.login"
-          class="group relative rounded-xl border border-n-weak bg-n-alpha-black2 p-4 flex items-center gap-3 hover:border-n-slate-7 transition-colors"
+          class="group relative rounded-xl border border-n-weak bg-n-alpha-black2 p-4 flex items-start gap-3 hover:border-n-slate-7 transition-colors"
           :class="{ 'opacity-70': m.status === 'pending_remove' }"
         >
           <div
@@ -217,14 +217,28 @@ onMounted(load);
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-n-slate-12 truncate">{{ m.nome || m.login }}</p>
-            <p v-if="m.nome" class="text-xs text-n-slate-11 truncate">{{ m.login }}</p>
-            <span
-              class="mt-1 inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-              :class="STATUS[m.status].cls"
-            >
-              <span class="w-1.5 h-1.5 rounded-full" :class="STATUS[m.status].dot" />
-              {{ STATUS[m.status].label }}
-            </span>
+            <p class="text-xs text-n-slate-11 truncate">@{{ m.login }}</p>
+            <p v-if="m.email" class="text-xs text-n-slate-11 truncate mt-0.5" :title="m.email">
+              ✉ {{ m.email }}
+            </p>
+            <p v-if="m.departamento" class="text-xs text-n-slate-11 truncate" :title="m.departamento">
+              🏢 {{ m.departamento }}
+            </p>
+            <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
+              <span
+                class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                :class="STATUS[m.status].cls"
+              >
+                <span class="w-1.5 h-1.5 rounded-full" :class="STATUS[m.status].dot" />
+                {{ STATUS[m.status].label }}
+              </span>
+              <span
+                v-if="m.habilitado === false"
+                class="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-red-500/15 text-red-600"
+              >
+                Inativo no AD
+              </span>
+            </div>
           </div>
           <button
             :disabled="busy"

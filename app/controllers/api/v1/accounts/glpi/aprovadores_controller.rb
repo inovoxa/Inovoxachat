@@ -62,6 +62,7 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       end
     end
     salvar(nova)
+    enriquecer_do_ad!(nova) # busca nome/email/departamento/habilitado atualizados do grupo
     render json: { membros: nova, resultados: resultados }
   end
 
@@ -78,8 +79,7 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
       next if login.blank? || vistos[key]
 
       vistos[key] = true
-      nome = m.is_a?(Hash) ? m['nome'].presence : nil
-      nova << { 'login' => login, 'nome' => nome, 'status' => 'synced' }
+      nova << item_do_ad(m, login)
     end
     salvar(nova)
     render json: { grupo: data['grupo'] || GRUPO, membros: nova }
@@ -103,19 +103,57 @@ class Api::V1::Accounts::Glpi::AprovadoresController < Api::V1::Accounts::Glpi::
     ((glpi_config.settings || {})[STORE_KEY] || []).map { |i| normalizar_item(i) }
   end
 
+  AD_FIELDS = %w[nome email departamento habilitado].freeze
+
+  # Monta um item a partir de um membro do AD (objeto {login,nome,email,departamento,habilitado}).
+  def item_do_ad(m, login)
+    base = { 'login' => login, 'status' => 'synced' }
+    return base.merge('nome' => nil) unless m.is_a?(Hash)
+
+    base.merge(
+      'nome' => m['nome'].presence,
+      'email' => m['email'].presence,
+      'departamento' => m['departamento'].presence,
+      'habilitado' => m['habilitado']
+    )
+  end
+
+  # Atualiza os dados (nome/email/departamento/habilitado) dos itens a partir do grupo no AD.
+  def enriquecer_do_ad!(itens)
+    data = run_script('-Action List')
+    por_login = {}
+    (data['membros'] || []).each { |m| por_login[m['login'].to_s.downcase] = m if m.is_a?(Hash) }
+    itens.each do |i|
+      ad = por_login[i['login'].to_s.downcase]
+      next unless ad
+
+      i['nome'] = ad['nome'].presence || i['nome']
+      i['email'] = ad['email'].presence
+      i['departamento'] = ad['departamento'].presence
+      i['habilitado'] = ad['habilitado']
+    end
+    salvar(itens)
+  rescue StandardError
+    nil # enriquecimento é best-effort; não falha o sync por causa disso
+  end
+
   # Conserta itens cujo 'login' virou o objeto inteiro do AD serializado (bug do import antigo):
   # extrai o login/nome reais de uma string tipo {"login" => "teste.ti", "nome" => "Teste TI", ...}.
   def normalizar_item(item)
     login = item['login'].to_s
     nome = item['nome']
+    extras = item.slice(*AD_FIELDS).except('nome')
     unless login.match?(SAFE_LOGIN)
       extraido = login[/["']login["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
       if extraido
         nome ||= login[/["']nome["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
+        extras['email'] ||= login[/["']email["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
+        extras['departamento'] ||= login[/["']departamento["']\s*(?:=>|:)\s*["']([^"']+)["']/, 1]
         login = extraido
       end
     end
     { 'login' => login, 'nome' => nome.presence, 'status' => item['status'].presence || 'synced' }
+      .merge(extras.compact)
   end
 
   def salvar(novos)
