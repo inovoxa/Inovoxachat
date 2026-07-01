@@ -11,11 +11,19 @@ Rails.application.config.after_initialize do
     Agents.configure do |config|
       config.openai_api_key = api_key
       if api_endpoint.present?
-        api_base = "#{api_endpoint.chomp('/')}/v1"
-        config.openai_api_base = api_base
+        base = api_endpoint.chomp('/')
+        # Não duplicar /v1 quando o endpoint já termina em /v1 (ex.: OpenRouter).
+        config.openai_api_base = base.end_with?('/v1') ? base : "#{base}/v1"
       end
       config.default_model = model
       config.debug = false
+      # OpenRouter: se o endpoint é do OpenRouter e a key nativa não foi definida,
+      # reutiliza a mesma key (que é a do OpenRouter) no slot correto.
+      if config.respond_to?(:openrouter_api_key=) &&
+         api_endpoint.to_s.include?('openrouter.ai') &&
+         InstallationConfig.find_by(name: 'CAPTAIN_OPENROUTER_API_KEY')&.value.blank?
+        config.openrouter_api_key = api_key
+      end
     end
   end
 rescue StandardError => e

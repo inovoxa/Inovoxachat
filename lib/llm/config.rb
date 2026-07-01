@@ -61,6 +61,25 @@ module Llm::Config
         setter = "#{provider}_api_key="
         config.public_send(setter, key) if config.respond_to?(setter)
       end
+      apply_openrouter_compatibility(config)
+    end
+
+    # Compatibilidade: modelos com id estilo OpenRouter (ex.: "openai/gpt-4o-mini",
+    # "deepseek/deepseek-chat") são resolvidos pelo RubyLLM como provider :openrouter, que
+    # exige openrouter_api_key. Se o endpoint aponta para o OpenRouter e o slot nativo
+    # (CAPTAIN_OPENROUTER_API_KEY) está vazio, reutilizamos a CAPTAIN_OPEN_AI_API_KEY
+    # (que na prática é a key do OpenRouter) — assim o setup "OpenAI-compatible" funciona.
+    def apply_openrouter_compatibility(config)
+      return unless config.respond_to?(:openrouter_api_key=)
+      return unless openrouter_endpoint?
+      return if InstallationConfig.find_by(name: PROVIDER_API_KEYS[:openrouter])&.value.present?
+      return if system_api_key.blank?
+
+      config.openrouter_api_key = system_api_key
+    end
+
+    def openrouter_endpoint?
+      openai_endpoint.to_s.include?('openrouter.ai')
     end
 
     def system_api_key
