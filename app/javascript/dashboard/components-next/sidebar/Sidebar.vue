@@ -656,6 +656,16 @@ const menuItems = computed(() => {
           ),
           activeOn: ['companies_dashboard_index', 'companies_dashboard_show'],
         },
+        {
+          name: 'Contracts',
+          label: t('SIDEBAR.CONTRACTS'),
+          to: accountScopedRoute('contracts_index'),
+        },
+        {
+          name: 'Equipments',
+          label: t('SIDEBAR.EQUIPMENTS'),
+          to: accountScopedRoute('equipments_index'),
+        },
       ],
     },
     {

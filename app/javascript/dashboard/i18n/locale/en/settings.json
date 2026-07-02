@@ -322,6 +322,8 @@
     "ACTIVE": "Active",
     "COMPANIES": "Companies",
     "ALL_COMPANIES": "All Companies",
+    "CONTRACTS": "Contracts",
+    "EQUIPMENTS": "Equipments",
     "CAPTAIN": "Captain",
     "CAPTAIN_ASSISTANTS": "Assistants",
     "CAPTAIN_DOCUMENTS": "Documents",
