@@ -660,6 +660,12 @@ const menuItems = computed(() => {
       icon: 'i-lucide-building-2',
       children: [
         {
+          name: 'Control Panel',
+          label: t('SIDEBAR.CONTROL_PANEL'),
+          to: accountScopedRoute('rental_dashboard'),
+          activeOn: ['rental_dashboard'],
+        },
+        {
           name: 'All Companies',
           label: t('SIDEBAR.ALL_COMPANIES'),
           to: accountScopedRoute(

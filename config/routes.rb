@@ -203,6 +203,7 @@ Rails.application.routes.draw do
           end
 
           # Módulo Empresas — locação (contratos/equipamentos). Escopado por conta.
+          resource :rental_dashboard, only: [:show], controller: 'rental_dashboard'
           resources :contracts, only: [:index, :show, :create, :update, :destroy]
           resources :equipments, only: [:index, :show, :create, :update, :destroy]
           resources :invoices, only: [:index, :show, :create, :update, :destroy] do
