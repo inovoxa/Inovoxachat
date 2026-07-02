@@ -206,6 +206,15 @@ Rails.application.routes.draw do
           resources :contracts, only: [:index, :show, :create, :update, :destroy]
           resources :equipments, only: [:index, :show, :create, :update, :destroy]
 
+          # CRM — funil de vendas (oportunidades).
+          resources :opportunities, only: [:index, :show, :create, :update, :destroy] do
+            member do
+              patch :move
+              post :ganhar
+              post :perder
+            end
+          end
+
           resources :companies, only: [:index, :show, :create, :update, :destroy] do
             collection do
               get :search

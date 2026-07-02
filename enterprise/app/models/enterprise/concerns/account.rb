@@ -19,6 +19,7 @@ module Enterprise::Concerns::Account
     has_many :contracts, dependent: :destroy_async
     has_many :equipments, dependent: :destroy_async
     has_many :contract_items, dependent: :destroy_async
+    has_many :opportunities, dependent: :destroy_async
     has_many :calls, dependent: :destroy_async
 
     has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'
