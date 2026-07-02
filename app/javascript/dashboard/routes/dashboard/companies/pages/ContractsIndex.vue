@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import ContractsAPI from 'dashboard/api/contracts';
+import { useAlert } from 'dashboard/composables';
+import ContractCreateDialog from 'dashboard/components-next/Companies/ContractCreateDialog.vue';
 
 const FILTROS = [
   { key: 'a_vencer', label: 'A vencer' },
@@ -21,6 +23,24 @@ const loading = ref(true);
 const error = ref('');
 const filtro = ref('a_vencer');
 const dias = ref(30);
+const dialogRef = ref(null);
+const saving = ref(false);
+
+async function salvar(payload) {
+  saving.value = true;
+  try {
+    if (payload.id) await ContractsAPI.update(payload.id, { contract: payload });
+    else await ContractsAPI.create({ contract: payload });
+    dialogRef.value?.onSuccess();
+    useAlert('Contrato salvo.');
+    load();
+  } catch (e) {
+    const d = e.response?.data;
+    useAlert(d ? [d.error, d.detail].filter(Boolean).join(' — ') : 'Erro ao salvar o contrato.');
+  } finally {
+    saving.value = false;
+  }
+}
 
 function fmtData(d) {
   return d ? new Date(d).toLocaleDateString('pt-BR') : '—';
@@ -69,15 +89,23 @@ onMounted(load);
   <div class="flex flex-col w-full h-full overflow-hidden p-6 gap-4">
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <h1 class="text-xl font-medium text-n-slate-12">Contratos</h1>
-      <div v-if="filtro === 'a_vencer'" class="flex items-center gap-2 text-sm">
-        <span class="text-n-slate-11">Janela:</span>
-        <select
-          v-model.number="dias"
-          class="rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1.5 text-n-slate-12"
-          @change="load"
+      <div class="flex items-center gap-2 text-sm">
+        <template v-if="filtro === 'a_vencer'">
+          <span class="text-n-slate-11">Janela:</span>
+          <select
+            v-model.number="dias"
+            class="rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1.5 text-n-slate-12"
+            @change="load"
+          >
+            <option v-for="d in DIAS_OPTS" :key="d" :value="d">{{ d }} dias</option>
+          </select>
+        </template>
+        <button
+          class="rounded-lg bg-woot-500 px-4 py-2 font-medium text-white hover:bg-woot-600"
+          @click="dialogRef?.open()"
         >
-          <option v-for="d in DIAS_OPTS" :key="d" :value="d">{{ d }} dias</option>
-        </select>
+          + Novo contrato
+        </button>
       </div>
     </div>
 
@@ -124,7 +152,8 @@ onMounted(load);
           <tr
             v-for="c in contratos"
             :key="c.id"
-            class="border-t border-n-weak hover:bg-n-alpha-black2"
+            class="border-t border-n-weak hover:bg-n-alpha-black2 cursor-pointer"
+            @click="dialogRef?.open(c)"
           >
             <td class="px-3 py-2 text-n-slate-12">{{ c.company_name || '—' }}</td>
             <td class="px-3 py-2 text-n-slate-11">
@@ -147,5 +176,7 @@ onMounted(load);
         </tbody>
       </table>
     </div>
+
+    <ContractCreateDialog ref="dialogRef" :is-loading="saving" @save="salvar" />
   </div>
 </template>
