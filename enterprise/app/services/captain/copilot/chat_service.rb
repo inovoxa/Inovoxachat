@@ -71,6 +71,9 @@ class Captain::Copilot::ChatService < Llm::BaseAiService
     tools << Captain::Tools::Copilot::SearchArticlesService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::SearchContactsService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::SearchLinearIssuesService.new(@assistant, user: @user)
+    # Service Desk (GLPI/OCS): só ficam ativas quando a integração está configurada (active?).
+    tools << Captain::Tools::Copilot::GlpiTicketsService.new(@assistant, user: @user)
+    tools << Captain::Tools::Copilot::GlpiInventoryService.new(@assistant, user: @user)
 
     tools.select(&:active?)
   end
