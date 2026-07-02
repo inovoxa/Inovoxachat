@@ -75,6 +75,8 @@ class Captain::Copilot::ChatService < Llm::BaseAiService
     tools << Captain::Tools::Copilot::GlpiTicketsService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::GlpiInventoryService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::AdUserService.new(@assistant, user: @user)
+    # Empresas/locação: consulta empresas da conta (ativa só com a feature companies).
+    tools << Captain::Tools::Copilot::CompanyLookupService.new(@assistant, user: @user)
 
     tools.select(&:active?)
   end

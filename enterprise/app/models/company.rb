@@ -25,8 +25,12 @@ class Company < ApplicationRecord
 
   ACTIVITY_ROLLUP_INTERVAL = 5.minutes
 
+  # Situação do cliente no funil/relacionamento (módulo de locação).
+  enum status: { lead: 0, ativo: 1, inativo: 2, churn: 3 }
+
   validates :account_id, presence: true
   validates :name, presence: true, length: { maximum: Limits::COMPANY_NAME_LENGTH_LIMIT }
+  validates :cnpj, uniqueness: { scope: :account_id }, allow_blank: true
   validates :domain, allow_blank: true, format: {
     with: /\A[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+\z/,
     message: I18n.t('errors.companies.domain.invalid')
@@ -36,10 +40,13 @@ class Company < ApplicationRecord
   validates :custom_attributes, jsonb_attributes_length: true
 
   belongs_to :account
+  belongs_to :account_owner, class_name: 'User', optional: true
   has_many :contacts, dependent: :nullify
   before_validation :prepare_jsonb_attributes
   after_create_commit :fetch_favicon, if: -> { domain.present? }
 
+  scope :by_status, ->(status) { where(status: status) if status.present? }
+  scope :owned_by, ->(user_id) { where(account_owner_id: user_id) if user_id.present? }
   scope :ordered_by_name, -> { order(:name) }
   scope :search_by_name_or_domain, lambda { |query|
     where('name ILIKE :search OR domain ILIKE :search', search: "%#{query.strip}%")

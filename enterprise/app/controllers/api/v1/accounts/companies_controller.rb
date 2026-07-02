@@ -61,6 +61,8 @@ class Api::V1::Accounts::CompaniesController < Api::V1::Accounts::EnterpriseAcco
 
   def resolved_companies
     @resolved_companies ||= Current.account.companies
+                                   .by_status(params[:status])
+                                   .owned_by(params[:account_owner_id])
   end
 
   def set_current_page
@@ -89,6 +91,11 @@ class Api::V1::Accounts::CompaniesController < Api::V1::Accounts::EnterpriseAcco
       :domain,
       :description,
       :avatar,
+      :cnpj,
+      :status,
+      :account_owner_id,
+      :phone,
+      :address,
       additional_attributes: {},
       custom_attributes: {}
     )
