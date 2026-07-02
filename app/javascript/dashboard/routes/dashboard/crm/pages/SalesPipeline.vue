@@ -88,6 +88,22 @@ async function salvar(payload) {
   }
 }
 
+async function onMoveStage({ id, stage }) {
+  saving.value = true;
+  try {
+    await OpportunitiesAPI.move(id, stage);
+    if (stage === 'ganho') {
+      await OpportunitiesAPI.ganhar(id, true);
+      useAlert('Oportunidade ganha! Contrato gerado.');
+    }
+    load();
+  } catch (e) {
+    useAlert(e.response?.data?.error || 'Erro ao mover a oportunidade.');
+  } finally {
+    saving.value = false;
+  }
+}
+
 async function acao(op, tipo) {
   saving.value = true;
   try {
@@ -191,6 +207,7 @@ onMounted(load);
       @save="salvar"
       @ganhar="op => acao(op, 'ganhar')"
       @perder="op => acao(op, 'perder')"
+      @move-stage="onMoveStage"
     />
   </div>
 </template>

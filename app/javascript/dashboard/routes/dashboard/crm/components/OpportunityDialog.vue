@@ -5,14 +5,23 @@ import Dialog from 'dashboard/components-next/dialog/Dialog.vue';
 import Input from 'dashboard/components-next/input/Input.vue';
 import CompaniesAPI from 'dashboard/api/companies';
 import AgentAPI from 'dashboard/api/agents';
+import ContractsAPI from 'dashboard/api/contracts';
 
 defineProps({ isLoading: { type: Boolean, default: false } });
-const emit = defineEmits(['save', 'ganhar', 'perder']);
+const emit = defineEmits(['save', 'ganhar', 'perder', 'move-stage']);
 
 const dialogRef = ref(null);
 const empresas = ref([]);
 const agentes = ref([]);
 const contatos = ref([]);
+const contratos = ref([]);
+
+const STAGES = [
+  { key: 'novo', label: 'Novo' },
+  { key: 'qualificado', label: 'Qualificado' },
+  { key: 'proposta', label: 'Proposta' },
+  { key: 'ganho', label: 'Ganho' },
+];
 
 const inputClass =
   'h-8 rounded-lg border border-n-weak bg-n-alpha-black2 px-2 text-sm text-n-slate-12 w-full';
@@ -20,6 +29,7 @@ const inputClass =
 const EMPTY = () => ({
   id: null,
   name: '',
+  stage: 'novo',
   company_id: '',
   contact_id: '',
   agent_id: '',
@@ -32,6 +42,17 @@ const EMPTY = () => ({
 const form = reactive(EMPTY());
 const isInvalid = computed(() => !form.name.trim());
 const isEdit = computed(() => !!form.id);
+
+const contatoSel = computed(() =>
+  contatos.value.find(c => String(c.id) === String(form.contact_id))
+);
+
+function fmtValor(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+function fmtData(d) {
+  return d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+}
 
 const reset = () => Object.assign(form, EMPTY());
 
@@ -46,9 +67,23 @@ async function carregarContatos(companyId) {
   }
 }
 
+async function carregarContratos(companyId) {
+  contratos.value = [];
+  if (!companyId) return;
+  try {
+    const { data } = await ContractsAPI.get({ company_id: companyId });
+    contratos.value = data.payload || [];
+  } catch (e) {
+    contratos.value = [];
+  }
+}
+
 watch(
   () => form.company_id,
-  id => carregarContatos(id)
+  id => {
+    carregarContatos(id);
+    carregarContratos(id);
+  }
 );
 
 async function carregarOpcoes() {
@@ -71,6 +106,7 @@ const open = async (op = {}) => {
   Object.assign(form, {
     id: op.id || null,
     name: op.name || '',
+    stage: op.stage || 'novo',
     company_id: op.company_id || '',
     contact_id: op.contact_id || '',
     agent_id: op.agent_id || '',
@@ -80,15 +116,25 @@ const open = async (op = {}) => {
     expected_closing: op.expected_closing || '',
     notes: op.notes || '',
   });
-  if (form.company_id) await carregarContatos(form.company_id);
+  if (form.company_id) {
+    await carregarContatos(form.company_id);
+    await carregarContratos(form.company_id);
+  }
   dialogRef.value?.open();
 };
+
+function irParaEstagio(stage) {
+  if (!isEdit.value || form.stage === stage) return;
+  form.stage = stage;
+  emit('move-stage', { id: form.id, stage });
+}
 
 const confirm = () => {
   if (isInvalid.value) return;
   emit('save', {
     id: form.id,
     name: form.name.trim(),
+    stage: form.stage,
     company_id: form.company_id || null,
     contact_id: form.contact_id || null,
     agent_id: form.agent_id || null,
@@ -109,13 +155,51 @@ defineExpose({ open, onSuccess, dialogRef });
 </script>
 
 <template>
-  <Dialog ref="dialogRef" width="2xl" :show-confirm-button="false" @confirm="confirm" @close="reset">
+  <Dialog ref="dialogRef" width="3xl" :show-confirm-button="false" @confirm="confirm" @close="reset">
     <div class="flex flex-col gap-4">
+      <!-- Pipeline de estágios (Odoo-like) -->
+      <div v-if="isEdit" class="flex items-center gap-1 flex-wrap">
+        <button
+          v-for="(s, i) in STAGES"
+          :key="s.key"
+          type="button"
+          class="text-xs px-3 py-1 font-medium transition-colors"
+          :class="[
+            form.stage === s.key
+              ? 'bg-woot-500 text-white'
+              : 'bg-n-alpha-black2 text-n-slate-11 hover:text-n-slate-12',
+            i === 0 ? 'rounded-l-lg' : '',
+            i === STAGES.length - 1 ? 'rounded-r-lg' : '',
+          ]"
+          @click="irParaEstagio(s.key)"
+        >
+          {{ s.label }}
+        </button>
+        <span
+          v-if="form.stage === 'perdido'"
+          class="text-xs px-3 py-1 rounded-lg bg-red-500/15 text-red-600 font-medium ml-1"
+        >
+          Perdido
+        </span>
+      </div>
+
       <span class="text-sm font-medium text-n-slate-12">
         {{ isEdit ? 'Oportunidade' : 'Nova oportunidade' }}
       </span>
 
       <Input v-model="form.name" placeholder="Título da oportunidade" :disabled="isLoading" autofocus />
+
+      <!-- Receita/probabilidade em destaque (edição) -->
+      <div v-if="isEdit" class="flex items-center gap-8 flex-wrap">
+        <div>
+          <p class="text-xs text-n-slate-11">Receita esperada</p>
+          <p class="text-2xl font-bold text-woot-600">{{ fmtValor(form.expected_value) }}</p>
+        </div>
+        <div>
+          <p class="text-xs text-n-slate-11">Probabilidade</p>
+          <p class="text-2xl font-bold text-n-slate-12">{{ form.probability }}%</p>
+        </div>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label class="flex flex-col gap-1">
@@ -153,6 +237,12 @@ defineExpose({ open, onSuccess, dialogRef });
         </label>
       </div>
 
+      <!-- Dados do contato selecionado -->
+      <div v-if="contatoSel" class="rounded-lg bg-n-alpha-black2 p-3 text-sm flex flex-wrap gap-x-6 gap-y-1">
+        <span v-if="contatoSel.email" class="text-n-slate-11">✉ {{ contatoSel.email }}</span>
+        <span v-if="contatoSel.phone_number" class="text-n-slate-11">📱 {{ contatoSel.phone_number }}</span>
+      </div>
+
       <div class="flex items-center gap-2">
         <span class="text-xs text-n-slate-11">Prioridade:</span>
         <button
@@ -176,6 +266,24 @@ defineExpose({ open, onSuccess, dialogRef });
           class="rounded-lg border border-n-weak bg-n-alpha-black2 px-2 py-1.5 text-sm text-n-slate-12"
         />
       </label>
+
+      <!-- Contratos / Aluguéis vinculados à empresa -->
+      <div v-if="isEdit && form.company_id">
+        <p class="text-xs font-medium text-n-slate-12 mb-1 border-b border-n-weak pb-1">
+          Aluguéis / Contratos da empresa ({{ contratos.length }})
+        </p>
+        <div v-if="contratos.length" class="flex flex-col gap-1 mt-1">
+          <div
+            v-for="c in contratos"
+            :key="c.id"
+            class="flex items-center justify-between text-xs text-n-slate-11"
+          >
+            <span>#{{ c.id }} · {{ fmtValor(c.value) }}</span>
+            <span>vence {{ fmtData(c.end_date) }} · {{ c.status }}</span>
+          </div>
+        </div>
+        <p v-else class="text-xs text-n-slate-11 mt-1">Nenhum contrato ainda.</p>
+      </div>
     </div>
 
     <template #footer>
