@@ -13,6 +13,7 @@ import CompanyContactsSidebar from 'dashboard/components-next/Companies/CompanyD
 import CompanyHistorySidebar from 'dashboard/components-next/Companies/CompanyDetail/CompanyHistorySidebar.vue';
 import CompanyNotesSidebar from 'dashboard/components-next/Companies/CompanyDetail/CompanyNotesSidebar.vue';
 import CompanyProfileCard from 'dashboard/components-next/Companies/CompanyDetail/CompanyProfileCard.vue';
+import CompanyRentalPanel from 'dashboard/components-next/Companies/CompanyDetail/CompanyRentalPanel.vue';
 import ConfirmCompanyDeleteDialog from 'dashboard/components-next/Companies/CompanyDetail/ConfirmCompanyDeleteDialog.vue';
 import { useCompaniesStore } from 'dashboard/stores/companies';
 
@@ -232,6 +233,8 @@ onBeforeUnmount(() => {
 
     <div v-else class="flex flex-col gap-6">
       <CompanyProfileCard :company="company" :is-loading="isFetchingCompany" />
+
+      <CompanyRentalPanel v-if="companyId" :company-id="companyId" />
 
       <Policy :permissions="['administrator']">
         <section
