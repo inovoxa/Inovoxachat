@@ -202,6 +202,10 @@ Rails.application.routes.draw do
             end
           end
 
+          # Módulo Empresas — locação (contratos/equipamentos). Escopado por conta.
+          resources :contracts, only: [:index, :show, :create, :update, :destroy]
+          resources :equipments, only: [:index, :show, :create, :update, :destroy]
+
           resources :companies, only: [:index, :show, :create, :update, :destroy] do
             collection do
               get :search

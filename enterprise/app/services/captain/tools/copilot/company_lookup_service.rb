@@ -32,6 +32,7 @@ class Captain::Tools::Copilot::CompanyLookupService < Captain::Tools::BaseTool
   private
 
   def formatar(c)
+    proximo = c.contracts.ativo.where('end_date >= ?', Date.current).order(:end_date).first
     [
       "Empresa: #{c.name}",
       "Status: #{STATUS_LABEL[c.status] || c.status}",
@@ -40,7 +41,9 @@ class Captain::Tools::Copilot::CompanyLookupService < Captain::Tools::BaseTool
       ("Telefone: #{c.phone}" if c.phone.present?),
       ("Endereço: #{c.address}" if c.address.present?),
       ("Domínio: #{c.domain}" if c.domain.present?),
-      "Contatos vinculados: #{c.contacts_count || 0}"
+      "Contatos vinculados: #{c.contacts_count || 0}",
+      "Contratos ativos: #{c.contracts.ativo.count}",
+      ("Próximo vencimento: #{proximo.end_date} (contrato ##{proximo.id})" if proximo)
     ].compact.join("\n")
   end
 end
