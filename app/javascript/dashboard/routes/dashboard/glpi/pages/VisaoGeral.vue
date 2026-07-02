@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import GlpiAPI from 'dashboard/api/glpi';
 import PeriodFilter from '../components/PeriodFilter.vue';
+import UsuarioAdModal from '../components/UsuarioAdModal.vue';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
@@ -20,6 +21,14 @@ const filterParams = ref({ period: '90d' });
 const loading = ref(true);
 const notConfigured = ref(false);
 const error = ref('');
+
+const buscaUsuario = ref('');
+const usuarioSelecionado = ref('');
+
+function pesquisarUsuario() {
+  const login = buscaUsuario.value.trim();
+  if (login) usuarioSelecionado.value = login;
+}
 
 const chartData = computed(() => {
   const s = data.value?.semanal || { labels: [], whatsapp: [], formulario: [] };
@@ -76,9 +85,26 @@ onMounted(load);
 
 <template>
   <div class="flex flex-col w-full h-full overflow-auto p-6 gap-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
       <h1 class="text-xl font-medium text-n-slate-12">Visão Geral (GLPI)</h1>
-      <PeriodFilter @change="onFilter" />
+      <div class="flex items-center gap-2 flex-wrap">
+        <form class="flex items-center gap-2" @submit.prevent="pesquisarUsuario">
+          <input
+            v-model="buscaUsuario"
+            type="search"
+            placeholder="Pesquisar usuário no AD (login)"
+            class="text-sm rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-1.5 text-n-slate-12 w-64"
+          />
+          <button
+            type="submit"
+            :disabled="!buscaUsuario.trim()"
+            class="rounded-lg bg-woot-500 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          >
+            Buscar
+          </button>
+        </form>
+        <PeriodFilter @change="onFilter" />
+      </div>
     </div>
 
     <p v-if="loading" class="text-n-slate-11">Carregando…</p>
@@ -127,5 +153,11 @@ onMounted(load);
         </div>
       </div>
     </template>
+
+    <UsuarioAdModal
+      v-if="usuarioSelecionado"
+      :login="usuarioSelecionado"
+      @close="usuarioSelecionado = ''"
+    />
   </div>
 </template>

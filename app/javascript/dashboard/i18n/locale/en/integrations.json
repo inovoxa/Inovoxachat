@@ -402,7 +402,7 @@
       "TITLE": "Copilot",
       "TRY_THESE_PROMPTS": "Try these prompts",
       "PANEL_TITLE": "Get started with Copilot",
-      "KICK_OFF_MESSAGE": "Need a quick summary, want to check past conversations, or draft a better reply? Copilot’s here to speed things up.",
+      "KICK_OFF_MESSAGE": "Look up a user by login (username). Look up a ticket. Look up a machine inventory.",
       "SEND_MESSAGE": "Send message...",
       "EMPTY_MESSAGE": "There was an error generating the response. Please try again.",
       "LOADER": "Captain is thinking",

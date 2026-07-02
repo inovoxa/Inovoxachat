@@ -402,7 +402,7 @@
       "TITLE": "Copiloto",
       "TRY_THESE_PROMPTS": "Experimente estes comandos",
       "PANEL_TITLE": "Comece a usar o Copiloto",
-      "KICK_OFF_MESSAGE": "Precisa de um resumo rápido, quer verificar conversas passadas ou redigir uma resposta melhor? O Copiloto está aqui para acelerar as coisas.",
+      "KICK_OFF_MESSAGE": "Pesquise usuário: basta informar o login (nome de usuário). Pesquise chamado. Pesquise inventário de máquina.",
       "SEND_MESSAGE": "Enviar mensagem...",
       "EMPTY_MESSAGE": "Houve um erro ao gerar a resposta. Por favor, tente novamente.",
       "LOADER": "Capitão está pensando",

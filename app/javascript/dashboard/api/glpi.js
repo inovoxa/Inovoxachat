@@ -56,6 +56,10 @@ class GlpiAPI extends ApiClient {
     return axios.get(`${this.url}/inventario/${id}`);
   }
 
+  getUsuarioAd(login) {
+    return axios.get(`${this.url}/usuario_ad`, { params: { login } });
+  }
+
   getAprovadores() {
     return axios.get(`${this.url}/aprovadores`);
   }
