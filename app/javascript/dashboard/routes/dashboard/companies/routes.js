@@ -3,6 +3,7 @@ import CompaniesIndex from './pages/CompaniesIndex.vue';
 import CompanyDetailView from './pages/CompanyDetailView.vue';
 import ContractsIndex from './pages/ContractsIndex.vue';
 import EquipmentsIndex from './pages/EquipmentsIndex.vue';
+import FinanceIndex from './pages/FinanceIndex.vue';
 import { FEATURE_FLAGS } from '../../../featureFlags';
 import { INSTALLATION_TYPES } from 'dashboard/constants/installationTypes';
 
@@ -36,6 +37,12 @@ export const routes = [
     path: frontendURL('accounts/:accountId/rental/equipments'),
     name: 'equipments_index',
     component: EquipmentsIndex,
+    meta: commonMeta,
+  },
+  {
+    path: frontendURL('accounts/:accountId/rental/finance'),
+    name: 'finance_index',
+    component: FinanceIndex,
     meta: commonMeta,
   },
   {

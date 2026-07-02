@@ -6,6 +6,7 @@ class Contract < ApplicationRecord
   belongs_to :company
   has_many :contract_items, dependent: :destroy
   has_many :equipments, through: :contract_items
+  has_many :invoices, dependent: :nullify
 
   accepts_nested_attributes_for :contract_items, allow_destroy: true
 

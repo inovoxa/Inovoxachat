@@ -205,6 +205,9 @@ Rails.application.routes.draw do
           # Módulo Empresas — locação (contratos/equipamentos). Escopado por conta.
           resources :contracts, only: [:index, :show, :create, :update, :destroy]
           resources :equipments, only: [:index, :show, :create, :update, :destroy]
+          resources :invoices, only: [:index, :show, :create, :update, :destroy] do
+            member { post :pagar }
+          end
 
           # CRM — funil de vendas (oportunidades).
           resources :opportunities, only: [:index, :show, :create, :update, :destroy] do

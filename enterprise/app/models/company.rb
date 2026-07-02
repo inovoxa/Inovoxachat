@@ -43,6 +43,7 @@ class Company < ApplicationRecord
   belongs_to :account_owner, class_name: 'User', optional: true
   has_many :contacts, dependent: :nullify
   has_many :contracts, dependent: :destroy
+  has_many :invoices, dependent: :destroy
   before_validation :prepare_jsonb_attributes
   after_create_commit :fetch_favicon, if: -> { domain.present? }
 

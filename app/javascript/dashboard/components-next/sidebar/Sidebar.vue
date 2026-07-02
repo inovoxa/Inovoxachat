@@ -679,6 +679,11 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.EQUIPMENTS'),
           to: accountScopedRoute('equipments_index'),
         },
+        {
+          name: 'Finance',
+          label: t('SIDEBAR.FINANCE'),
+          to: accountScopedRoute('finance_index'),
+        },
       ],
     },
     {
