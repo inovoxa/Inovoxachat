@@ -218,6 +218,9 @@ Rails.application.routes.draw do
           # Planejamento (turnos por recurso).
           resources :planning_shifts, only: [:index, :show, :create, :update, :destroy]
 
+          # Calendário (reuniões).
+          resources :meetings, only: [:index, :show, :create, :update, :destroy]
+
           # Projetos (Kanban de tarefas).
           resources :projects, only: [:index, :show, :create, :update, :destroy]
           resources :project_tasks, only: [:index, :show, :create, :update, :destroy] do

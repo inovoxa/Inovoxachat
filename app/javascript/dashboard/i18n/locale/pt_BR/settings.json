@@ -394,7 +394,9 @@
     "REPAIRS": "Reparos",
     "REPAIRS_BOARD": "Ordens de reparo",
     "PLANNING": "Planejamento",
-    "PLANNING_BOARD": "Agenda de turnos"
+    "PLANNING_BOARD": "Agenda de turnos",
+    "CALENDAR": "Calendário",
+    "CALENDAR_MEETINGS": "Reuniões"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Configurações do Capitão",

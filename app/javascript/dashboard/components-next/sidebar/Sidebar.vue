@@ -694,6 +694,19 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Calendar',
+      label: t('SIDEBAR.CALENDAR'),
+      icon: 'i-lucide-calendar',
+      children: [
+        {
+          name: 'Calendar Meetings',
+          label: t('SIDEBAR.CALENDAR_MEETINGS'),
+          to: accountScopedRoute('calendar_meetings'),
+          activeOn: ['calendar_meetings'],
+        },
+      ],
+    },
+    {
       name: 'Companies',
       label: t('SIDEBAR.COMPANIES'),
       icon: 'i-lucide-building-2',

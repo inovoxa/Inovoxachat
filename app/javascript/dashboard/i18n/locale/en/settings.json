@@ -420,7 +420,9 @@
     "REPAIRS": "Repairs",
     "REPAIRS_BOARD": "Repair orders",
     "PLANNING": "Planning",
-    "PLANNING_BOARD": "Shift schedule"
+    "PLANNING_BOARD": "Shift schedule",
+    "CALENDAR": "Calendar",
+    "CALENDAR_MEETINGS": "Meetings"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Captain Settings",
