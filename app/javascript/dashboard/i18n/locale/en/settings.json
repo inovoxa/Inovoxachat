@@ -418,7 +418,9 @@
     "PROJECTS": "Projects",
     "PROJECTS_BOARD": "Task board",
     "REPAIRS": "Repairs",
-    "REPAIRS_BOARD": "Repair orders"
+    "REPAIRS_BOARD": "Repair orders",
+    "PLANNING": "Planning",
+    "PLANNING_BOARD": "Shift schedule"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Captain Settings",

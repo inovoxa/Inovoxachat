@@ -392,7 +392,9 @@
     "PROJECTS": "Projetos",
     "PROJECTS_BOARD": "Quadro de tarefas",
     "REPAIRS": "Reparos",
-    "REPAIRS_BOARD": "Ordens de reparo"
+    "REPAIRS_BOARD": "Ordens de reparo",
+    "PLANNING": "Planejamento",
+    "PLANNING_BOARD": "Agenda de turnos"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Configurações do Capitão",
