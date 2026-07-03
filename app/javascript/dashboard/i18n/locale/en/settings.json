@@ -416,7 +416,9 @@
     "CAPTAIN_AI": "Captain",
     "CONVERSATION_WORKFLOW": "Conversation Workflow",
     "PROJECTS": "Projects",
-    "PROJECTS_BOARD": "Task board"
+    "PROJECTS_BOARD": "Task board",
+    "REPAIRS": "Repairs",
+    "REPAIRS_BOARD": "Repair orders"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Captain Settings",

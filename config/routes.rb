@@ -210,6 +210,11 @@ Rails.application.routes.draw do
             member { post :pagar }
           end
 
+          # Reparos (ordens de serviço).
+          resources :repair_orders, only: [:index, :show, :create, :update, :destroy] do
+            member { patch :move }
+          end
+
           # Projetos (Kanban de tarefas).
           resources :projects, only: [:index, :show, :create, :update, :destroy]
           resources :project_tasks, only: [:index, :show, :create, :update, :destroy] do

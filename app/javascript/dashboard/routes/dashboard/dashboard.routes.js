@@ -12,6 +12,7 @@ import { routes as captainRoutes } from './captain/captain.routes';
 import { routes as glpiRoutes } from './glpi/glpi.routes';
 import { routes as crmRoutes } from './crm/routes';
 import { routes as projectRoutes } from './projects/routes';
+import { routes as repairRoutes } from './repairs/routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -27,6 +28,7 @@ export default {
         ...glpiRoutes,
         ...crmRoutes,
         ...projectRoutes,
+        ...repairRoutes,
         ...inboxRoutes,
         ...conversation.routes,
         ...settings.routes,

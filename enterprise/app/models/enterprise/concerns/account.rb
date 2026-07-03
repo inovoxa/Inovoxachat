@@ -23,6 +23,7 @@ module Enterprise::Concerns::Account
     has_many :opportunities, dependent: :destroy_async
     has_many :projects, dependent: :destroy_async
     has_many :project_tasks, dependent: :destroy_async
+    has_many :repair_orders, dependent: :destroy_async
     has_many :calls, dependent: :destroy_async
 
     has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'

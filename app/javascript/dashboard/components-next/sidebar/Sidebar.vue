@@ -668,6 +668,19 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Repairs',
+      label: t('SIDEBAR.REPAIRS'),
+      icon: 'i-lucide-wrench',
+      children: [
+        {
+          name: 'Repairs Board',
+          label: t('SIDEBAR.REPAIRS_BOARD'),
+          to: accountScopedRoute('repairs_board'),
+          activeOn: ['repairs_board'],
+        },
+      ],
+    },
+    {
       name: 'Companies',
       label: t('SIDEBAR.COMPANIES'),
       icon: 'i-lucide-building-2',
