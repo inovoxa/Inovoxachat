@@ -707,6 +707,19 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Sales',
+      label: t('SIDEBAR.SALES'),
+      icon: 'i-lucide-receipt-text',
+      children: [
+        {
+          name: 'Sales Quotations',
+          label: t('SIDEBAR.SALES_QUOTATIONS'),
+          to: accountScopedRoute('sales_quotations'),
+          activeOn: ['sales_quotations'],
+        },
+      ],
+    },
+    {
       name: 'Companies',
       label: t('SIDEBAR.COMPANIES'),
       icon: 'i-lucide-building-2',

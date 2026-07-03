@@ -396,7 +396,9 @@
     "PLANNING": "Planejamento",
     "PLANNING_BOARD": "Agenda de turnos",
     "CALENDAR": "Calendário",
-    "CALENDAR_MEETINGS": "Reuniões"
+    "CALENDAR_MEETINGS": "Reuniões",
+    "SALES": "Vendas",
+    "SALES_QUOTATIONS": "Cotações"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Configurações do Capitão",

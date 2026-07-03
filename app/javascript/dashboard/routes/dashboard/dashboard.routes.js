@@ -15,6 +15,7 @@ import { routes as projectRoutes } from './projects/routes';
 import { routes as repairRoutes } from './repairs/routes';
 import { routes as planningRoutes } from './planning/routes';
 import { routes as calendarRoutes } from './calendar/routes';
+import { routes as salesRoutes } from './sales/routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -33,6 +34,7 @@ export default {
         ...repairRoutes,
         ...planningRoutes,
         ...calendarRoutes,
+        ...salesRoutes,
         ...inboxRoutes,
         ...conversation.routes,
         ...settings.routes,

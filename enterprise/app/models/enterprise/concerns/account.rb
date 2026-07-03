@@ -26,6 +26,8 @@ module Enterprise::Concerns::Account
     has_many :repair_orders, dependent: :destroy_async
     has_many :planning_shifts, dependent: :destroy_async
     has_many :meetings, dependent: :destroy_async
+    has_many :quotations, dependent: :destroy_async
+    has_many :quotation_lines, dependent: :destroy_async
     has_many :calls, dependent: :destroy_async
 
     has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'

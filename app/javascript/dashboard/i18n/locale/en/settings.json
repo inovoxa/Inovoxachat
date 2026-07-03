@@ -422,7 +422,9 @@
     "PLANNING": "Planning",
     "PLANNING_BOARD": "Shift schedule",
     "CALENDAR": "Calendar",
-    "CALENDAR_MEETINGS": "Meetings"
+    "CALENDAR_MEETINGS": "Meetings",
+    "SALES": "Sales",
+    "SALES_QUOTATIONS": "Quotations"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Captain Settings",

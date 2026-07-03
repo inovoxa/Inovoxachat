@@ -80,6 +80,7 @@ class Captain::Copilot::ChatService < Llm::BaseAiService
     tools << Captain::Tools::Copilot::ContractsLookupService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::InvoicesLookupService.new(@assistant, user: @user)
     tools << Captain::Tools::Copilot::OpportunitiesLookupService.new(@assistant, user: @user)
+    tools << Captain::Tools::Copilot::QuotationsLookupService.new(@assistant, user: @user)
 
     tools.select(&:active?)
   end

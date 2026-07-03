@@ -221,6 +221,15 @@ Rails.application.routes.draw do
           # Calendário (reuniões).
           resources :meetings, only: [:index, :show, :create, :update, :destroy]
 
+          # Vendas — cotações de locação (Odoo-like). Escopado por conta.
+          resources :quotations, only: [:index, :show, :create, :update, :destroy] do
+            member do
+              post :confirm
+              post :send_quote
+              post :cancel
+            end
+          end
+
           # Projetos (Kanban de tarefas).
           resources :projects, only: [:index, :show, :create, :update, :destroy]
           resources :project_tasks, only: [:index, :show, :create, :update, :destroy] do
