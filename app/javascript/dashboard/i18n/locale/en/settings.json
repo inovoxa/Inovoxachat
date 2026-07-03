@@ -414,7 +414,9 @@
     "DOCS": "Read docs",
     "SECURITY": "Security",
     "CAPTAIN_AI": "Captain",
-    "CONVERSATION_WORKFLOW": "Conversation Workflow"
+    "CONVERSATION_WORKFLOW": "Conversation Workflow",
+    "PROJECTS": "Projects",
+    "PROJECTS_BOARD": "Task board"
   },
   "CAPTAIN_SETTINGS": {
     "TITLE": "Captain Settings",

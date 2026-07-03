@@ -11,6 +11,7 @@ import campaignsRoutes from './campaigns/campaigns.routes';
 import { routes as captainRoutes } from './captain/captain.routes';
 import { routes as glpiRoutes } from './glpi/glpi.routes';
 import { routes as crmRoutes } from './crm/routes';
+import { routes as projectRoutes } from './projects/routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -25,6 +26,7 @@ export default {
         ...captainRoutes,
         ...glpiRoutes,
         ...crmRoutes,
+        ...projectRoutes,
         ...inboxRoutes,
         ...conversation.routes,
         ...settings.routes,

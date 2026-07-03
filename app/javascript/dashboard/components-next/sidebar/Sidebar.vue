@@ -655,6 +655,19 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Projects',
+      label: t('SIDEBAR.PROJECTS'),
+      icon: 'i-lucide-kanban-square',
+      children: [
+        {
+          name: 'Projects Board',
+          label: t('SIDEBAR.PROJECTS_BOARD'),
+          to: accountScopedRoute('projects_board'),
+          activeOn: ['projects_board'],
+        },
+      ],
+    },
+    {
       name: 'Companies',
       label: t('SIDEBAR.COMPANIES'),
       icon: 'i-lucide-building-2',

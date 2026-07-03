@@ -210,6 +210,12 @@ Rails.application.routes.draw do
             member { post :pagar }
           end
 
+          # Projetos (Kanban de tarefas).
+          resources :projects, only: [:index, :show, :create, :update, :destroy]
+          resources :project_tasks, only: [:index, :show, :create, :update, :destroy] do
+            member { patch :move }
+          end
+
           # CRM — funil de vendas (oportunidades).
           resources :opportunities, only: [:index, :show, :create, :update, :destroy] do
             member do
