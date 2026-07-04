@@ -16,17 +16,7 @@ const emit = defineEmits(['create']);
 const { t } = useI18n();
 const dialogRef = ref(null);
 
-const STATUS_OPTIONS = ['lead', 'ativo', 'inativo', 'churn'];
-
-const form = reactive({
-  name: '',
-  domain: '',
-  description: '',
-  cnpj: '',
-  phone: '',
-  status: 'lead',
-  address: '',
-});
+const form = reactive({ name: '', domain: '', description: '' });
 
 const isFormInvalid = computed(() => !form.name.trim());
 
@@ -34,20 +24,12 @@ const resetForm = () => {
   form.name = '';
   form.domain = '';
   form.description = '';
-  form.cnpj = '';
-  form.phone = '';
-  form.status = 'lead';
-  form.address = '';
 };
 
 const open = (company = {}) => {
   form.name = company.name || '';
   form.domain = company.domain || '';
   form.description = company.description || '';
-  form.cnpj = company.cnpj || '';
-  form.phone = company.phone || '';
-  form.status = company.status || 'lead';
-  form.address = company.address || '';
   dialogRef.value?.open();
 };
 
@@ -58,10 +40,6 @@ const handleConfirm = () => {
     name: form.name.trim(),
     domain: form.domain.trim() || null,
     description: form.description.trim() || null,
-    cnpj: form.cnpj.trim() || null,
-    phone: form.phone.trim() || null,
-    status: form.status,
-    address: form.address.trim() || null,
   });
 };
 
@@ -104,38 +82,8 @@ defineExpose({ dialogRef, onSuccess, open });
             :disabled="isLoading"
             custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
           />
-          <Input
-            v-model="form.cnpj"
-            :placeholder="t('COMPANIES.DETAIL.PROFILE.FIELDS.CNPJ')"
-            :disabled="isLoading"
-            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
-          />
-          <Input
-            v-model="form.phone"
-            :placeholder="t('COMPANIES.DETAIL.PROFILE.FIELDS.PHONE')"
-            :disabled="isLoading"
-            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
-          />
-          <label class="flex flex-col gap-1">
-            <span class="text-xs text-n-slate-11">{{ t('COMPANIES.DETAIL.PROFILE.FIELDS.STATUS') }}</span>
-            <select
-              v-model="form.status"
-              :disabled="isLoading"
-              class="h-8 rounded-lg border border-n-weak bg-n-alpha-black2 px-2 text-sm text-n-slate-12"
-            >
-              <option v-for="opt in STATUS_OPTIONS" :key="opt" :value="opt">
-                {{ t(`COMPANIES.STATUS.${opt.toUpperCase()}`) }}
-              </option>
-            </select>
-          </label>
         </div>
       </div>
-      <Input
-        v-model="form.address"
-        :placeholder="t('COMPANIES.DETAIL.PROFILE.FIELDS.ADDRESS')"
-        :disabled="isLoading"
-        custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
-      />
       <TextArea
         v-model="form.description"
         :placeholder="t('COMPANIES.DETAIL.PROFILE.DESCRIPTION_PLACEHOLDER')"

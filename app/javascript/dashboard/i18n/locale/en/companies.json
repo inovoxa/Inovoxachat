@@ -1,12 +1,6 @@
 {
   "COMPANIES": {
     "HEADER": "Companies",
-    "STATUS": {
-      "LEAD": "Lead",
-      "ATIVO": "Active client",
-      "INATIVO": "Inactive",
-      "CHURN": "Churn"
-    },
     "SORT_BY": {
       "LABEL": "Sort by",
       "OPTIONS": {
@@ -130,11 +124,7 @@
         },
         "FIELDS": {
           "NAME": "Name",
-          "DOMAIN": "Domain",
-          "CNPJ": "Tax ID (CNPJ)",
-          "PHONE": "Phone",
-          "STATUS": "Status",
-          "ADDRESS": "Address"
+          "DOMAIN": "Domain"
         }
       },
       "DELETE": {

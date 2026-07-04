@@ -202,49 +202,6 @@ Rails.application.routes.draw do
             end
           end
 
-          # Módulo Empresas — locação (contratos/equipamentos). Escopado por conta.
-          resource :rental_dashboard, only: [:show], controller: 'rental_dashboard'
-          resources :contracts, only: [:index, :show, :create, :update, :destroy]
-          resources :equipments, only: [:index, :show, :create, :update, :destroy]
-          resources :invoices, only: [:index, :show, :create, :update, :destroy] do
-            member { post :pagar }
-          end
-
-          # Reparos (ordens de serviço).
-          resources :repair_orders, only: [:index, :show, :create, :update, :destroy] do
-            member { patch :move }
-          end
-
-          # Planejamento (turnos por recurso).
-          resources :planning_shifts, only: [:index, :show, :create, :update, :destroy]
-
-          # Calendário (reuniões).
-          resources :meetings, only: [:index, :show, :create, :update, :destroy]
-
-          # Vendas — cotações de locação (Odoo-like). Escopado por conta.
-          resources :quotations, only: [:index, :show, :create, :update, :destroy] do
-            member do
-              post :confirm
-              post :send_quote
-              post :cancel
-            end
-          end
-
-          # Projetos (Kanban de tarefas).
-          resources :projects, only: [:index, :show, :create, :update, :destroy]
-          resources :project_tasks, only: [:index, :show, :create, :update, :destroy] do
-            member { patch :move }
-          end
-
-          # CRM — funil de vendas (oportunidades).
-          resources :opportunities, only: [:index, :show, :create, :update, :destroy] do
-            member do
-              patch :move
-              post :ganhar
-              post :perder
-            end
-          end
-
           resources :companies, only: [:index, :show, :create, :update, :destroy] do
             collection do
               get :search

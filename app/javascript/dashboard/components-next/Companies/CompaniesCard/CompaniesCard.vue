@@ -14,23 +14,11 @@ const props = defineProps({
   contactsCount: { type: Number, default: 0 },
   avatarUrl: { type: String, default: '' },
   lastActivityAt: { type: [String, Number], default: null },
-  status: { type: String, default: '' },
 });
 
 const emit = defineEmits(['showCompany']);
 
 const { t } = useI18n();
-
-const STATUS_META = {
-  lead: 'bg-blue-500/15 text-blue-600',
-  ativo: 'bg-green-500/15 text-green-600',
-  inativo: 'bg-slate-500/15 text-slate-500',
-  churn: 'bg-red-500/15 text-red-600',
-};
-const statusClass = computed(() => STATUS_META[props.status] || 'bg-slate-500/15 text-slate-500');
-const statusLabel = computed(() =>
-  props.status ? t(`COMPANIES.STATUS.${props.status.toUpperCase()}`) : ''
-);
 
 const onClickViewDetails = () => emit('showCompany', props.id);
 
@@ -65,13 +53,6 @@ const formattedLastActivityAt = computed(() => {
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 min-w-0">
           <span class="text-base font-medium truncate text-n-slate-12">
             {{ displayName }}
-          </span>
-          <span
-            v-if="statusLabel"
-            class="text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0"
-            :class="statusClass"
-          >
-            {{ statusLabel }}
           </span>
           <span
             v-if="hasContacts"

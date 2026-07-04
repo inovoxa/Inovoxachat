@@ -642,94 +642,10 @@ const menuItems = computed(() => {
       ],
     },
     {
-      name: 'CRM',
-      label: t('SIDEBAR.CRM'),
-      icon: 'i-lucide-target',
-      children: [
-        {
-          name: 'Sales Pipeline',
-          label: t('SIDEBAR.SALES_PIPELINE'),
-          to: accountScopedRoute('crm_pipeline'),
-          activeOn: ['crm_pipeline'],
-        },
-      ],
-    },
-    {
-      name: 'Projects',
-      label: t('SIDEBAR.PROJECTS'),
-      icon: 'i-lucide-kanban-square',
-      children: [
-        {
-          name: 'Projects Board',
-          label: t('SIDEBAR.PROJECTS_BOARD'),
-          to: accountScopedRoute('projects_board'),
-          activeOn: ['projects_board'],
-        },
-      ],
-    },
-    {
-      name: 'Repairs',
-      label: t('SIDEBAR.REPAIRS'),
-      icon: 'i-lucide-wrench',
-      children: [
-        {
-          name: 'Repairs Board',
-          label: t('SIDEBAR.REPAIRS_BOARD'),
-          to: accountScopedRoute('repairs_board'),
-          activeOn: ['repairs_board'],
-        },
-      ],
-    },
-    {
-      name: 'Planning',
-      label: t('SIDEBAR.PLANNING'),
-      icon: 'i-lucide-calendar-clock',
-      children: [
-        {
-          name: 'Planning Board',
-          label: t('SIDEBAR.PLANNING_BOARD'),
-          to: accountScopedRoute('planning_board'),
-          activeOn: ['planning_board'],
-        },
-      ],
-    },
-    {
-      name: 'Calendar',
-      label: t('SIDEBAR.CALENDAR'),
-      icon: 'i-lucide-calendar',
-      children: [
-        {
-          name: 'Calendar Meetings',
-          label: t('SIDEBAR.CALENDAR_MEETINGS'),
-          to: accountScopedRoute('calendar_meetings'),
-          activeOn: ['calendar_meetings'],
-        },
-      ],
-    },
-    {
-      name: 'Sales',
-      label: t('SIDEBAR.SALES'),
-      icon: 'i-lucide-receipt-text',
-      children: [
-        {
-          name: 'Sales Quotations',
-          label: t('SIDEBAR.SALES_QUOTATIONS'),
-          to: accountScopedRoute('sales_quotations'),
-          activeOn: ['sales_quotations'],
-        },
-      ],
-    },
-    {
       name: 'Companies',
       label: t('SIDEBAR.COMPANIES'),
       icon: 'i-lucide-building-2',
       children: [
-        {
-          name: 'Control Panel',
-          label: t('SIDEBAR.CONTROL_PANEL'),
-          to: accountScopedRoute('rental_dashboard'),
-          activeOn: ['rental_dashboard'],
-        },
         {
           name: 'All Companies',
           label: t('SIDEBAR.ALL_COMPANIES'),
@@ -739,21 +655,6 @@ const menuItems = computed(() => {
             { page: 1, search: undefined }
           ),
           activeOn: ['companies_dashboard_index', 'companies_dashboard_show'],
-        },
-        {
-          name: 'Contracts',
-          label: t('SIDEBAR.CONTRACTS'),
-          to: accountScopedRoute('contracts_index'),
-        },
-        {
-          name: 'Equipments',
-          label: t('SIDEBAR.EQUIPMENTS'),
-          to: accountScopedRoute('equipments_index'),
-        },
-        {
-          name: 'Finance',
-          label: t('SIDEBAR.FINANCE'),
-          to: accountScopedRoute('finance_index'),
         },
       ],
     },

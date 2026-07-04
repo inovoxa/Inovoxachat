@@ -16,18 +16,6 @@ module Enterprise::Concerns::Account
 
     has_many :copilot_threads, dependent: :destroy_async
     has_many :companies, dependent: :destroy_async
-    has_many :contracts, dependent: :destroy_async
-    has_many :equipments, dependent: :destroy_async
-    has_many :contract_items, dependent: :destroy_async
-    has_many :invoices, dependent: :destroy_async
-    has_many :opportunities, dependent: :destroy_async
-    has_many :projects, dependent: :destroy_async
-    has_many :project_tasks, dependent: :destroy_async
-    has_many :repair_orders, dependent: :destroy_async
-    has_many :planning_shifts, dependent: :destroy_async
-    has_many :meetings, dependent: :destroy_async
-    has_many :quotations, dependent: :destroy_async
-    has_many :quotation_lines, dependent: :destroy_async
     has_many :calls, dependent: :destroy_async
 
     has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'

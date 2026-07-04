@@ -1,12 +1,6 @@
 {
   "COMPANIES": {
     "HEADER": "Empresas",
-    "STATUS": {
-      "LEAD": "Lead",
-      "ATIVO": "Cliente ativo",
-      "INATIVO": "Inativo",
-      "CHURN": "Churn"
-    },
     "SORT_BY": {
       "LABEL": "Classificar por",
       "OPTIONS": {
@@ -126,11 +120,7 @@
         },
         "FIELDS": {
           "NAME": "Nome",
-          "DOMAIN": "Domínio",
-          "CNPJ": "CNPJ",
-          "PHONE": "Telefone",
-          "STATUS": "Status",
-          "ADDRESS": "Endereço"
+          "DOMAIN": "Domínio"
         }
       },
       "DELETE": {
