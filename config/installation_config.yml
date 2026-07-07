@@ -43,11 +43,11 @@
   display_title: 'Brand Name'
   description: 'The name that would be used in emails and the widget'
 - name: TERMS_URL
-  value: 'https://inovoxa.com.br'
+  value: 'https://chat.inovoxa.com.br/legal/termos.html'
   display_title: 'Terms URL'
   description: 'The terms of service URL displayed in Signup Page'
 - name: PRIVACY_URL
-  value: 'https://inovoxa.com.br'
+  value: 'https://chat.inovoxa.com.br/legal/privacidade.html'
   display_title: 'Privacy URL'
   description: 'The privacy policy URL displayed in the app'
 - name: DISPLAY_MANIFEST
