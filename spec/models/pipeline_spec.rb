@@ -85,4 +85,38 @@ RSpec.describe Pipeline do
       expect(contact.reload.pipeline_stage).to eq(pipeline.pipeline_stages.first)
     end
   end
+
+  describe 'backfill on enabling the mode' do
+    let(:account) { create(:account) }
+
+    it 'backfills recent unstaged conversations when the mode is turned on' do
+      pipeline = create(:pipeline, account: account, template_key: 'suporte', auto_add_mode: :disabled)
+      conversation = create(:conversation, account: account)
+      expect(conversation.reload.pipeline_stage).to be_nil
+
+      pipeline.update!(auto_add_mode: :new_conversations)
+
+      expect(conversation.reload.pipeline_stage).to eq(pipeline.pipeline_stages.first)
+    end
+
+    it 'does not touch conversations already in a stage' do
+      pipeline = create(:pipeline, account: account, template_key: 'suporte', auto_add_mode: :disabled)
+      other_stage = pipeline.pipeline_stages.second
+      conversation = create(:conversation, account: account)
+      conversation.update!(pipeline_stage: other_stage)
+
+      pipeline.update!(auto_add_mode: :new_conversations)
+
+      expect(conversation.reload.pipeline_stage).to eq(other_stage)
+    end
+  end
+
+  describe 'account association' do
+    it 'exposes pipeline_stages through pipelines' do
+      account = create(:account)
+      pipeline = create(:pipeline, account: account, template_key: 'generico')
+
+      expect(account.pipeline_stages).to match_array(pipeline.pipeline_stages)
+    end
+  end
 end
