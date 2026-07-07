@@ -112,6 +112,12 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
     head :ok
   end
 
+  # Move o card do Kanban: define (ou limpa, se vier vazio) o estágio da conversa.
+  def assign_pipeline_stage
+    @conversation.update!(pipeline_stage: pipeline_stage_from_params)
+    head :ok
+  end
+
   def update_last_seen
     # High-traffic accounts generate excessive DB writes when agents frequently switch between conversations.
     # Throttle last_seen updates to once per hour when there are no unread messages to reduce DB load.
@@ -149,6 +155,12 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   def permitted_update_params
     # TODO: Move the other conversation attributes to this method and remove specific endpoints for each attribute
     params.permit(:priority)
+  end
+
+  def pipeline_stage_from_params
+    return if params[:pipeline_stage_id].blank?
+
+    Current.account.pipeline_stages.find(params[:pipeline_stage_id])
   end
 
   def attachment_params

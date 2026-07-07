@@ -504,6 +504,13 @@ const menuItems = computed(() => {
       ],
     },
     {
+      name: 'Kanban',
+      icon: 'i-lucide-kanban',
+      label: t('SIDEBAR.KANBAN'),
+      to: accountScopedRoute('kanban_view'),
+      activeOn: ['kanban_view'],
+    },
+    {
       name: 'Captain',
       icon: 'i-woot-captain',
       label: t('SIDEBAR.CAPTAIN'),

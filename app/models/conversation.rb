@@ -108,6 +108,7 @@ class Conversation < ApplicationRecord
   belongs_to :contact_inbox
   belongs_to :team, optional: true
   belongs_to :campaign, optional: true
+  belongs_to :pipeline_stage, optional: true
 
   has_many :mentions, dependent: :destroy_async
   has_many :messages, dependent: :destroy_async, autosave: true
@@ -124,6 +125,7 @@ class Conversation < ApplicationRecord
   after_update_commit :execute_after_update_commit_callbacks
   after_create_commit :notify_conversation_creation
   after_create_commit :load_attributes_created_by_db_triggers
+  after_create_commit :assign_default_pipeline_stage
   before_destroy :set_unread_count_deletion_data
   after_destroy_commit :notify_conversation_deletion
 
@@ -242,6 +244,13 @@ class Conversation < ApplicationRecord
   end
 
   private
+
+  def assign_default_pipeline_stage
+    return if pipeline_stage_id.present?
+
+    stage = Pipeline.entry_stage_for(account, :new_conversations)
+    update_column(:pipeline_stage_id, stage.id) if stage # rubocop:disable Rails/SkipsModelValidations
+  end
 
   def execute_after_update_commit_callbacks
     handle_resolved_status_change

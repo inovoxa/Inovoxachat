@@ -1,0 +1,64 @@
+{
+  "KANBAN": {
+    "HEADER": "Kanban",
+    "LOADING": "Carregando board...",
+    "NEW_PIPELINE": "Novo pipeline",
+    "SETTINGS": "Configurar",
+    "PERIOD": {
+      "D7": "7 dias",
+      "D30": "30 dias",
+      "D90": "90 dias",
+      "D180": "180 dias"
+    },
+    "EMPTY": {
+      "TITLE": "Nenhum pipeline ainda",
+      "DESCRIPTION": "Crie um pipeline para organizar suas conversas e contatos em um quadro Kanban.",
+      "CREATE": "Criar pipeline"
+    },
+    "SELECTOR": {
+      "LABEL": "Pipeline"
+    },
+    "BOARD": {
+      "EMPTY_STAGE": "Sem cards",
+      "MOVE_ERROR": "Não foi possível mover o card. O board foi recarregado.",
+      "NEW_CONTACT": "Novo contato"
+    },
+    "CREATE_MODAL": {
+      "TITLE": "Novo pipeline",
+      "NAME_LABEL": "Nome",
+      "NAME_PLACEHOLDER": "ex.: Suporte, Vendas, Onboarding",
+      "DESCRIPTION_LABEL": "Descrição (opcional)",
+      "TEMPLATE_LABEL": "Começar a partir de um template",
+      "CUSTOM_LABEL": "Personalizado",
+      "CUSTOM_DESCRIPTION": "Comece do zero com um único estágio \"Início\".",
+      "PREVIEW_LABEL": "Estágios que serão criados",
+      "PREVIEW_HINT": "Isso é só um ponto de partida — depois você pode renomear, recolorir, adicionar, remover e reordenar os estágios.",
+      "AUTO_ADD": {
+        "LABEL": "Entrada automática no primeiro estágio",
+        "DISABLED": "Desativada",
+        "NEW_CONVERSATIONS": "Toda conversa nova",
+        "NEW_CONTACTS": "Todo contato novo"
+      },
+      "CANCEL": "Cancelar",
+      "SUBMIT": "Criar pipeline",
+      "ERROR": "Não foi possível criar o pipeline."
+    },
+    "SETTINGS_MODAL": {
+      "TITLE": "Configurações do pipeline",
+      "NAME_LABEL": "Nome",
+      "DESCRIPTION_LABEL": "Descrição",
+      "AUTO_ADD_LABEL": "Entrada automática no primeiro estágio",
+      "STAGES_LABEL": "Estágios",
+      "REORDER_HINT": "Arraste ⠿ para reordenar as colunas.",
+      "ADD_STAGE": "Adicionar",
+      "ADD_STAGE_PLACEHOLDER": "Nome do novo estágio",
+      "DELETE_STAGE": "Remover",
+      "CONFIRM": "Confirmar?",
+      "SAVE": "Salvar alterações",
+      "CANCEL": "Cancelar",
+      "DELETE_PIPELINE": "Excluir pipeline",
+      "DELETE_PIPELINE_HINT": "Os cards não são excluídos — eles apenas saem do board.",
+      "ERROR": "Não foi possível salvar as alterações."
+    }
+  }
+}

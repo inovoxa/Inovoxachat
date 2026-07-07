@@ -35,6 +35,10 @@ class ContactPolicy < ApplicationPolicy
     true
   end
 
+  def assign_pipeline_stage?
+    true
+  end
+
   def show?
     true
   end

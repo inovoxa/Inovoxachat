@@ -187,6 +187,7 @@ Rails.application.routes.draw do
               post :update_last_seen
               post :unread
               post :custom_attributes
+              post :assign_pipeline_stage
               get :attachments
               get :inbox_assistant
               get :reporting_events if ChatwootApp.enterprise?
@@ -231,6 +232,7 @@ Rails.application.routes.draw do
             member do
               get :contactable_inboxes
               post :destroy_custom_attributes
+              post :assign_pipeline_stage
               delete :avatar
             end
             scope module: :contacts do
@@ -306,6 +308,20 @@ Rails.application.routes.draw do
             end
           end
           resources :labels, only: [:index, :show, :create, :update, :destroy]
+
+          resources :pipelines, only: [:index, :show, :create, :update, :destroy] do
+            collection do
+              get :templates
+            end
+            member do
+              get :cards
+            end
+            resources :pipeline_stages, path: :stages, only: [:index, :create, :update, :destroy] do
+              collection do
+                post :reorder
+              end
+            end
+          end
 
           resources :notifications, only: [:index, :update, :destroy] do
             collection do

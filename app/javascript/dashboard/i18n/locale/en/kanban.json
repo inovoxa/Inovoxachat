@@ -1,0 +1,64 @@
+{
+  "KANBAN": {
+    "HEADER": "Kanban",
+    "LOADING": "Loading board...",
+    "NEW_PIPELINE": "New pipeline",
+    "SETTINGS": "Configure",
+    "PERIOD": {
+      "D7": "7 days",
+      "D30": "30 days",
+      "D90": "90 days",
+      "D180": "180 days"
+    },
+    "EMPTY": {
+      "TITLE": "No pipelines yet",
+      "DESCRIPTION": "Create a pipeline to organize your conversations and contacts on a Kanban board.",
+      "CREATE": "Create pipeline"
+    },
+    "SELECTOR": {
+      "LABEL": "Pipeline"
+    },
+    "BOARD": {
+      "EMPTY_STAGE": "No cards",
+      "MOVE_ERROR": "Could not move the card. The board was reloaded.",
+      "NEW_CONTACT": "New contact"
+    },
+    "CREATE_MODAL": {
+      "TITLE": "New pipeline",
+      "NAME_LABEL": "Name",
+      "NAME_PLACEHOLDER": "e.g. Support, Sales, Onboarding",
+      "DESCRIPTION_LABEL": "Description (optional)",
+      "TEMPLATE_LABEL": "Start from a template",
+      "CUSTOM_LABEL": "Custom",
+      "CUSTOM_DESCRIPTION": "Start from scratch with a single \"Start\" stage.",
+      "PREVIEW_LABEL": "Stages that will be created",
+      "PREVIEW_HINT": "This is just a starting point — you can rename, recolor, add, remove and reorder stages later.",
+      "AUTO_ADD": {
+        "LABEL": "Automatic entry on the first stage",
+        "DISABLED": "Disabled",
+        "NEW_CONVERSATIONS": "Every new conversation",
+        "NEW_CONTACTS": "Every new contact"
+      },
+      "CANCEL": "Cancel",
+      "SUBMIT": "Create pipeline",
+      "ERROR": "Could not create the pipeline."
+    },
+    "SETTINGS_MODAL": {
+      "TITLE": "Pipeline settings",
+      "NAME_LABEL": "Name",
+      "DESCRIPTION_LABEL": "Description",
+      "AUTO_ADD_LABEL": "Automatic entry on the first stage",
+      "STAGES_LABEL": "Stages",
+      "REORDER_HINT": "Drag ⠿ to reorder the columns.",
+      "ADD_STAGE": "Add",
+      "ADD_STAGE_PLACEHOLDER": "New stage name",
+      "DELETE_STAGE": "Remove",
+      "CONFIRM": "Confirm?",
+      "SAVE": "Save changes",
+      "CANCEL": "Cancel",
+      "DELETE_PIPELINE": "Delete pipeline",
+      "DELETE_PIPELINE_HINT": "Cards are not deleted — they only leave the board.",
+      "ERROR": "Could not save the changes."
+    }
+  }
+}

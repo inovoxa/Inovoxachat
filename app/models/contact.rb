@@ -56,6 +56,7 @@ class Contact < ApplicationRecord
             format: { with: /\+[1-9]\d{1,14}\z/, message: I18n.t('errors.contacts.phone_number.invalid') }
 
   belongs_to :account
+  belongs_to :pipeline_stage, optional: true
   has_many :conversations, dependent: :destroy_async
   has_many :contact_inboxes, dependent: :destroy_async
   has_many :csat_survey_responses, dependent: :destroy_async
@@ -64,6 +65,7 @@ class Contact < ApplicationRecord
   has_many :notes, dependent: :destroy_async
   before_validation :prepare_contact_attributes
   after_create_commit :dispatch_create_event, :ip_lookup
+  after_create_commit :assign_default_pipeline_stage
   after_update_commit :dispatch_update_event
   after_destroy_commit :dispatch_destroy_event
   before_save :sync_contact_attributes
@@ -196,6 +198,13 @@ class Contact < ApplicationRecord
   end
 
   private
+
+  def assign_default_pipeline_stage
+    return if pipeline_stage_id.present?
+
+    stage = Pipeline.entry_stage_for(account, :new_contacts)
+    update_column(:pipeline_stage_id, stage.id) if stage # rubocop:disable Rails/SkipsModelValidations
+  end
 
   def ip_lookup
     return unless account.feature_enabled?('ip_lookup')

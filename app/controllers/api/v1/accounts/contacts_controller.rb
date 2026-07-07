@@ -13,7 +13,8 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
 
   before_action :check_authorization
   before_action :set_current_page, only: [:index, :active, :search, :filter]
-  before_action :fetch_contact, only: [:show, :update, :destroy, :avatar, :contactable_inboxes, :destroy_custom_attributes]
+  before_action :fetch_contact, only: [:show, :update, :destroy, :avatar, :contactable_inboxes, :destroy_custom_attributes,
+                                       :assign_pipeline_stage]
   before_action :set_include_contact_inboxes, only: [:index, :active, :search, :filter, :show, :update]
 
   def index
@@ -80,6 +81,12 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
   def destroy_custom_attributes
     @contact.custom_attributes = @contact.custom_attributes.excluding(params[:custom_attributes])
     @contact.save!
+  end
+
+  # Move o card do Kanban: define (ou limpa, se vier vazio) o estágio do contato.
+  def assign_pipeline_stage
+    @contact.update!(pipeline_stage: pipeline_stage_from_params)
+    head :ok
   end
 
   def create
@@ -204,6 +211,12 @@ class Api::V1::Accounts::ContactsController < Api::V1::Accounts::BaseController
     contact_scope = Current.account.contacts
     contact_scope = contact_scope.includes(contact_inboxes: [:inbox]) if @include_contact_inboxes
     @contact = contact_scope.find(params[:id])
+  end
+
+  def pipeline_stage_from_params
+    return if params[:pipeline_stage_id].blank?
+
+    Current.account.pipeline_stages.find(params[:pipeline_stage_id])
   end
 
   def process_avatar_from_url
