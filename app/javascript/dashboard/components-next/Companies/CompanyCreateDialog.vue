@@ -16,7 +16,15 @@ const emit = defineEmits(['create']);
 const { t } = useI18n();
 const dialogRef = ref(null);
 
-const form = reactive({ name: '', domain: '', description: '' });
+const form = reactive({
+  name: '',
+  domain: '',
+  description: '',
+  cnpj: '',
+  phone: '',
+  city: '',
+  industry: '',
+});
 
 const isFormInvalid = computed(() => !form.name.trim());
 
@@ -24,12 +32,21 @@ const resetForm = () => {
   form.name = '';
   form.domain = '';
   form.description = '';
+  form.cnpj = '';
+  form.phone = '';
+  form.city = '';
+  form.industry = '';
 };
 
 const open = (company = {}) => {
+  const extra = company.additional_attributes || {};
   form.name = company.name || '';
   form.domain = company.domain || '';
   form.description = company.description || '';
+  form.cnpj = extra.cnpj || '';
+  form.phone = extra.phone || '';
+  form.city = extra.city || '';
+  form.industry = extra.industry || '';
   dialogRef.value?.open();
 };
 
@@ -40,6 +57,12 @@ const handleConfirm = () => {
     name: form.name.trim(),
     domain: form.domain.trim() || null,
     description: form.description.trim() || null,
+    additional_attributes: {
+      cnpj: form.cnpj.trim() || null,
+      phone: form.phone.trim() || null,
+      city: form.city.trim() || null,
+      industry: form.industry.trim() || null,
+    },
   });
 };
 
@@ -79,6 +102,30 @@ defineExpose({ dialogRef, onSuccess, open });
           <Input
             v-model="form.domain"
             :placeholder="t('COMPANIES.DETAIL.PROFILE.FIELDS.DOMAIN')"
+            :disabled="isLoading"
+            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
+          />
+          <Input
+            v-model="form.cnpj"
+            placeholder="CNPJ"
+            :disabled="isLoading"
+            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
+          />
+          <Input
+            v-model="form.phone"
+            :placeholder="t('COMPANIES.DETAIL.PROFILE.FIELDS.PHONE') || 'Telefone'"
+            :disabled="isLoading"
+            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
+          />
+          <Input
+            v-model="form.city"
+            placeholder="Cidade"
+            :disabled="isLoading"
+            custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
+          />
+          <Input
+            v-model="form.industry"
+            placeholder="Segmento"
             :disabled="isLoading"
             custom-input-class="h-8 !pt-1 !pb-1 [&:not(.error,.focus)]:!outline-transparent"
           />
