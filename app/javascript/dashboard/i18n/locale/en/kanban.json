@@ -52,7 +52,15 @@
       "AUTO_ADD_LABEL": "Automatic entry on the first stage",
       "INBOXES_LABEL": "Inboxes",
       "STAGES_LABEL": "Stages",
-      "REORDER_HINT": "Drag ⠿ to reorder the columns.",
+      "REORDER_HINT": "Drag ⠿ to reorder the columns. The status next to it moves the card automatically when the conversation switches to it.",
+      "MAPPED_STATUS_TITLE": "Conversation status that moves the card to this column",
+      "STATUS": {
+        "NONE": "No status",
+        "OPEN": "Open",
+        "PENDING": "Pending",
+        "SNOOZED": "Snoozed",
+        "RESOLVED": "Resolved"
+      },
       "ADD_STAGE": "Add",
       "ADD_STAGE_PLACEHOLDER": "New stage name",
       "DELETE_STAGE": "Remove",

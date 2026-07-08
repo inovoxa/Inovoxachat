@@ -52,7 +52,15 @@
       "AUTO_ADD_LABEL": "Entrada automática no primeiro estágio",
       "INBOXES_LABEL": "Caixas de entrada",
       "STAGES_LABEL": "Estágios",
-      "REORDER_HINT": "Arraste ⠿ para reordenar as colunas.",
+      "REORDER_HINT": "Arraste ⠿ para reordenar as colunas. O status ao lado move o card automaticamente quando a conversa muda para ele.",
+      "MAPPED_STATUS_TITLE": "Status da conversa que leva o card para esta coluna",
+      "STATUS": {
+        "NONE": "Sem status",
+        "OPEN": "Aberta",
+        "PENDING": "Pendente",
+        "SNOOZED": "Adiada",
+        "RESOLVED": "Resolvida"
+      },
       "ADD_STAGE": "Adicionar",
       "ADD_STAGE_PLACEHOLDER": "Nome do novo estágio",
       "DELETE_STAGE": "Remover",

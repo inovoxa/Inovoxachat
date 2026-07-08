@@ -21,7 +21,12 @@ class PipelineStage < ApplicationRecord
   has_many :conversations, dependent: :nullify
   has_many :contacts, dependent: :nullify
 
+  # Espelha o enum de status da Conversation; o card migra para cá quando a
+  # conversa assume o status correspondente. nil = sem mapeamento.
+  enum mapped_status: { open: 0, resolved: 1, pending: 2, snoozed: 3 }, _prefix: :mapped
+
   validates :name, presence: { message: I18n.t('errors.validations.presence') }
+  validates :mapped_status, uniqueness: { scope: :pipeline_id }, allow_nil: true
   validates :position, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :color, presence: true
 

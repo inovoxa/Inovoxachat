@@ -45,10 +45,13 @@ const syncStages = () => {
       ...stage,
       name: local?.dirty ? local.name : stage.name,
       color: local?.dirty ? local.color : stage.color,
+      mapped_status: local?.dirty ? local.mapped_status : stage.mapped_status,
       dirty: local?.dirty || false,
     };
   });
 };
+
+const STATUS_OPTIONS = ['open', 'pending', 'snoozed', 'resolved'];
 
 watch(() => props.pipeline.stages, syncStages, { immediate: true, deep: true });
 
@@ -110,6 +113,7 @@ const onSave = async () => {
           id: stage.id,
           name: stage.name,
           color: stage.color,
+          mapped_status: stage.mapped_status || null,
         })
       )
     );
@@ -220,6 +224,19 @@ const onDeletePipeline = async () => {
                 class="flex-1 text-sm rounded-md border border-transparent bg-transparent px-2 py-1 text-n-slate-12 focus:border-n-weak"
                 @input="markDirty(element)"
               />
+              <select
+                v-model="element.mapped_status"
+                :title="t('KANBAN.SETTINGS_MODAL.MAPPED_STATUS_TITLE')"
+                class="text-xs rounded-md border border-n-weak bg-n-alpha-black2 px-1.5 py-1 text-n-slate-11"
+                @change="markDirty(element)"
+              >
+                <option :value="null">
+                  {{ t('KANBAN.SETTINGS_MODAL.STATUS.NONE') }}
+                </option>
+                <option v-for="s in STATUS_OPTIONS" :key="s" :value="s">
+                  {{ t(`KANBAN.SETTINGS_MODAL.STATUS.${s.toUpperCase()}`) }}
+                </option>
+              </select>
               <button
                 class="text-xs px-2 py-1 rounded-md"
                 :class="

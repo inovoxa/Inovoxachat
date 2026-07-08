@@ -45,6 +45,6 @@ class Api::V1::Accounts::PipelineStagesController < Api::V1::Accounts::BaseContr
   end
 
   def permitted_params
-    params.require(:pipeline_stage).permit(:name, :color, :position)
+    params.require(:pipeline_stage).permit(:name, :color, :position, :mapped_status)
   end
 end

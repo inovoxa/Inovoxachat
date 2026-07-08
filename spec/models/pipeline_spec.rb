@@ -120,6 +120,35 @@ RSpec.describe Pipeline do
     end
   end
 
+  describe 'status to stage sync' do
+    let(:account) { create(:account) }
+
+    it 'moves the card to the stage mapped to the new status' do
+      pipeline = create(:pipeline, account: account, template_key: 'suporte')
+      open_stage = pipeline.pipeline_stages.first
+      resolved_stage = pipeline.pipeline_stages.last
+      resolved_stage.update!(mapped_status: :resolved)
+
+      conversation = create(:conversation, account: account, status: :open)
+      conversation.update!(pipeline_stage: open_stage)
+
+      conversation.update!(status: :resolved)
+
+      expect(conversation.reload.pipeline_stage).to eq(resolved_stage)
+    end
+
+    it 'does nothing when no stage maps the new status' do
+      pipeline = create(:pipeline, account: account, template_key: 'suporte')
+      stage = pipeline.pipeline_stages.first
+      conversation = create(:conversation, account: account, status: :open)
+      conversation.update!(pipeline_stage: stage)
+
+      conversation.update!(status: :resolved)
+
+      expect(conversation.reload.pipeline_stage).to eq(stage)
+    end
+  end
+
   describe 'inbox-scoped entry' do
     let(:account) { create(:account) }
     let(:inbox_a) { create(:inbox, account: account) }

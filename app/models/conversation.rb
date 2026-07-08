@@ -254,9 +254,30 @@ class Conversation < ApplicationRecord
 
   def execute_after_update_commit_callbacks
     handle_resolved_status_change
+    sync_pipeline_stage_on_status_change
     notify_status_change
     create_activity
     notify_conversation_updation
+  end
+
+  # Ao mudar de status, leva o card para o estágio mapeado àquele status.
+  # Se já está num funil, migra dentro dele; senão, entra no 1º funil da inbox
+  # que tenha um estágio mapeado para o novo status.
+  def sync_pipeline_stage_on_status_change
+    return unless saved_change_to_status?
+
+    if pipeline_stage
+      target = pipeline_stage.pipeline.pipeline_stages.find_by(mapped_status: status)
+    else
+      pipeline = account.pipelines.joins(:pipeline_inboxes)
+                        .where(pipeline_inboxes: { inbox_id: inbox_id }).order(:id)
+                        .detect { |p| p.pipeline_stages.exists?(mapped_status: status) }
+      target = pipeline&.pipeline_stages&.find_by(mapped_status: status)
+    end
+
+    return if target.nil? || target.id == pipeline_stage_id
+
+    update_column(:pipeline_stage_id, target.id) # rubocop:disable Rails/SkipsModelValidations
   end
 
   def handle_resolved_status_change
