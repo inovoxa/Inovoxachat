@@ -6,6 +6,7 @@ import PipelineSelector from '../components/PipelineSelector.vue';
 import PipelineCreateModal from '../components/PipelineCreateModal.vue';
 import PipelineSettingsModal from '../components/PipelineSettingsModal.vue';
 import PipelineBoard from '../components/PipelineBoard.vue';
+import ScheduleMessageModal from '../components/ScheduleMessageModal.vue';
 
 const PERIODS = [7, 30, 90, 180];
 
@@ -22,6 +23,7 @@ const isAdmin = computed(() => currentRole.value === 'administrator');
 const days = ref(30);
 const showCreateModal = ref(false);
 const showSettingsModal = ref(false);
+const scheduleCard = ref(null);
 
 const boardStages = computed(() =>
   board.value.pipelineId === currentPipeline.value?.id
@@ -140,6 +142,7 @@ const onPipelineDeleted = () => {
       :stages="boardStages"
       :loading="uiFlags.isFetchingBoard"
       @reload="loadCards"
+      @schedule="card => (scheduleCard = card)"
     />
 
     <PipelineCreateModal
@@ -154,6 +157,13 @@ const onPipelineDeleted = () => {
       @close="showSettingsModal = false"
       @updated="loadCards"
       @deleted="onPipelineDeleted"
+    />
+
+    <ScheduleMessageModal
+      v-if="scheduleCard"
+      :conversation-id="scheduleCard.id"
+      :title="scheduleCard.contact?.name"
+      @close="scheduleCard = null"
     />
   </div>
 </template>

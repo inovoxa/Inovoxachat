@@ -31,6 +31,25 @@
       "SCHEDULE": "Schedule message",
       "OPEN": "Open"
     },
+    "SCHEDULE_MODAL": {
+      "TITLE": "Schedule message",
+      "MESSAGE_LABEL": "Message",
+      "MESSAGE_PLACEHOLDER": "Write the message to be sent...",
+      "WHEN_LABEL": "Send at",
+      "SUBMIT": "Schedule",
+      "LIST_LABEL": "Scheduled",
+      "LOADING": "Loading...",
+      "EMPTY": "No scheduled messages.",
+      "CANCEL": "Cancel",
+      "PAST_ERROR": "Pick a date and time in the future.",
+      "ERROR": "Could not schedule the message.",
+      "STATUS": {
+        "PENDING": "Scheduled",
+        "SENT": "Sent",
+        "CANCELED": "Canceled",
+        "FAILED": "Failed"
+      }
+    },
     "CREATE_MODAL": {
       "TITLE": "New pipeline",
       "NAME_LABEL": "Name",

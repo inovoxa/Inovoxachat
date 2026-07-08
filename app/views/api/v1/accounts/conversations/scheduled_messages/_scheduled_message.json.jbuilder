@@ -1,0 +1,5 @@
+json.id scheduled_message.id
+json.content scheduled_message.content
+json.scheduled_at scheduled_message.scheduled_at.to_i
+json.status scheduled_message.status
+json.created_by_id scheduled_message.created_by_id

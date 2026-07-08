@@ -31,6 +31,25 @@
       "SCHEDULE": "Agendar mensagem",
       "OPEN": "Abrir"
     },
+    "SCHEDULE_MODAL": {
+      "TITLE": "Agendar mensagem",
+      "MESSAGE_LABEL": "Mensagem",
+      "MESSAGE_PLACEHOLDER": "Escreva a mensagem que será enviada...",
+      "WHEN_LABEL": "Enviar em",
+      "SUBMIT": "Agendar",
+      "LIST_LABEL": "Agendadas",
+      "LOADING": "Carregando...",
+      "EMPTY": "Nenhuma mensagem agendada.",
+      "CANCEL": "Cancelar",
+      "PAST_ERROR": "Escolha uma data e hora no futuro.",
+      "ERROR": "Não foi possível agendar a mensagem.",
+      "STATUS": {
+        "PENDING": "Agendada",
+        "SENT": "Enviada",
+        "CANCELED": "Cancelada",
+        "FAILED": "Falhou"
+      }
+    },
     "CREATE_MODAL": {
       "TITLE": "Novo pipeline",
       "NAME_LABEL": "Nome",
