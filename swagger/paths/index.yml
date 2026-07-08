@@ -836,3 +836,137 @@
           application/json:
             schema:
               $ref: '#/components/schemas/conversation_messages'
+
+# Kanban Pipelines
+/accounts/{account_id}/pipelines:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+  get:
+    tags:
+      - Pipelines
+    operationId: listPipelines
+    summary: List pipelines
+    description: Lists the Kanban pipelines the current user can see.
+    responses:
+      '200':
+        description: Success
+  post:
+    tags:
+      - Pipelines
+    operationId: createPipeline
+    summary: Create a pipeline
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              template_key: { type: string, enum: [suporte, vendas, generico] }
+              auto_add_mode: { type: string, enum: [disabled, new_conversations, new_contacts] }
+              inbox_ids: { type: array, items: { type: integer } }
+    responses:
+      '200':
+        description: Success
+
+/accounts/{account_id}/pipelines/{id}/cards:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    - name: days
+      in: query
+      description: Period window in days (default 30).
+      schema: { type: integer }
+  get:
+    tags:
+      - Pipelines
+    operationId: getPipelineCards
+    summary: Get board cards
+    responses:
+      '200':
+        description: Success
+
+/accounts/{account_id}/pipelines/{pipeline_id}/stages/reorder:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - name: pipeline_id
+      in: path
+      required: true
+      schema: { type: integer }
+  post:
+    tags:
+      - Pipelines
+    operationId: reorderPipelineStages
+    summary: Reorder stages
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              stage_ids: { type: array, items: { type: integer } }
+    responses:
+      '200':
+        description: Success
+
+/accounts/{account_id}/conversations/{conversation_id}/assign_pipeline_stage:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - name: conversation_id
+      in: path
+      required: true
+      schema: { type: integer }
+  post:
+    tags:
+      - Pipelines
+    operationId: assignConversationPipelineStage
+    summary: Move a conversation card
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              pipeline_stage_id: { type: integer, nullable: true }
+    responses:
+      '200':
+        description: Success
+
+/accounts/{account_id}/conversations/{conversation_id}/scheduled_messages:
+  parameters:
+    - $ref: '#/components/parameters/account_id'
+    - name: conversation_id
+      in: path
+      required: true
+      schema: { type: integer }
+  get:
+    tags:
+      - Pipelines
+    operationId: listScheduledMessages
+    summary: List scheduled messages
+    responses:
+      '200':
+        description: Success
+  post:
+    tags:
+      - Pipelines
+    operationId: createScheduledMessage
+    summary: Schedule a message
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              scheduled_message:
+                type: object
+                properties:
+                  content: { type: string }
+                  scheduled_at: { type: string, format: date-time }
+    responses:
+      '200':
+        description: Success
