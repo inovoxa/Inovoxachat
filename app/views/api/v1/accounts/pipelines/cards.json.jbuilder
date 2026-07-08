@@ -2,7 +2,7 @@ json.payload do
   json.array! @pipeline.pipeline_stages do |stage|
     conversations = stage.conversations
                          .where(last_activity_at: @since..)
-                         .includes(:assignee, contact: { avatar_attachment: :blob })
+                         .includes(:assignee, :inbox, contact: { avatar_attachment: :blob })
                          .order(last_activity_at: :desc)
     conversations = conversations.where(inbox_id: @inbox_ids) if @inbox_ids.present?
 
@@ -22,7 +22,18 @@ json.payload do
       json.status conversation.status
       json.priority conversation.priority
       json.inbox_id conversation.inbox_id
+      json.inbox_name conversation.inbox&.name
       json.last_activity_at conversation.last_activity_at.to_i
+      json.labels conversation.cached_label_list_array
+      last_message = conversation.messages.where(message_type: [0, 1], private: false)
+                                 .reorder(created_at: :desc).first
+      if last_message
+        json.last_message do
+          json.content last_message.content.to_s.truncate(90)
+          json.created_at last_message.created_at.to_i
+          json.incoming last_message.incoming?
+        end
+      end
       json.contact do
         json.id conversation.contact.id
         json.name conversation.contact.name

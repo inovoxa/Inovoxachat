@@ -23,6 +23,14 @@
       "MOVE_ERROR": "Could not move the card. The board was reloaded.",
       "NEW_CONTACT": "New contact"
     },
+    "CARD_MODAL": {
+      "LOADING": "Loading messages...",
+      "NO_MESSAGES": "No messages in this conversation.",
+      "CONTACT_HINT": "Contact has no conversation yet.",
+      "MOVE_TO": "Move to...",
+      "SCHEDULE": "Schedule message",
+      "OPEN": "Open"
+    },
     "CREATE_MODAL": {
       "TITLE": "New pipeline",
       "NAME_LABEL": "Name",

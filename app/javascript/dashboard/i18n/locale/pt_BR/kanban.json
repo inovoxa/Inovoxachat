@@ -23,6 +23,14 @@
       "MOVE_ERROR": "Não foi possível mover o card. O board foi recarregado.",
       "NEW_CONTACT": "Novo contato"
     },
+    "CARD_MODAL": {
+      "LOADING": "Carregando mensagens...",
+      "NO_MESSAGES": "Sem mensagens nesta conversa.",
+      "CONTACT_HINT": "Contato ainda sem conversa associada.",
+      "MOVE_TO": "Mover para...",
+      "SCHEDULE": "Agendar mensagem",
+      "OPEN": "Abrir"
+    },
     "CREATE_MODAL": {
       "TITLE": "Novo pipeline",
       "NAME_LABEL": "Nome",

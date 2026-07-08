@@ -4,7 +4,6 @@ import PipelineStageColumn from '../PipelineStageColumn.vue';
 
 const mocks = vi.hoisted(() => ({
   dispatch: vi.fn(() => Promise.resolve({})),
-  push: vi.fn(),
 }));
 
 vi.mock('dashboard/composables/store', () => ({
@@ -15,10 +14,11 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key }),
 }));
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: { accountId: '1' } }),
-  useRouter: () => ({ push: mocks.push }),
-}));
+const CardDetailModalStub = {
+  name: 'CardDetailModal',
+  props: ['card', 'stages'],
+  template: '<div class="card-detail-modal">{{ card.id }}</div>',
+};
 
 const stages = [
   {
@@ -48,6 +48,7 @@ const mountBoard = () =>
     props: { stages },
     global: {
       stubs: {
+        CardDetailModal: CardDetailModalStub,
         Draggable: {
           props: ['list'],
           template: `
@@ -66,7 +67,6 @@ describe('PipelineBoard', () => {
   beforeEach(() => {
     mocks.dispatch.mockClear();
     mocks.dispatch.mockResolvedValue({});
-    mocks.push.mockClear();
   });
 
   it('renders one column per stage with conversation and contact cards', () => {
@@ -131,23 +131,26 @@ describe('PipelineBoard', () => {
     expect(wrapper.text()).toContain('KANBAN.BOARD.MOVE_ERROR');
   });
 
-  it('navigates to the conversation when a conversation card is clicked', async () => {
+  it('opens the detail modal when a card is clicked', async () => {
     const wrapper = mountBoard();
     const firstColumn = wrapper.findAllComponents(PipelineStageColumn).at(0);
+
+    expect(wrapper.find('.card-detail-modal').exists()).toBe(false);
 
     firstColumn.vm.$emit('cardClick', { type: 'conversation', id: 5 });
     await flushPromises();
 
-    expect(mocks.push).toHaveBeenCalledWith('/app/accounts/1/conversations/5');
+    expect(wrapper.find('.card-detail-modal').exists()).toBe(true);
   });
 
-  it('navigates to the contact when a contact card is clicked', async () => {
+  it('re-emits schedule from the modal', async () => {
     const wrapper = mountBoard();
     const firstColumn = wrapper.findAllComponents(PipelineStageColumn).at(0);
-
-    firstColumn.vm.$emit('cardClick', { type: 'contact', id: 7 });
+    firstColumn.vm.$emit('cardClick', { type: 'conversation', id: 5 });
     await flushPromises();
 
-    expect(mocks.push).toHaveBeenCalledWith('/app/accounts/1/contacts/7');
+    wrapper.findComponent(CardDetailModalStub).vm.$emit('schedule', { id: 5 });
+
+    expect(wrapper.emitted('schedule')).toBeTruthy();
   });
 });

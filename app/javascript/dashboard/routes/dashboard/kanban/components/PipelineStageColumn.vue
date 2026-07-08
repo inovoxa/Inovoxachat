@@ -1,6 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import Draggable from 'vuedraggable';
+import { dynamicTime } from 'shared/helpers/timeHelper';
 
 defineProps({
   column: {
@@ -21,6 +22,7 @@ const PRIORITY_CLASS = {
 };
 
 const initials = name => (name || '?').trim().charAt(0).toUpperCase();
+const relativeTime = ts => (ts ? dynamicTime(ts) : '');
 </script>
 
 <template>
@@ -83,12 +85,43 @@ const initials = name => (name || '?').trim().charAt(0).toUpperCase();
                 {{ element.priority }}
               </span>
             </div>
+            <p
+              v-if="element.last_message"
+              class="text-xs text-n-slate-11 line-clamp-2"
+            >
+              <span v-if="!element.last_message.incoming" class="text-n-slate-10"
+                >↩ </span
+              >{{ element.last_message.content }}
+            </p>
+            <div
+              v-if="element.labels && element.labels.length"
+              class="flex flex-wrap gap-1"
+            >
+              <span
+                v-for="label in element.labels"
+                :key="label"
+                class="text-[10px] px-1.5 py-0.5 rounded-full bg-n-slate-4 text-n-slate-11"
+              >
+                {{ label }}
+              </span>
+            </div>
             <div class="flex items-center justify-between">
               <span class="text-xs text-n-slate-11">#{{ element.id }}</span>
               <span
                 class="text-xs px-1.5 py-0.5 rounded-full bg-n-slate-4 text-n-slate-11"
               >
                 {{ element.status }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span
+                v-if="element.inbox_name"
+                class="text-[10px] text-n-slate-10 truncate"
+              >
+                {{ element.inbox_name }}
+              </span>
+              <span class="text-[10px] text-n-slate-10 whitespace-nowrap ml-auto">
+                {{ relativeTime(element.last_activity_at) }}
               </span>
             </div>
             <div
@@ -133,11 +166,16 @@ const initials = name => (name || '?').trim().charAt(0).toUpperCase();
             >
               {{ element.email || element.phone_number }}
             </p>
-            <span
-              class="text-xs px-1.5 py-0.5 rounded-full bg-n-teal-9/20 text-n-teal-11 self-start"
-            >
-              {{ t('KANBAN.BOARD.NEW_CONTACT') }}
-            </span>
+            <div class="flex items-center justify-between gap-2">
+              <span
+                class="text-xs px-1.5 py-0.5 rounded-full bg-n-teal-9/20 text-n-teal-11"
+              >
+                {{ t('KANBAN.BOARD.NEW_CONTACT') }}
+              </span>
+              <span class="text-[10px] text-n-slate-10 whitespace-nowrap">
+                {{ relativeTime(element.created_at) }}
+              </span>
+            </div>
           </template>
         </div>
       </template>

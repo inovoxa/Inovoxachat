@@ -1,9 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'dashboard/composables/store';
 import PipelineStageColumn from './PipelineStageColumn.vue';
+import CardDetailModal from './CardDetailModal.vue';
 
 const props = defineProps({
   stages: {
@@ -16,15 +16,18 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['reload']);
+const emit = defineEmits(['reload', 'schedule']);
 
 const store = useStore();
-const route = useRoute();
-const router = useRouter();
 const { t } = useI18n();
 
 const columns = ref([]);
 const error = ref('');
+const selectedCard = ref(null);
+
+const stageOptions = computed(() =>
+  columns.value.map(column => ({ id: column.id, name: column.name }))
+);
 
 // Cards de conversa e de contato convivem na mesma coluna; a chave única
 // combina o tipo com o id para o drag-and-drop não confundir os dois.
@@ -50,11 +53,7 @@ const buildColumns = () => {
 
 watch(() => props.stages, buildColumns, { immediate: true, deep: true });
 
-// Update otimista: o vuedraggable já moveu o card localmente; se a API
-// falhar, recarregamos o board para reverter.
-const onChange = async (stageId, event) => {
-  if (!event.added) return;
-  const item = event.added.element;
+const moveCard = async (item, stageId) => {
   error.value = '';
   try {
     if (item.type === 'conversation') {
@@ -68,19 +67,29 @@ const onChange = async (stageId, event) => {
         stageId,
       });
     }
+    return true;
   } catch (e) {
     error.value = t('KANBAN.BOARD.MOVE_ERROR');
     emit('reload');
+    return false;
   }
 };
 
+// Update otimista: o vuedraggable já moveu o card localmente; se a API
+// falhar, recarregamos o board para reverter.
+const onChange = (stageId, event) => {
+  if (!event.added) return;
+  moveCard(event.added.element, stageId);
+};
+
 const onCardClick = item => {
-  const { accountId } = route.params;
-  if (item.type === 'conversation') {
-    router.push(`/app/accounts/${accountId}/conversations/${item.id}`);
-  } else {
-    router.push(`/app/accounts/${accountId}/contacts/${item.id}`);
-  }
+  selectedCard.value = item;
+};
+
+const onModalMove = async ({ card, stageId }) => {
+  const ok = await moveCard(card, stageId);
+  selectedCard.value = null;
+  if (ok) emit('reload');
 };
 </script>
 
@@ -99,5 +108,14 @@ const onCardClick = item => {
         @card-click="onCardClick"
       />
     </div>
+
+    <CardDetailModal
+      v-if="selectedCard"
+      :card="selectedCard"
+      :stages="stageOptions"
+      @close="selectedCard = null"
+      @moved="onModalMove"
+      @schedule="card => emit('schedule', card)"
+    />
   </div>
 </template>
