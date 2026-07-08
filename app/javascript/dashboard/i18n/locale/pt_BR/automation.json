@@ -145,6 +145,7 @@
       "REMOVE_ASSIGNED_TEAM": "Remover Time Atribuído",
       "ADD_LABEL": "Adicionar uma Etiqueta",
       "REMOVE_LABEL": "Remover uma Etiqueta",
+      "CHANGE_PIPELINE_STAGE": "Mover para estágio do funil",
       "SEND_EMAIL_TO_TEAM": "Enviar um e-mail para o Time",
       "SEND_EMAIL_TRANSCRIPT": "Enviar uma transcrição por e-mail",
       "MUTE_CONVERSATION": "Silenciar Conversa",

@@ -99,6 +99,7 @@ export const getActionOptions = ({
   teams,
   labels,
   slaPolicies,
+  pipelineStages,
   type,
   addNoneToListFn,
   priorityOptions,
@@ -110,6 +111,7 @@ export const getActionOptions = ({
     add_label: generateConditionOptions(labels, 'title'),
     remove_label: generateConditionOptions(labels, 'title'),
     change_priority: priorityOptions,
+    change_pipeline_stage: pipelineStages,
     add_sla: slaPolicies,
   };
   return actionsMap[type];

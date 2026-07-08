@@ -54,6 +54,13 @@ class AutomationRules::ActionService < ActionService
     Messages::MessageBuilder.new(nil, @conversation.reload, params).perform
   end
 
+  # Move o card do Kanban para o estágio escolhido na regra (ex.: etiqueta
+  # "comercial" -> estágio 1 do funil de Vendas).
+  def change_pipeline_stage(stage_ids)
+    stage = @account.pipeline_stages.find_by(id: stage_ids[0])
+    @conversation.update!(pipeline_stage_id: stage.id) if stage
+  end
+
   def send_email_to_team(params)
     teams = Team.where(id: params[0][:team_ids])
 

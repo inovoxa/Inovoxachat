@@ -145,6 +145,10 @@ export const AUTOMATIONS = {
         name: 'RESOLVE_CONVERSATION',
       },
       {
+        key: 'change_pipeline_stage',
+        name: 'CHANGE_PIPELINE_STAGE',
+      },
+      {
         key: 'send_webhook_event',
         name: 'SEND_WEBHOOK_EVENT',
       },
@@ -277,6 +281,10 @@ export const AUTOMATIONS = {
       {
         key: 'resolve_conversation',
         name: 'RESOLVE_CONVERSATION',
+      },
+      {
+        key: 'change_pipeline_stage',
+        name: 'CHANGE_PIPELINE_STAGE',
       },
       {
         key: 'send_webhook_event',
@@ -423,6 +431,10 @@ export const AUTOMATIONS = {
       {
         key: 'resolve_conversation',
         name: 'RESOLVE_CONVERSATION',
+      },
+      {
+        key: 'change_pipeline_stage',
+        name: 'CHANGE_PIPELINE_STAGE',
       },
       {
         key: 'send_webhook_event',
@@ -739,6 +751,11 @@ export const AUTOMATION_ACTION_TYPES = [
     key: 'remove_label',
     label: 'REMOVE_LABEL',
     inputType: 'multi_select',
+  },
+  {
+    key: 'change_pipeline_stage',
+    label: 'CHANGE_PIPELINE_STAGE',
+    inputType: 'search_select',
   },
   {
     key: 'send_email_to_team',

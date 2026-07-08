@@ -21,6 +21,20 @@ RSpec.describe AutomationRules::ActionService do
       end
     end
 
+    describe '#perform with change_pipeline_stage action' do
+      let(:pipeline) { create(:pipeline, account: account, template_key: 'suporte') }
+      let(:stage) { pipeline.pipeline_stages.second }
+      let!(:rule) do
+        create(:automation_rule, account: account,
+                                 actions: [{ action_name: 'change_pipeline_stage', action_params: [stage.id] }])
+      end
+
+      it 'moves the conversation to the given stage' do
+        described_class.new(rule, account, conversation).perform
+        expect(conversation.reload.pipeline_stage_id).to eq(stage.id)
+      end
+    end
+
     describe '#perform with send_attachment action' do
       let(:message_builder) { double }
 
