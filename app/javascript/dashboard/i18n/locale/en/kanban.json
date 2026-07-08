@@ -31,6 +31,19 @@
       "SCHEDULE": "Schedule message",
       "OPEN": "Open"
     },
+    "CONVO_ACTIONS": {
+      "SCHEDULE": "Schedule message",
+      "ASSIGN": "Assign to a pipeline",
+      "ASSIGN_TITLE": "Assign conversation to a pipeline",
+      "PIPELINE": "Pipeline",
+      "STAGE": "Stage",
+      "STAGE_PLACEHOLDER": "Select a stage",
+      "NO_PIPELINES": "No pipeline available for this account.",
+      "CANCEL": "Cancel",
+      "CONFIRM": "Assign",
+      "ASSIGN_SUCCESS": "Conversation assigned to the pipeline.",
+      "ASSIGN_ERROR": "Could not assign the conversation."
+    },
     "SCHEDULE_MODAL": {
       "TITLE": "Schedule message",
       "MESSAGE_LABEL": "Message",

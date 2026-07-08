@@ -31,6 +31,19 @@
       "SCHEDULE": "Agendar mensagem",
       "OPEN": "Abrir"
     },
+    "CONVO_ACTIONS": {
+      "SCHEDULE": "Agendar mensagem",
+      "ASSIGN": "Associar a um funil",
+      "ASSIGN_TITLE": "Associar conversa a um funil",
+      "PIPELINE": "Funil",
+      "STAGE": "Estágio",
+      "STAGE_PLACEHOLDER": "Selecione um estágio",
+      "NO_PIPELINES": "Nenhum funil disponível para esta conta.",
+      "CANCEL": "Cancelar",
+      "CONFIRM": "Associar",
+      "ASSIGN_SUCCESS": "Conversa associada ao funil.",
+      "ASSIGN_ERROR": "Não foi possível associar a conversa."
+    },
     "SCHEDULE_MODAL": {
       "TITLE": "Agendar mensagem",
       "MESSAGE_LABEL": "Mensagem",
