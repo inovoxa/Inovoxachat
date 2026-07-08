@@ -19,6 +19,8 @@ class Pipeline < ApplicationRecord
   belongs_to :account
 
   has_many :pipeline_stages, -> { order(:position) }, dependent: :destroy, inverse_of: :pipeline
+  has_many :pipeline_inboxes, dependent: :destroy
+  has_many :inboxes, through: :pipeline_inboxes
 
   # Entrada automática no primeiro estágio do pipeline:
   # disabled          -> nada entra automaticamente
@@ -36,8 +38,13 @@ class Pipeline < ApplicationRecord
   after_update :backfill_entry_stage, if: :saved_change_to_auto_add_mode?
 
   # Primeiro estágio do primeiro pipeline da conta configurado com o modo dado.
-  def self.entry_stage_for(account, mode)
+  # Se inbox_ids for informado, só considera pipelines vinculados a alguma dessas
+  # inboxes (pipelines sem inbox vinculada são tratados como globais).
+  def self.entry_stage_for(account, mode, inbox_ids = nil)
     account.pipelines.where(auto_add_mode: mode).order(:id).each do |pipeline|
+      pipeline_inbox_ids = pipeline.inbox_ids
+      next if inbox_ids.present? && pipeline_inbox_ids.any? && (pipeline_inbox_ids & Array(inbox_ids)).empty?
+
       stage = pipeline.pipeline_stages.first
       return stage if stage
     end
@@ -54,14 +61,16 @@ class Pipeline < ApplicationRecord
     stage = pipeline_stages.first
     return unless stage
 
+    scoped_inbox_ids = inbox_ids
+
     if new_conversations?
-      account.conversations.where(pipeline_stage_id: nil)
-             .where(last_activity_at: BACKFILL_WINDOW.ago..)
-             .update_all(pipeline_stage_id: stage.id) # rubocop:disable Rails/SkipsModelValidations
+      scope = account.conversations.where(pipeline_stage_id: nil).where(last_activity_at: BACKFILL_WINDOW.ago..)
+      scope = scope.where(inbox_id: scoped_inbox_ids) if scoped_inbox_ids.any?
+      scope.update_all(pipeline_stage_id: stage.id) # rubocop:disable Rails/SkipsModelValidations
     elsif new_contacts?
-      account.contacts.where(pipeline_stage_id: nil)
-             .where(created_at: BACKFILL_WINDOW.ago..)
-             .update_all(pipeline_stage_id: stage.id) # rubocop:disable Rails/SkipsModelValidations
+      scope = account.contacts.where(pipeline_stage_id: nil).where(created_at: BACKFILL_WINDOW.ago..)
+      scope = scope.where(id: ContactInbox.where(inbox_id: scoped_inbox_ids).select(:contact_id)) if scoped_inbox_ids.any?
+      scope.update_all(pipeline_stage_id: stage.id) # rubocop:disable Rails/SkipsModelValidations
     end
   end
 

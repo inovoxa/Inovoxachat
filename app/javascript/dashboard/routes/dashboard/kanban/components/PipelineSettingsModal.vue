@@ -3,6 +3,7 @@ import { reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Draggable from 'vuedraggable';
 import { useStore } from 'dashboard/composables/store';
+import InboxMultiSelect from './InboxMultiSelect.vue';
 
 const props = defineProps({
   pipeline: {
@@ -22,6 +23,7 @@ const form = reactive({
   name: props.pipeline.name,
   description: props.pipeline.description || '',
   auto_add_mode: props.pipeline.auto_add_mode,
+  inbox_ids: [...(props.pipeline.inbox_ids || [])],
 });
 
 const stages = ref([]);
@@ -98,6 +100,7 @@ const onSave = async () => {
       name: form.name,
       description: form.description,
       auto_add_mode: form.auto_add_mode,
+      inbox_ids: form.inbox_ids,
     });
     const dirtyStages = stages.value.filter(stage => stage.dirty);
     await Promise.all(
@@ -179,6 +182,11 @@ const onDeletePipeline = async () => {
           </option>
         </select>
       </label>
+
+      <div class="flex flex-col gap-1 text-sm text-n-slate-11">
+        {{ t('KANBAN.SETTINGS_MODAL.INBOXES_LABEL') }}
+        <InboxMultiSelect v-model="form.inbox_ids" />
+      </div>
 
       <div class="flex flex-col gap-2">
         <span class="text-sm text-n-slate-11">

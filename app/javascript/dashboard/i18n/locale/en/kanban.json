@@ -39,6 +39,8 @@
         "NEW_CONVERSATIONS": "Every new conversation",
         "NEW_CONTACTS": "Every new contact"
       },
+      "INBOXES_LABEL": "Inboxes",
+      "INBOXES_HINT": "The pipeline only shows cards from the selected inboxes. With none selected, it applies to all.",
       "CANCEL": "Cancel",
       "SUBMIT": "Create pipeline",
       "ERROR": "Could not create the pipeline."
@@ -48,6 +50,7 @@
       "NAME_LABEL": "Name",
       "DESCRIPTION_LABEL": "Description",
       "AUTO_ADD_LABEL": "Automatic entry on the first stage",
+      "INBOXES_LABEL": "Inboxes",
       "STAGES_LABEL": "Stages",
       "REORDER_HINT": "Drag ⠿ to reorder the columns.",
       "ADD_STAGE": "Add",

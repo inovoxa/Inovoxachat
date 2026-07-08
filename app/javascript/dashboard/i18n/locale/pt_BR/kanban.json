@@ -39,6 +39,8 @@
         "NEW_CONVERSATIONS": "Toda conversa nova",
         "NEW_CONTACTS": "Todo contato novo"
       },
+      "INBOXES_LABEL": "Caixas de entrada",
+      "INBOXES_HINT": "O funil só mostra cards das caixas selecionadas. Sem seleção, vale para todas.",
       "CANCEL": "Cancelar",
       "SUBMIT": "Criar pipeline",
       "ERROR": "Não foi possível criar o pipeline."
@@ -48,6 +50,7 @@
       "NAME_LABEL": "Nome",
       "DESCRIPTION_LABEL": "Descrição",
       "AUTO_ADD_LABEL": "Entrada automática no primeiro estágio",
+      "INBOXES_LABEL": "Caixas de entrada",
       "STAGES_LABEL": "Estágios",
       "REORDER_HINT": "Arraste ⠿ para reordenar as colunas.",
       "ADD_STAGE": "Adicionar",

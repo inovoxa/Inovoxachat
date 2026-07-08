@@ -202,7 +202,7 @@ class Contact < ApplicationRecord
   def assign_default_pipeline_stage
     return if pipeline_stage_id.present?
 
-    stage = Pipeline.entry_stage_for(account, :new_contacts)
+    stage = Pipeline.entry_stage_for(account, :new_contacts, contact_inboxes.pluck(:inbox_id))
     update_column(:pipeline_stage_id, stage.id) if stage # rubocop:disable Rails/SkipsModelValidations
   end
 

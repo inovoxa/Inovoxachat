@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
+import InboxMultiSelect from './InboxMultiSelect.vue';
 
 const emit = defineEmits(['close', 'created']);
 
@@ -15,6 +16,7 @@ const name = ref('');
 const description = ref('');
 const selectedTemplate = ref('custom');
 const autoAddMode = ref('disabled');
+const inboxIds = ref([]);
 const error = ref('');
 
 const AUTO_ADD_OPTIONS = ['disabled', 'new_conversations', 'new_contacts'];
@@ -43,6 +45,7 @@ const onSubmit = async () => {
       template_key:
         selectedTemplate.value === 'custom' ? null : selectedTemplate.value,
       auto_add_mode: autoAddMode.value,
+      inbox_ids: inboxIds.value,
     });
     emit('created');
   } catch (e) {
@@ -157,6 +160,14 @@ const onSubmit = async () => {
           </option>
         </select>
       </label>
+
+      <div class="flex flex-col gap-1 text-sm text-n-slate-11">
+        {{ t('KANBAN.CREATE_MODAL.INBOXES_LABEL') }}
+        <InboxMultiSelect v-model="inboxIds" />
+        <span class="text-xs text-n-slate-10">
+          {{ t('KANBAN.CREATE_MODAL.INBOXES_HINT') }}
+        </span>
+      </div>
 
       <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 

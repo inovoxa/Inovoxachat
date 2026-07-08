@@ -7,7 +7,14 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   DEFAULT_CARDS_PERIOD_DAYS = 30
 
   def index
-    @pipelines = policy_scope(Current.account.pipelines.includes(:pipeline_stages))
+    scope = Current.account.pipelines.includes(:pipeline_stages, :inboxes)
+    # Agente só enxerga funis vinculados a alguma inbox a que tem acesso.
+    unless Current.account_user.administrator?
+      scope = scope.joins(:pipeline_inboxes)
+                   .where(pipeline_inboxes: { inbox_id: accessible_inbox_ids })
+                   .distinct
+    end
+    @pipelines = scope
   end
 
   def show; end
@@ -31,9 +38,24 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   # Cards do board (conversas + contatos por estágio), filtrados por período.
   def cards
     @since = cards_period_days.days.ago
+    @inbox_ids = visible_inbox_ids
   end
 
   private
+
+  # Inboxes cujos cards devem aparecer no board:
+  # - admin: todas as inboxes do funil (vazio = todas, funil global);
+  # - agente: interseção entre as inboxes do funil e as inboxes a que tem acesso.
+  def visible_inbox_ids
+    pipeline_inbox_ids = @pipeline.inbox_ids
+    return pipeline_inbox_ids if Current.account_user.administrator?
+
+    pipeline_inbox_ids.present? ? (pipeline_inbox_ids & accessible_inbox_ids) : accessible_inbox_ids
+  end
+
+  def accessible_inbox_ids
+    @accessible_inbox_ids ||= Current.user.assigned_inboxes.pluck(:id)
+  end
 
   def cards_period_days
     days = params[:days].to_i
@@ -45,6 +67,6 @@ class Api::V1::Accounts::PipelinesController < Api::V1::Accounts::BaseController
   end
 
   def permitted_params
-    params.require(:pipeline).permit(:name, :description, :template_key, :auto_add_mode)
+    params.require(:pipeline).permit(:name, :description, :template_key, :auto_add_mode, inbox_ids: [])
   end
 end

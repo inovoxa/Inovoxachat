@@ -4,7 +4,12 @@ json.payload do
                          .where(last_activity_at: @since..)
                          .includes(:assignee, contact: { avatar_attachment: :blob })
                          .order(last_activity_at: :desc)
+    conversations = conversations.where(inbox_id: @inbox_ids) if @inbox_ids.present?
+
     contacts = stage.contacts.where(created_at: @since..).order(created_at: :desc)
+    if @inbox_ids.present?
+      contacts = contacts.where(id: ContactInbox.where(inbox_id: @inbox_ids).select(:contact_id))
+    end
 
     json.id stage.id
     json.name stage.name

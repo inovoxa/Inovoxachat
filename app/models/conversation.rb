@@ -248,7 +248,7 @@ class Conversation < ApplicationRecord
   def assign_default_pipeline_stage
     return if pipeline_stage_id.present?
 
-    stage = Pipeline.entry_stage_for(account, :new_conversations)
+    stage = Pipeline.entry_stage_for(account, :new_conversations, [inbox_id])
     update_column(:pipeline_stage_id, stage.id) if stage # rubocop:disable Rails/SkipsModelValidations
   end
 

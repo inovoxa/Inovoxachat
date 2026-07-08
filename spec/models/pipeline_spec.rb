@@ -119,4 +119,21 @@ RSpec.describe Pipeline do
       expect(account.pipeline_stages).to match_array(pipeline.pipeline_stages)
     end
   end
+
+  describe 'inbox-scoped entry' do
+    let(:account) { create(:account) }
+    let(:inbox_a) { create(:inbox, account: account) }
+    let(:inbox_b) { create(:inbox, account: account) }
+
+    it 'only assigns a conversation whose inbox is linked to the pipeline' do
+      pipeline = create(:pipeline, account: account, template_key: 'suporte', auto_add_mode: :new_conversations)
+      pipeline.inboxes << inbox_a
+
+      in_scope = create(:conversation, account: account, inbox: inbox_a)
+      out_of_scope = create(:conversation, account: account, inbox: inbox_b)
+
+      expect(in_scope.reload.pipeline_stage).to eq(pipeline.pipeline_stages.first)
+      expect(out_of_scope.reload.pipeline_stage).to be_nil
+    end
+  end
 end
