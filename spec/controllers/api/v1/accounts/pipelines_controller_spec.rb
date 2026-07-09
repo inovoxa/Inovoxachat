@@ -166,6 +166,46 @@ RSpec.describe 'Pipelines API', type: :request do
       expect(conversation.reload.pipeline_stage_id).to eq(stage.id)
     end
 
+    it 'resolves the conversation when the target stage is mapped to resolved' do
+      stage.update!(mapped_status: 'resolved')
+
+      post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/assign_pipeline_stage",
+           headers: agent.create_new_auth_token,
+           params: { pipeline_stage_id: stage.id },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(conversation.reload.status).to eq('resolved')
+      expect(conversation.pipeline_stage_id).to eq(stage.id)
+    end
+
+    it 'reopens a resolved conversation when the target stage is mapped to open' do
+      stage.update!(mapped_status: 'open')
+      conversation.update!(status: :resolved)
+
+      post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/assign_pipeline_stage",
+           headers: agent.create_new_auth_token,
+           params: { pipeline_stage_id: stage.id },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(conversation.reload.status).to eq('open')
+      expect(conversation.pipeline_stage_id).to eq(stage.id)
+    end
+
+    it 'keeps the conversation status when the target stage has no mapped status' do
+      conversation.update!(status: :resolved)
+
+      post "/api/v1/accounts/#{account.id}/conversations/#{conversation.display_id}/assign_pipeline_stage",
+           headers: agent.create_new_auth_token,
+           params: { pipeline_stage_id: stage.id },
+           as: :json
+
+      expect(response).to have_http_status(:success)
+      expect(conversation.reload.status).to eq('resolved')
+      expect(conversation.pipeline_stage_id).to eq(stage.id)
+    end
+
     it 'clears the stage when pipeline_stage_id is blank' do
       conversation.update!(pipeline_stage: stage)
 

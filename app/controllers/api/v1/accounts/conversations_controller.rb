@@ -113,8 +113,13 @@ class Api::V1::Accounts::ConversationsController < Api::V1::Accounts::BaseContro
   end
 
   # Move o card do Kanban: define (ou limpa, se vier vazio) o estágio da conversa.
+  # Se o estágio de destino estiver mapeado a um status, a conversa assume esse
+  # status (arrastar para "Resolvido" resolve; arrastar de volta reabre).
   def assign_pipeline_stage
-    @conversation.update!(pipeline_stage: pipeline_stage_from_params)
+    stage = pipeline_stage_from_params
+    attributes = { pipeline_stage: stage }
+    attributes[:status] = stage.mapped_status if stage&.mapped_status.present? && @conversation.status != stage.mapped_status
+    @conversation.update!(attributes)
     head :ok
   end
 

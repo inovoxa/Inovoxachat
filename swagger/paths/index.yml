@@ -925,6 +925,10 @@
       - Pipelines
     operationId: assignConversationPipelineStage
     summary: Move a conversation card
+    description: >-
+      Sets (or clears, when pipeline_stage_id is null) the conversation's pipeline stage.
+      If the target stage is mapped to a conversation status, the conversation also
+      assumes that status (e.g. dragging to a resolved-mapped stage resolves it).
     requestBody:
       content:
         application/json:
