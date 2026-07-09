@@ -913,6 +913,12 @@ const menuItems = computed(() => {
           to: accountScopedRoute('booking_pages_index'),
         },
         {
+          name: 'Settings Calendar',
+          label: t('SIDEBAR.CALENDAR_SETTINGS'),
+          icon: 'i-lucide-calendar-cog',
+          to: accountScopedRoute('calendar_integrations_index'),
+        },
+        {
           name: 'Conversation Workflow',
           label: t('SIDEBAR.CONVERSATION_WORKFLOW'),
           icon: 'i-lucide-workflow',

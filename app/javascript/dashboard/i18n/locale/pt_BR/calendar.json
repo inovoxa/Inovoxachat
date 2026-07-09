@@ -71,6 +71,34 @@
     },
     "CONVERSATION_ACTION": {
       "SCHEDULE": "Agendar evento"
+    },
+    "INTEGRATIONS": {
+      "HEADER": "Sincronização de calendário",
+      "DESCRIPTION": "Conecte o Google Calendar ou o Outlook para espelhar os eventos nos dois sentidos.",
+      "PROVIDERS": {
+        "GOOGLE": "Google Calendar",
+        "OUTLOOK": "Outlook (Microsoft Graph)"
+      },
+      "CONFIG": {
+        "TITLE": "Credenciais OAuth",
+        "HINT": "Cole o client id/secret do Google Cloud Console e do Azure. O secret é write-only: nunca é exibido de volta.",
+        "SECRET_SAVED": "•••••• (salvo — digite para substituir)",
+        "SECRET_PLACEHOLDER": "Client secret",
+        "SAVE": "Salvar credenciais",
+        "SAVED": "Credenciais salvas"
+      },
+      "MY_CONNECTIONS": "Minhas conexões",
+      "LOADING": "Carregando…",
+      "CONNECT": "Conectar",
+      "DISCONNECT": "Desconectar",
+      "DISCONNECT_CONFIRM": "Desconectar este calendário? Os eventos sincronizados permanecem, mas param de atualizar.",
+      "DISCONNECTED": "Calendário desconectado",
+      "NOT_CONNECTED": "Não conectado",
+      "SYNC_ENABLED": "Sync ativo",
+      "LAST_SYNC": "Última sincronização",
+      "NEVER_SYNCED": "nunca",
+      "AUTH_ERROR": "Não foi possível iniciar a autorização. Verifique as credenciais OAuth.",
+      "ERROR": "Algo deu errado. Tente novamente."
     }
   }
 }

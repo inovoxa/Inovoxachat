@@ -71,6 +71,34 @@
     },
     "CONVERSATION_ACTION": {
       "SCHEDULE": "Schedule event"
+    },
+    "INTEGRATIONS": {
+      "HEADER": "Calendar sync",
+      "DESCRIPTION": "Connect Google Calendar or Outlook to mirror events both ways.",
+      "PROVIDERS": {
+        "GOOGLE": "Google Calendar",
+        "OUTLOOK": "Outlook (Microsoft Graph)"
+      },
+      "CONFIG": {
+        "TITLE": "OAuth credentials",
+        "HINT": "Paste the client id/secret from Google Cloud Console and Azure. The secret is write-only: it is never shown back.",
+        "SECRET_SAVED": "•••••• (saved — type to replace)",
+        "SECRET_PLACEHOLDER": "Client secret",
+        "SAVE": "Save credentials",
+        "SAVED": "Credentials saved"
+      },
+      "MY_CONNECTIONS": "My connections",
+      "LOADING": "Loading…",
+      "CONNECT": "Connect",
+      "DISCONNECT": "Disconnect",
+      "DISCONNECT_CONFIRM": "Disconnect this calendar? Synced events remain, but stop updating.",
+      "DISCONNECTED": "Calendar disconnected",
+      "NOT_CONNECTED": "Not connected",
+      "SYNC_ENABLED": "Sync on",
+      "LAST_SYNC": "Last sync",
+      "NEVER_SYNCED": "never",
+      "AUTH_ERROR": "Could not start the authorization. Check the OAuth credentials.",
+      "ERROR": "Something went wrong. Please try again."
     }
   }
 }

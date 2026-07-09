@@ -181,6 +181,27 @@
   type: secret
 # End of Microsoft Email Channel Config
 
+# MARK: Calendar Sync Config (Inovoxa)
+# Normalmente inseridas pela tela de Configurações do Calendário; env vars de
+# mesmo nome funcionam como fallback na primeira leitura.
+- name: GOOGLE_CALENDAR_CLIENT_ID
+  display_title: 'Google Calendar Client ID'
+  description: 'OAuth client id used by the calendar sync (Google Calendar API).'
+  locked: false
+- name: GOOGLE_CALENDAR_CLIENT_SECRET
+  display_title: 'Google Calendar Client Secret'
+  locked: false
+  type: secret
+- name: MS_GRAPH_CLIENT_ID
+  display_title: 'Microsoft Graph Client ID'
+  description: 'OAuth client id used by the calendar sync (Outlook via Microsoft Graph).'
+  locked: false
+- name: MS_GRAPH_CLIENT_SECRET
+  display_title: 'Microsoft Graph Client Secret'
+  locked: false
+  type: secret
+# End of Calendar Sync Config
+
 # MARK: Captain Config
 - name: CAPTAIN_OPEN_AI_API_KEY
   display_title: 'OpenAI API Key'

@@ -27,6 +27,7 @@ import security from './security/security.routes';
 import conversationWorkflow from './conversationWorkflow/conversationWorkflow.routes';
 import captain from './captain/captain.routes';
 import booking from './booking/booking.routes';
+import calendarSettings from './calendar/calendar.routes';
 
 export default {
   routes: [
@@ -69,5 +70,6 @@ export default {
     ...conversationWorkflow.routes,
     ...captain.routes,
     ...booking.routes,
+    ...calendarSettings.routes,
   ],
 };

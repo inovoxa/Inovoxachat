@@ -328,6 +328,12 @@ Rails.application.routes.draw do
 
           resources :calendar_events, only: [:index, :show, :create, :update, :destroy]
 
+          namespace :calendar do
+            resource :oauth_config, only: [:show, :update]
+            resources :authorizations, only: [:create]
+            resources :connections, only: [:index, :update, :destroy]
+          end
+
           resources :booking_pages, only: [:index, :show, :create, :update, :destroy]
 
           resources :notifications, only: [:index, :update, :destroy] do
@@ -683,6 +689,9 @@ Rails.application.routes.draw do
   post 'webhooks/instagram', to: 'webhooks/instagram#events'
   post 'webhooks/tiktok', to: 'webhooks/tiktok#events'
   post 'webhooks/shopify', to: 'webhooks/shopify#events'
+  # Webhooks de sync do módulo Calendário (Google push channel / Graph subscription).
+  post 'webhooks/calendar/google', to: 'webhooks/calendar_google#process_payload'
+  post 'webhooks/calendar/outlook', to: 'webhooks/calendar_outlook#process_payload'
 
   namespace :twitter do
     resource :callback, only: [:show]
@@ -710,6 +719,9 @@ Rails.application.routes.draw do
 
   get 'microsoft/callback', to: 'microsoft/callbacks#show'
   get 'google/callback', to: 'google/callbacks#show'
+  # Callbacks OAuth do módulo Calendário (sync Google/Outlook).
+  get 'calendar/google/callback', to: 'calendar/google_callbacks#show'
+  get 'calendar/microsoft/callback', to: 'calendar/microsoft_callbacks#show'
   get 'instagram/callback', to: 'instagram/callbacks#show'
   get 'tiktok/callback', to: 'tiktok/callbacks#show'
   get 'notion/callback', to: 'notion/callbacks#show'
