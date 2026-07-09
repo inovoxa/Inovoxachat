@@ -21,6 +21,7 @@ class PipelineStage < ApplicationRecord
   has_many :conversations, dependent: :nullify
   has_many :contacts, dependent: :nullify
   has_many :calendar_events, dependent: :nullify
+  has_many :booking_pages, foreign_key: :default_pipeline_stage_id, dependent: :nullify, inverse_of: :default_pipeline_stage
 
   # Espelha o enum de status da Conversation; o card migra para cá quando a
   # conversa assume o status correspondente. nil = sem mapeamento.

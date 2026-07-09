@@ -10,6 +10,7 @@ import attributes from './modules/attributes';
 import auditlogs from './modules/auditlogs';
 import auth from './modules/auth';
 import automations from './modules/automations';
+import bookingPages from './modules/bookingPages';
 import bulkActions from './modules/bulkActions';
 import calendarEvents from './modules/calendarEvents';
 import campaigns from './modules/campaigns';
@@ -77,6 +78,7 @@ export default createStore({
     auditlogs,
     auth,
     automations,
+    bookingPages,
     bulkActions,
     calendarEvents,
     campaigns,

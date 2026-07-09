@@ -1,0 +1,25 @@
+<% when_local = @booking_request.start_time.in_time_zone(@page.timezone).strftime('%d/%m/%Y %H:%M') %>
+<!DOCTYPE html>
+<html>
+  <body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2d3d;">
+    <p><%= t('booking.mailer.confirmation.greeting', name: @booking_request.guest_name) %></p>
+    <p><%= t('booking.mailer.confirmation.body', page: @page.name) %></p>
+    <table style="border-collapse: collapse;">
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.when') %></strong></td>
+        <td style="padding: 4px 8px;"><%= when_local %> (<%= @page.timezone %>)</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.duration') %></strong></td>
+        <td style="padding: 4px 8px;"><%= @page.duration_minutes %> min</td>
+      </tr>
+      <% if @booking_request.notes.present? %>
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.notes') %></strong></td>
+        <td style="padding: 4px 8px;"><%= @booking_request.notes %></td>
+      </tr>
+      <% end %>
+    </table>
+    <p style="color: #64748b; font-size: 12px;"><%= t('booking.mailer.confirmation.ics_hint') %></p>
+  </body>
+</html>

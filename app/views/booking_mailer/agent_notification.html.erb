@@ -1,0 +1,29 @@
+<% when_local = @booking_request.start_time.in_time_zone(@page.timezone).strftime('%d/%m/%Y %H:%M') %>
+<!DOCTYPE html>
+<html>
+  <body style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: #1f2d3d;">
+    <p><%= t('booking.mailer.agent.body', page: @page.name) %></p>
+    <table style="border-collapse: collapse;">
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.guest') %></strong></td>
+        <td style="padding: 4px 8px;"><%= @booking_request.guest_name %> (<%= @booking_request.guest_email %>)</td>
+      </tr>
+      <% if @booking_request.guest_phone.present? %>
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.phone') %></strong></td>
+        <td style="padding: 4px 8px;"><%= @booking_request.guest_phone %></td>
+      </tr>
+      <% end %>
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.when') %></strong></td>
+        <td style="padding: 4px 8px;"><%= when_local %> (<%= @page.timezone %>)</td>
+      </tr>
+      <% if @booking_request.notes.present? %>
+      <tr>
+        <td style="padding: 4px 8px;"><strong><%= t('booking.mailer.labels.notes') %></strong></td>
+        <td style="padding: 4px 8px;"><%= @booking_request.notes %></td>
+      </tr>
+      <% end %>
+    </table>
+  </body>
+</html>

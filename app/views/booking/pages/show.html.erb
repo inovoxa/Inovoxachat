@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= @booking_page.name %></title>
+    <%= csrf_meta_tags %>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      window.bookingConfig = {
+        slug: <%= raw @booking_page.slug.to_json %>,
+        name: <%= raw @booking_page.name.to_json %>
+      }
+    </script>
+    <%= vite_client_tag %>
+    <%= vite_javascript_tag 'booking' %>
+  </head>
+  <body>
+    <div id="app"></div>
+    <%= yield %>
+  </body>
+</html>

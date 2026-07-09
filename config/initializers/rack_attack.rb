@@ -209,6 +209,16 @@ class Rack::Attack
     match_data[:account_id] if match_data.present?
   end
 
+  ## Prevent scraping of public booking availability ##
+  throttle('public/booking_pages/available_slots', limit: 60, period: 1.minute) do |req|
+    req.ip if req.path.match?(%r{\A/public/api/v1/booking_pages/[^/]+/available_slots})
+  end
+
+  ## Prevent spam of public booking creation ##
+  throttle('public/booking_pages/bookings', limit: 5, period: 1.hour) do |req|
+    req.ip if req.post? && req.path.match?(%r{\A/public/api/v1/booking_pages/[^/]+/bookings\z})
+  end
+
   ## Prevent abuse of contact search api
   throttle('/api/v1/accounts/:account_id/contacts/search', limit: ENV.fetch('RATE_LIMIT_CONTACT_SEARCH', '100').to_i, period: 1.minute) do |req|
     match_data = %r{/api/v1/accounts/(?<account_id>\d+)/contacts/search}.match(req.path)

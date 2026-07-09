@@ -31,6 +31,27 @@
 
 en:
   hello: 'Hello world'
+  booking:
+    initial_message: |-
+      New booking via "%{page}".
+      Guest: %{name}
+      When: %{datetime} (%{timezone})
+      Notes: %{notes}
+    mailer:
+      labels:
+        when: 'When'
+        duration: 'Duration'
+        notes: 'Notes'
+        guest: 'Guest'
+        phone: 'Phone'
+      confirmation:
+        subject: 'Your booking with %{page} is confirmed'
+        greeting: 'Hi %{name},'
+        body: 'Your booking via "%{page}" is confirmed. Details below:'
+        ics_hint: 'Add the attached invite (.ics) to your calendar.'
+      agent:
+        subject: 'New booking from %{guest}'
+        body: 'A new booking was made through "%{page}".'
   inbox:
     reauthorization:
       success: 'Channel reauthorized successfully'
@@ -61,6 +82,8 @@ en:
       presence: must not be blank
       invalid: is invalid
       end_after_start: must be after the start time
+    booking:
+      slot_unavailable: The selected time is no longer available. Please pick another slot.
     webhook:
       invalid: Invalid events
     signup:

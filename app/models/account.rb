@@ -93,6 +93,7 @@ class Account < ApplicationRecord
   has_many :pipelines, dependent: :destroy_async
   has_many :pipeline_stages, through: :pipelines
   has_many :calendar_events, dependent: :destroy_async
+  has_many :booking_pages, dependent: :destroy_async
   has_many :portals, dependent: :destroy_async, class_name: '::Portal'
   has_many :scheduled_messages, dependent: :destroy_async
   has_many :sms_channels, dependent: :destroy_async, class_name: '::Channel::Sms'

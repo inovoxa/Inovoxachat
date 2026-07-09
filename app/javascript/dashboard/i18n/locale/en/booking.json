@@ -1,0 +1,41 @@
+{
+  "BOOKING": {
+    "HEADER": "Booking pages",
+    "DESCRIPTION": "Public scheduling pages that create a conversation and a calendar event on booking.",
+    "NEW": "New page",
+    "LOADING": "Loading…",
+    "EMPTY": "No booking pages yet.",
+    "INACTIVE": "inactive",
+    "COPY_LINK": "Copy link",
+    "LINK_COPIED": "Public link copied",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "DELETE_CONFIRM": "Delete the booking page \"{name}\"?",
+    "DELETED": "Booking page deleted",
+    "ERROR": "Something went wrong. Please try again.",
+    "FORM": {
+      "NEW_TITLE": "New booking page",
+      "EDIT_TITLE": "Edit booking page",
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "INBOX": "Destination inbox",
+      "OWNER": "Owner agent",
+      "DURATION": "Duration (min)",
+      "BUFFER_BEFORE": "Buffer before (min)",
+      "BUFFER_AFTER": "Buffer after (min)",
+      "MIN_NOTICE": "Min notice (h)",
+      "MAX_ADVANCE": "Max advance (days)",
+      "TIMEZONE": "Timezone",
+      "PIPELINE": "Pipeline",
+      "STAGE": "Default stage",
+      "ACTIVE": "Active",
+      "AVAILABILITY": "Weekly availability",
+      "ADD_RANGE": "Add range",
+      "SAVE": "Save",
+      "CANCEL": "Cancel",
+      "NAME_REQUIRED": "Name is required.",
+      "INBOX_REQUIRED": "Select a destination inbox.",
+      "OWNER_REQUIRED": "Select an owner agent."
+    }
+  }
+}

@@ -35,6 +35,8 @@ Rails.application.routes.draw do
     namespace :survey do
       resources :responses, only: [:show]
     end
+    # Página pública de agendamento (SPA standalone estilo survey).
+    get 'booking/:slug', to: 'booking/pages#show', as: :public_booking_page
     resource :slack_uploads, only: [:show]
   end
 
@@ -325,6 +327,8 @@ Rails.application.routes.draw do
           end
 
           resources :calendar_events, only: [:index, :show, :create, :update, :destroy]
+
+          resources :booking_pages, only: [:index, :show, :create, :update, :destroy]
 
           resources :notifications, only: [:index, :update, :destroy] do
             collection do
@@ -630,6 +634,16 @@ Rails.application.routes.draw do
         end
 
         resources :csat_survey, only: [:show, :update]
+
+        # Agendamento público (estilo Calendly), sem sessão.
+        resources :booking_pages, only: [:show], param: :slug do
+          member do
+            get :available_slots
+            post :bookings
+          end
+        end
+        get 'booking_pages/:slug/bookings/:booking_id/ics',
+            to: 'booking_pages#ics', as: :public_booking_ics
       end
     end
   end

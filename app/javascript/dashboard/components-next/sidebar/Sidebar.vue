@@ -907,6 +907,12 @@ const menuItems = computed(() => {
           to: accountScopedRoute('sla_list'),
         },
         {
+          name: 'Settings Booking',
+          label: t('SIDEBAR.BOOKING'),
+          icon: 'i-lucide-calendar-clock',
+          to: accountScopedRoute('booking_pages_index'),
+        },
+        {
           name: 'Conversation Workflow',
           label: t('SIDEBAR.CONVERSATION_WORKFLOW'),
           icon: 'i-lucide-workflow',

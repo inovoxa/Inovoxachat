@@ -96,6 +96,7 @@ class User < ApplicationRecord
   has_many :conversation_participants, dependent: :destroy_async
   has_many :participating_conversations, through: :conversation_participants, source: :conversation
   has_many :calendar_events, dependent: :destroy_async
+  has_many :booking_pages, dependent: :destroy_async
 
   has_many :inbox_members, dependent: :destroy_async
   has_many :inboxes, through: :inbox_members, source: :inbox

@@ -68,6 +68,7 @@ class Inbox < ApplicationRecord
   has_many :pipeline_inboxes, dependent: :destroy_async
   has_many :conversations, dependent: :destroy_async
   has_many :messages, dependent: :destroy_async
+  has_many :booking_pages, dependent: :destroy_async
 
   has_one :inbox_assignment_policy, dependent: :destroy
   has_one :assignment_policy, through: :inbox_assignment_policy

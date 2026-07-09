@@ -1,0 +1,41 @@
+{
+  "BOOKING": {
+    "HEADER": "Páginas de agendamento",
+    "DESCRIPTION": "Páginas públicas de agendamento que criam uma conversa e um evento no calendário ao agendar.",
+    "NEW": "Nova página",
+    "LOADING": "Carregando…",
+    "EMPTY": "Nenhuma página de agendamento ainda.",
+    "INACTIVE": "inativa",
+    "COPY_LINK": "Copiar link",
+    "LINK_COPIED": "Link público copiado",
+    "EDIT": "Editar",
+    "DELETE": "Excluir",
+    "DELETE_CONFIRM": "Excluir a página de agendamento \"{name}\"?",
+    "DELETED": "Página de agendamento excluída",
+    "ERROR": "Algo deu errado. Tente novamente.",
+    "FORM": {
+      "NEW_TITLE": "Nova página de agendamento",
+      "EDIT_TITLE": "Editar página de agendamento",
+      "NAME": "Nome",
+      "DESCRIPTION": "Descrição",
+      "INBOX": "Caixa de entrada de destino",
+      "OWNER": "Agente responsável",
+      "DURATION": "Duração (min)",
+      "BUFFER_BEFORE": "Intervalo antes (min)",
+      "BUFFER_AFTER": "Intervalo depois (min)",
+      "MIN_NOTICE": "Antecedência mín. (h)",
+      "MAX_ADVANCE": "Antecedência máx. (dias)",
+      "TIMEZONE": "Fuso horário",
+      "PIPELINE": "Funil",
+      "STAGE": "Estágio inicial",
+      "ACTIVE": "Ativa",
+      "AVAILABILITY": "Disponibilidade semanal",
+      "ADD_RANGE": "Adicionar faixa",
+      "SAVE": "Salvar",
+      "CANCEL": "Cancelar",
+      "NAME_REQUIRED": "O nome é obrigatório.",
+      "INBOX_REQUIRED": "Selecione uma caixa de entrada de destino.",
+      "OWNER_REQUIRED": "Selecione um agente responsável."
+    }
+  }
+}

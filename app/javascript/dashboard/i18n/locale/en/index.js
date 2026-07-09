@@ -4,6 +4,7 @@ import agentMgmt from './agentMgmt.json';
 import attributesMgmt from './attributesMgmt.json';
 import auditLogs from './auditLogs.json';
 import automation from './automation.json';
+import booking from './booking.json';
 import bulkActions from './bulkActions.json';
 import calendar from './calendar.json';
 import campaign from './campaign.json';
@@ -74,6 +75,7 @@ export default {
   ...integrations,
   ...kanban,
   ...calendar,
+  ...booking,
   ...labelsMgmt,
   ...login,
   ...macros,
