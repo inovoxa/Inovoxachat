@@ -7,6 +7,7 @@ import BackButton from '../BackButton.vue';
 import InboxName from '../InboxName.vue';
 import MoreActions from './MoreActions.vue';
 import KanbanConversationActions from './KanbanConversationActions.vue';
+import CalendarConversationAction from './CalendarConversationAction.vue';
 import Avatar from 'next/avatar/Avatar.vue';
 import SLACardLabel from './components/SLACardLabel.vue';
 import ConversationCallButton from './ConversationCallButton.vue';
@@ -177,6 +178,11 @@ const copyConversationId = async () => {
       <KanbanConversationActions
         :conversation-id="currentChat.id"
         :contact-name="currentChat.meta?.sender?.name"
+      />
+      <CalendarConversationAction
+        :conversation-id="currentChat.id"
+        :contact-id="currentChat.meta?.sender?.id"
+        :pipeline-stage-id="currentChat.pipeline_stage_id"
       />
       <MoreActions :conversation-id="currentChat.id" />
     </div>

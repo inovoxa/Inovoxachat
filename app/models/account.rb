@@ -92,6 +92,7 @@ class Account < ApplicationRecord
   # exige que a associação intermediária já esteja definida.
   has_many :pipelines, dependent: :destroy_async
   has_many :pipeline_stages, through: :pipelines
+  has_many :calendar_events, dependent: :destroy_async
   has_many :portals, dependent: :destroy_async, class_name: '::Portal'
   has_many :scheduled_messages, dependent: :destroy_async
   has_many :sms_channels, dependent: :destroy_async, class_name: '::Channel::Sms'

@@ -511,6 +511,13 @@ const menuItems = computed(() => {
       activeOn: ['kanban_view'],
     },
     {
+      name: 'Calendar',
+      icon: 'i-lucide-calendar',
+      label: t('SIDEBAR.CALENDAR'),
+      to: accountScopedRoute('calendar_view'),
+      activeOn: ['calendar_view'],
+    },
+    {
       name: 'Captain',
       icon: 'i-woot-captain',
       label: t('SIDEBAR.CAPTAIN'),

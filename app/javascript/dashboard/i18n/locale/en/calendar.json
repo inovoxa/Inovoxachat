@@ -1,0 +1,76 @@
+{
+  "CALENDAR": {
+    "HEADER": "Calendar",
+    "LOADING": "Loading events…",
+    "NEW_EVENT": "New event",
+    "VIEWS": {
+      "TODAY": "Today",
+      "MONTH": "Month",
+      "WEEK": "Week",
+      "DAY": "Day",
+      "AGENDA": "Agenda"
+    },
+    "FILTERS": {
+      "TITLE": "Filters",
+      "AGENTS": "Agents",
+      "PIPELINES": "Pipelines",
+      "CLEAR": "Clear filters"
+    },
+    "SOURCE": {
+      "INTERNAL": "Internal",
+      "GOOGLE": "Google Calendar",
+      "OUTLOOK": "Outlook"
+    },
+    "MODAL": {
+      "NEW_TITLE": "New event",
+      "EDIT_TITLE": "Edit event",
+      "SERIES_NOTICE": "You are editing a recurring series. Changes apply to every occurrence.",
+      "EXTERNAL_NOTICE": "This event is synced from {source} and is read-only here. Edit it in the provider.",
+      "FIELDS": {
+        "TITLE": "Title",
+        "TITLE_PLACEHOLDER": "Event title",
+        "DESCRIPTION": "Description",
+        "LOCATION": "Location",
+        "START": "Start",
+        "END": "End",
+        "ALL_DAY": "All day",
+        "TIMEZONE": "Timezone",
+        "STATUS": "Status",
+        "RECURRENCE": "Recurrence",
+        "ATTENDEES": "Attendees",
+        "ATTENDEE_EMAIL": "Email",
+        "ATTENDEE_NAME": "Name",
+        "ADD_ATTENDEE": "Add attendee",
+        "CONVERSATION": "Linked conversation",
+        "CONTACT": "Linked contact",
+        "PIPELINE": "Pipeline",
+        "STAGE": "Stage"
+      },
+      "STATUS": {
+        "CONFIRMED": "Confirmed",
+        "TENTATIVE": "Tentative",
+        "CANCELLED": "Cancelled"
+      },
+      "RECURRENCE_PRESETS": {
+        "NONE": "Does not repeat",
+        "DAILY": "Daily",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly",
+        "CUSTOM": "Custom (RRULE)"
+      },
+      "RRULE_PLACEHOLDER": "FREQ=WEEKLY;BYDAY=MO,WE",
+      "SAVE": "Save",
+      "DELETE": "Delete",
+      "CANCEL": "Cancel",
+      "DELETE_CONFIRM": "Delete this event?",
+      "SAVED": "Event saved",
+      "DELETED": "Event deleted",
+      "ERROR": "Something went wrong. Please try again.",
+      "REQUIRED_ERROR": "Title, start and end are required.",
+      "END_BEFORE_START_ERROR": "End must be after start."
+    },
+    "CONVERSATION_ACTION": {
+      "SCHEDULE": "Schedule event"
+    }
+  }
+}

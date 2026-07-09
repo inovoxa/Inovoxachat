@@ -5,6 +5,7 @@ import attributesMgmt from './attributesMgmt.json';
 import auditLogs from './auditLogs.json';
 import automation from './automation.json';
 import bulkActions from './bulkActions.json';
+import calendar from './calendar.json';
 import campaign from './campaign.json';
 import cannedMgmt from './cannedMgmt.json';
 import chatlist from './chatlist.json';
@@ -72,6 +73,7 @@ export default {
   ...integrationApps,
   ...integrations,
   ...kanban,
+  ...calendar,
   ...labelsMgmt,
   ...login,
   ...macros,

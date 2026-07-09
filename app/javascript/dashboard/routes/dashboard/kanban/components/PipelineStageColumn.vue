@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n';
 import Draggable from 'vuedraggable';
-import { dynamicTime } from 'shared/helpers/timeHelper';
+import { dynamicTime, messageTimestamp } from 'shared/helpers/timeHelper';
 
 defineProps({
   column: {
@@ -23,6 +23,13 @@ const PRIORITY_CLASS = {
 
 const initials = name => (name || '?').trim().charAt(0).toUpperCase();
 const relativeTime = ts => (ts ? dynamicTime(ts) : '');
+
+// Tooltip do badge de calendário: título + data/hora do próximo evento.
+const nextEventTooltip = event => {
+  if (!event) return '';
+  const when = messageTimestamp(event.start_time, 'MMM d, yyyy · h:mm a');
+  return `${event.title} · ${when}`;
+};
 </script>
 
 <template>
@@ -107,11 +114,19 @@ const relativeTime = ts => (ts ? dynamicTime(ts) : '');
             </div>
             <div class="flex items-center justify-between">
               <span class="text-xs text-n-slate-11">#{{ element.id }}</span>
-              <span
-                class="text-xs px-1.5 py-0.5 rounded-full bg-n-slate-4 text-n-slate-11"
-              >
-                {{ element.status }}
-              </span>
+              <div class="flex items-center gap-1.5">
+                <span
+                  v-if="element.next_calendar_event"
+                  v-tooltip.top="nextEventTooltip(element.next_calendar_event)"
+                  class="i-lucide-calendar-clock w-3.5 h-3.5 text-woot-500"
+                  @click.stop
+                />
+                <span
+                  class="text-xs px-1.5 py-0.5 rounded-full bg-n-slate-4 text-n-slate-11"
+                >
+                  {{ element.status }}
+                </span>
+              </div>
             </div>
             <div class="flex items-center justify-between gap-2">
               <span

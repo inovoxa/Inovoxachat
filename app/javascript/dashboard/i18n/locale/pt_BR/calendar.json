@@ -1,0 +1,76 @@
+{
+  "CALENDAR": {
+    "HEADER": "Calendário",
+    "LOADING": "Carregando eventos…",
+    "NEW_EVENT": "Novo evento",
+    "VIEWS": {
+      "TODAY": "Hoje",
+      "MONTH": "Mês",
+      "WEEK": "Semana",
+      "DAY": "Dia",
+      "AGENDA": "Agenda"
+    },
+    "FILTERS": {
+      "TITLE": "Filtros",
+      "AGENTS": "Agentes",
+      "PIPELINES": "Funis",
+      "CLEAR": "Limpar filtros"
+    },
+    "SOURCE": {
+      "INTERNAL": "Interno",
+      "GOOGLE": "Google Calendar",
+      "OUTLOOK": "Outlook"
+    },
+    "MODAL": {
+      "NEW_TITLE": "Novo evento",
+      "EDIT_TITLE": "Editar evento",
+      "SERIES_NOTICE": "Você está editando uma série recorrente. As alterações valem para todas as ocorrências.",
+      "EXTERNAL_NOTICE": "Este evento é sincronizado do {source} e é somente leitura aqui. Edite-o no provedor.",
+      "FIELDS": {
+        "TITLE": "Título",
+        "TITLE_PLACEHOLDER": "Título do evento",
+        "DESCRIPTION": "Descrição",
+        "LOCATION": "Local",
+        "START": "Início",
+        "END": "Término",
+        "ALL_DAY": "Dia inteiro",
+        "TIMEZONE": "Fuso horário",
+        "STATUS": "Status",
+        "RECURRENCE": "Recorrência",
+        "ATTENDEES": "Participantes",
+        "ATTENDEE_EMAIL": "E-mail",
+        "ATTENDEE_NAME": "Nome",
+        "ADD_ATTENDEE": "Adicionar participante",
+        "CONVERSATION": "Conversa vinculada",
+        "CONTACT": "Contato vinculado",
+        "PIPELINE": "Funil",
+        "STAGE": "Estágio"
+      },
+      "STATUS": {
+        "CONFIRMED": "Confirmado",
+        "TENTATIVE": "Provisório",
+        "CANCELLED": "Cancelado"
+      },
+      "RECURRENCE_PRESETS": {
+        "NONE": "Não se repete",
+        "DAILY": "Diariamente",
+        "WEEKLY": "Semanalmente",
+        "MONTHLY": "Mensalmente",
+        "CUSTOM": "Personalizado (RRULE)"
+      },
+      "RRULE_PLACEHOLDER": "FREQ=WEEKLY;BYDAY=MO,WE",
+      "SAVE": "Salvar",
+      "DELETE": "Excluir",
+      "CANCEL": "Cancelar",
+      "DELETE_CONFIRM": "Excluir este evento?",
+      "SAVED": "Evento salvo",
+      "DELETED": "Evento excluído",
+      "ERROR": "Algo deu errado. Tente novamente.",
+      "REQUIRED_ERROR": "Título, início e término são obrigatórios.",
+      "END_BEFORE_START_ERROR": "O término deve ser após o início."
+    },
+    "CONVERSATION_ACTION": {
+      "SCHEDULE": "Agendar evento"
+    }
+  }
+}

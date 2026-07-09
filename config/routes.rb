@@ -324,6 +324,8 @@ Rails.application.routes.draw do
             end
           end
 
+          resources :calendar_events, only: [:index, :show, :create, :update, :destroy]
+
           resources :notifications, only: [:index, :update, :destroy] do
             collection do
               post :read_all

@@ -20,6 +20,7 @@ class PipelineStage < ApplicationRecord
 
   has_many :conversations, dependent: :nullify
   has_many :contacts, dependent: :nullify
+  has_many :calendar_events, dependent: :nullify
 
   # Espelha o enum de status da Conversation; o card migra para cá quando a
   # conversa assume o status correspondente. nil = sem mapeamento.

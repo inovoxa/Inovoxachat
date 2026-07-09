@@ -166,6 +166,9 @@ gem 'html2text'
 # to calculate working hours
 gem 'working_hours'
 
+# Calendário (Inovoxa): expansão de recorrência RRULE dos eventos.
+gem 'ice_cube'
+
 # full text search for articles
 gem 'pg_search'
 

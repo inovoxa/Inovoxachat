@@ -11,6 +11,16 @@ json.payload do
       contacts = contacts.where(id: ContactInbox.where(inbox_id: @inbox_ids).select(:contact_id))
     end
 
+    # Próximo evento futuro por conversa (uma consulta por estágio, sem N+1).
+    # Nota: recorrentes cujo mestre já passou não aparecem no badge (MVP).
+    conversation_ids = conversations.map(&:id)
+    next_events_by_conversation = CalendarEvent
+                                  .where(conversation_id: conversation_ids, status: %i[confirmed tentative])
+                                  .where('start_time > ?', Time.current)
+                                  .order(:start_time)
+                                  .group_by(&:conversation_id)
+                                  .transform_values(&:first)
+
     json.id stage.id
     json.name stage.name
     json.color stage.color
@@ -44,6 +54,14 @@ json.payload do
           json.id conversation.assignee.id
           json.name conversation.assignee.name
           json.thumbnail conversation.assignee.avatar_url
+        end
+      end
+      next_event = next_events_by_conversation[conversation.id]
+      if next_event
+        json.next_calendar_event do
+          json.id next_event.id
+          json.title next_event.title
+          json.start_time next_event.start_time
         end
       end
     end
