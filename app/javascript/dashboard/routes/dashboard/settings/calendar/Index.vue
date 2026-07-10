@@ -112,6 +112,22 @@ const toggleSync = async connection => {
   }
 };
 
+const syncingNow = ref(null);
+
+const syncNow = async connection => {
+  syncingNow.value = connection.id;
+  try {
+    await CalendarConnectionsAPI.syncNow(connection.id);
+    useAlert(t('CALENDAR.INTEGRATIONS.SYNC_QUEUED'));
+    // Dá tempo do job rodar e recarrega para exibir resultado/erro.
+    setTimeout(loadConnections, 8000);
+  } catch (e) {
+    useAlert(t('CALENDAR.INTEGRATIONS.ERROR'));
+  } finally {
+    syncingNow.value = null;
+  }
+};
+
 const calendarIdChanged = connection =>
   (calendarIdDrafts[connection.id] || '').trim() !==
   (connection.external_calendar_id || '');
@@ -266,6 +282,13 @@ const lastSyncLabel = connection => {
               {{ t('CALENDAR.INTEGRATIONS.SYNC_ENABLED') }}
             </label>
             <button
+              class="px-2.5 py-1 text-xs rounded-lg border border-n-weak text-n-slate-12 hover:bg-n-alpha-black2 disabled:opacity-50"
+              :disabled="syncingNow === connectionByProvider(provider).id"
+              @click="syncNow(connectionByProvider(provider))"
+            >
+              {{ t('CALENDAR.INTEGRATIONS.SYNC_NOW') }}
+            </button>
+            <button
               class="text-xs text-red-500 hover:underline"
               @click="disconnect(connectionByProvider(provider))"
             >
@@ -282,6 +305,15 @@ const lastSyncLabel = connection => {
           </button>
         </div>
         </div>
+
+        <!-- Última falha de sincronização (limpa quando um sync completa). -->
+        <p
+          v-if="connectionByProvider(provider)?.last_sync_error"
+          class="text-xs text-red-500 rounded-lg bg-red-500/10 px-3 py-2 break-all"
+        >
+          {{ t('CALENDAR.INTEGRATIONS.LAST_ERROR') }}:
+          {{ connectionByProvider(provider).last_sync_error }}
+        </p>
 
         <!-- ID da agenda alvo (vazio = agenda principal). Trocar ressincroniza do zero. -->
         <div

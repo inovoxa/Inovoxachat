@@ -26,6 +26,10 @@ class CalendarConnectionsAPI extends ApiClient {
       connection: { sync_enabled: syncEnabled },
     });
   }
+
+  syncNow(id) {
+    return axios.post(`${this.url}/${id}/sync`);
+  }
 }
 
 export default new CalendarConnectionsAPI();

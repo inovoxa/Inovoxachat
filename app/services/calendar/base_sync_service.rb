@@ -24,7 +24,12 @@ class Calendar::BaseSyncService
 
     pull
     push
-    @connection.update!(last_synced_at: @started_at)
+    @connection.update!(last_synced_at: @started_at, last_sync_error: nil)
+  rescue StandardError => e
+    # Persiste a falha para a tela de integrações; relança para o Sidekiq
+    # aplicar os retries normais.
+    @connection.update!(last_sync_error: e.message.to_s.truncate(500))
+    raise
   end
 
   private

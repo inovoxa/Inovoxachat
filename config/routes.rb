@@ -331,7 +331,11 @@ Rails.application.routes.draw do
           namespace :calendar do
             resource :oauth_config, only: [:show, :update]
             resources :authorizations, only: [:create]
-            resources :connections, only: [:index, :update, :destroy]
+            resources :connections, only: [:index, :update, :destroy] do
+              member do
+                post :sync
+              end
+            end
           end
 
           resources :booking_pages, only: [:index, :show, :create, :update, :destroy]

@@ -1,6 +1,6 @@
 # Conexões de calendário do usuário atual (cada um gerencia só as suas).
 class Api::V1::Accounts::Calendar::ConnectionsController < Api::V1::Accounts::BaseController
-  before_action :fetch_connection, only: [:update, :destroy]
+  before_action :fetch_connection, only: [:update, :destroy, :sync]
 
   def index
     render json: { payload: scoped_connections.map { |connection| serialize(connection) } }
@@ -37,6 +37,12 @@ class Api::V1::Accounts::Calendar::ConnectionsController < Api::V1::Accounts::Ba
     head :ok
   end
 
+  # Sincronização manual imediata (o resultado/erro aparece em last_sync_error).
+  def sync
+    Calendar::SyncEventsJob.perform_later(@connection.id)
+    head :ok
+  end
+
   private
 
   def scoped_connections
@@ -70,6 +76,7 @@ class Api::V1::Accounts::Calendar::ConnectionsController < Api::V1::Accounts::Ba
       sync_enabled: connection.sync_enabled,
       external_calendar_id: connection.external_calendar_id,
       last_synced_at: connection.last_synced_at,
+      last_sync_error: connection.last_sync_error,
       webhook_expires_at: connection.webhook_expires_at,
       expires_at: connection.expires_at
     }
