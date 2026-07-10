@@ -92,7 +92,7 @@
       "MY_CONNECTIONS": "My connections",
       "CALENDAR_ID": "Calendar ID (optional)",
       "CALENDAR_ID_PLACEHOLDER": "primary (default calendar)",
-      "CALENDAR_ID_HINT": "Leave blank to sync the account's main calendar. To sync a specific calendar, paste its ID (Google: calendar settings → \"Integrate calendar\" → Calendar ID, e.g. xxxx@group.calendar.google.com). Changing it restarts the sync on the new calendar.",
+      "CALENDAR_ID_HINT": "Leave blank to sync the account's main calendar. To sync a specific calendar, paste its ID (Google: calendar settings → \"Integrate calendar\" → Calendar ID, e.g. xxxx{'@'}group.calendar.google.com). Changing it restarts the sync on the new calendar.",
       "CALENDAR_ID_SAVE": "Save",
       "CALENDAR_ID_SAVED": "Calendar updated — resyncing from scratch",
       "LOADING": "Loading…",

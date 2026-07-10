@@ -92,7 +92,7 @@
       "MY_CONNECTIONS": "Minhas conexões",
       "CALENDAR_ID": "ID da agenda (opcional)",
       "CALENDAR_ID_PLACEHOLDER": "primary (agenda principal)",
-      "CALENDAR_ID_HINT": "Deixe vazio para sincronizar a agenda principal da conta. Para uma agenda específica, cole o ID dela (Google: configurações da agenda → \"Integrar agenda\" → ID da agenda, ex.: xxxx@group.calendar.google.com). Trocar o ID reinicia a sincronização na agenda nova.",
+      "CALENDAR_ID_HINT": "Deixe vazio para sincronizar a agenda principal da conta. Para uma agenda específica, cole o ID dela (Google: configurações da agenda → \"Integrar agenda\" → ID da agenda, ex.: xxxx{'@'}group.calendar.google.com). Trocar o ID reinicia a sincronização na agenda nova.",
       "CALENDAR_ID_SAVE": "Salvar",
       "CALENDAR_ID_SAVED": "Agenda atualizada — ressincronizando do zero",
       "LOADING": "Carregando…",
