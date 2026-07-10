@@ -3,6 +3,8 @@
     "HEADER": "Calendário",
     "LOADING": "Carregando eventos…",
     "NEW_EVENT": "Novo evento",
+    "NO_EVENTS": "Nenhum evento para exibir",
+    "SETTINGS_LINK": "Configurações de sincronização",
     "VIEWS": {
       "TODAY": "Hoje",
       "MONTH": "Mês",

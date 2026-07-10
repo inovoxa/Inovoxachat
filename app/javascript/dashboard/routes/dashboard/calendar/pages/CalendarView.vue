@@ -1,17 +1,33 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import allLocales from '@fullcalendar/core/locales-all';
 import CalendarEventModal from '../components/CalendarEventModal.vue';
 import CalendarSidebarFilters from '../components/CalendarSidebarFilters.vue';
 
 const store = useStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const route = useRoute();
+const router = useRouter();
+
+// Locale do FullCalendar acompanha o idioma da UI ('pt_BR' -> 'pt-br').
+const calendarLocale = computed(() =>
+  (locale.value || 'en').toLowerCase().replace('_', '-')
+);
+
+const openSettings = () => {
+  router.push({
+    name: 'calendar_integrations_index',
+    params: { accountId: route.params.accountId },
+  });
+};
 
 const records = useMapGetter('calendarEvents/getCalendarEvents');
 const uiFlags = useMapGetter('calendarEvents/getUIFlags');
@@ -69,18 +85,22 @@ const loadRange = async ({ startStr, endStr }) => {
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
+  locales: allLocales,
+  locale: calendarLocale.value,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
     right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
   },
   buttonText: {
-    today: t('CALENDAR.VIEWS.TODAY') || 'today',
+    today: t('CALENDAR.VIEWS.TODAY'),
     month: t('CALENDAR.VIEWS.MONTH'),
     week: t('CALENDAR.VIEWS.WEEK'),
     day: t('CALENDAR.VIEWS.DAY'),
     list: t('CALENDAR.VIEWS.AGENDA'),
   },
+  noEventsText: t('CALENDAR.NO_EVENTS'),
+  allDayText: t('CALENDAR.MODAL.FIELDS.ALL_DAY'),
   height: '100%',
   nowIndicator: true,
   events: calendarEvents.value,
@@ -140,6 +160,13 @@ const onSaved = async () => {
             {{ t('CALENDAR.LOADING') }}
           </span>
           <button
+            v-tooltip.bottom="t('CALENDAR.SETTINGS_LINK')"
+            class="px-2 py-1.5 rounded-lg border border-n-weak text-n-slate-11 hover:text-n-slate-12 hover:bg-n-alpha-black2"
+            @click="openSettings"
+          >
+            <span class="i-lucide-settings block w-4 h-4" />
+          </button>
+          <button
             class="px-3 py-1.5 text-sm rounded-lg bg-woot-500 text-white hover:bg-woot-600"
             @click="openNewEvent"
           >
@@ -164,19 +191,47 @@ const onSaved = async () => {
 </template>
 
 <style scoped>
-/* Escopar overrides para não brigar com o reset do Tailwind. */
+/* Overrides escopados usando os tokens do tema (variam entre claro/escuro),
+   para o FullCalendar não impor os fundos brancos padrão no dark mode. */
 .calendar-wrap :deep(.fc) {
-  --fc-border-color: var(--color-border-weak, #e5e7eb);
+  --fc-border-color: rgb(var(--slate-6));
+  --fc-page-bg-color: rgb(var(--solid-1));
+  --fc-neutral-bg-color: rgb(var(--slate-3));
+  --fc-neutral-text-color: rgb(var(--slate-11));
+  --fc-list-event-hover-bg-color: rgb(var(--slate-3));
+  --fc-today-bg-color: rgb(31 147 255 / 0.08);
+  color: rgb(var(--slate-12));
   font-size: 0.85rem;
 }
 .calendar-wrap :deep(.fc .fc-button-primary) {
   background-color: transparent;
   border-color: var(--fc-border-color);
   color: inherit;
+  text-transform: capitalize;
 }
-.calendar-wrap :deep(.fc .fc-button-primary:not(:disabled).fc-button-active) {
+.calendar-wrap :deep(.fc .fc-button-primary:not(:disabled).fc-button-active),
+.calendar-wrap :deep(.fc .fc-button-primary:not(:disabled):active) {
   background-color: #1f93ff;
   border-color: #1f93ff;
   color: #fff;
+}
+/* Cabeçalho de dia da visão Agenda (list view): fundo e texto do tema. */
+.calendar-wrap :deep(.fc .fc-list-day-cushion) {
+  background-color: rgb(var(--slate-3));
+  color: rgb(var(--slate-12));
+}
+.calendar-wrap :deep(.fc .fc-list-event:hover td) {
+  background-color: rgb(var(--slate-3));
+}
+.calendar-wrap :deep(.fc .fc-list-empty) {
+  background-color: transparent;
+  color: rgb(var(--slate-11));
+}
+/* Cabeçalhos de coluna (Mês/Semana/Dia) também acompanham o tema. */
+.calendar-wrap :deep(.fc .fc-col-header-cell-cushion),
+.calendar-wrap :deep(.fc .fc-daygrid-day-number),
+.calendar-wrap :deep(.fc .fc-list-day-text),
+.calendar-wrap :deep(.fc .fc-list-day-side-text) {
+  color: rgb(var(--slate-12));
 }
 </style>
