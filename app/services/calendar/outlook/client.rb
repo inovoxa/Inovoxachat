@@ -7,9 +7,15 @@ class Calendar::Outlook::Client
     @connection = connection
   end
 
+  # Prefixo dos recursos: calendário específico quando informado, senão o padrão.
+  def calendar_base
+    calendar = @connection.external_calendar_id.presence
+    calendar ? "/me/calendars/#{ERB::Util.url_encode(calendar)}" : '/me'
+  end
+
   # calendarView/delta — primeira carga com janela [start, end]; depois via deltaLink.
   def delta_start(start_time, end_time)
-    request(:get, '/me/calendarView/delta', query: { startDateTime: start_time, endDateTime: end_time })
+    request(:get, "#{calendar_base}/calendarView/delta", query: { startDateTime: start_time, endDateTime: end_time })
   end
 
   # nextLink/deltaLink são URLs absolutas devolvidas pelo Graph.
@@ -19,22 +25,22 @@ class Calendar::Outlook::Client
   end
 
   def create_event(payload)
-    request(:post, '/me/events', body: payload)
+    request(:post, "#{calendar_base}/events", body: payload)
   end
 
   def update_event(event_id, payload)
-    request(:patch, "/me/events/#{event_id}", body: payload)
+    request(:patch, "#{calendar_base}/events/#{event_id}", body: payload)
   end
 
   def delete_event(event_id)
-    request(:delete, "/me/events/#{event_id}")
+    request(:delete, "#{calendar_base}/events/#{event_id}")
   end
 
   def create_subscription(notification_url:, client_state:, expires_at:)
     request(:post, '/subscriptions', body: {
               changeType: 'created,updated,deleted',
               notificationUrl: notification_url,
-              resource: '/me/events',
+              resource: "#{calendar_base}/events",
               expirationDateTime: expires_at.utc.iso8601,
               clientState: client_state
             })

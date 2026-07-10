@@ -8,8 +8,10 @@ class Calendar::Google::Client
     @connection = connection
   end
 
+  # ID da agenda alvo (ex.: 'abc...@group.calendar.google.com'); vazio = principal.
+  # URL-encoded porque o id contém '@' e vai no path.
   def calendar_id
-    @connection.external_calendar_id.presence || 'primary'
+    ERB::Util.url_encode(@connection.external_calendar_id.presence || 'primary')
   end
 
   # events.list — incremental via syncToken; primeira carga via timeMin.

@@ -16,6 +16,10 @@ const connections = ref([]);
 const loading = ref(true);
 const connecting = ref('');
 
+// Edição do ID da agenda alvo por conexão (vazio = agenda principal).
+const calendarIdDrafts = reactive({});
+const savingCalendarId = ref(null);
+
 // Credenciais OAuth (bloco admin). O secret é write-only: o GET só informa
 // se há um salvo (secret_present); digitar um novo valor substitui.
 const oauthConfig = reactive({
@@ -32,6 +36,9 @@ const loadConnections = async () => {
   try {
     const { data } = await CalendarConnectionsAPI.get();
     connections.value = data.payload || [];
+    connections.value.forEach(connection => {
+      calendarIdDrafts[connection.id] = connection.external_calendar_id || '';
+    });
   } catch (e) {
     connections.value = [];
   } finally {
@@ -102,6 +109,27 @@ const toggleSync = async connection => {
     await loadConnections();
   } catch (e) {
     useAlert(t('CALENDAR.INTEGRATIONS.ERROR'));
+  }
+};
+
+const calendarIdChanged = connection =>
+  (calendarIdDrafts[connection.id] || '').trim() !==
+  (connection.external_calendar_id || '');
+
+const saveCalendarId = async connection => {
+  savingCalendarId.value = connection.id;
+  try {
+    await CalendarConnectionsAPI.update(connection.id, {
+      connection: {
+        external_calendar_id: (calendarIdDrafts[connection.id] || '').trim(),
+      },
+    });
+    useAlert(t('CALENDAR.INTEGRATIONS.CALENDAR_ID_SAVED'));
+    await loadConnections();
+  } catch (e) {
+    useAlert(t('CALENDAR.INTEGRATIONS.ERROR'));
+  } finally {
+    savingCalendarId.value = null;
   }
 };
 
@@ -200,8 +228,9 @@ const lastSyncLabel = connection => {
         v-for="provider in PROVIDERS"
         v-else
         :key="provider"
-        class="flex items-center justify-between gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-4"
+        class="flex flex-col gap-3 rounded-xl border border-n-weak bg-n-solid-1 p-4"
       >
+        <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <span
             class="w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-semibold"
@@ -250,6 +279,36 @@ const lastSyncLabel = connection => {
             @click="connect(provider)"
           >
             {{ t('CALENDAR.INTEGRATIONS.CONNECT') }}
+          </button>
+        </div>
+        </div>
+
+        <!-- ID da agenda alvo (vazio = agenda principal). Trocar ressincroniza do zero. -->
+        <div
+          v-if="connectionByProvider(provider)"
+          class="flex items-end gap-2 border-t border-n-weak pt-3"
+        >
+          <label class="flex flex-col gap-1 text-xs text-n-slate-11 flex-1 min-w-0">
+            {{ t('CALENDAR.INTEGRATIONS.CALENDAR_ID') }}
+            <input
+              v-model="calendarIdDrafts[connectionByProvider(provider).id]"
+              type="text"
+              :placeholder="t('CALENDAR.INTEGRATIONS.CALENDAR_ID_PLACEHOLDER')"
+              class="text-xs rounded-lg border border-n-weak bg-n-alpha-black2 px-3 py-2 text-n-slate-12 font-mono"
+            />
+            <span class="text-[10px] text-n-slate-10">
+              {{ t('CALENDAR.INTEGRATIONS.CALENDAR_ID_HINT') }}
+            </span>
+          </label>
+          <button
+            class="px-3 py-2 text-xs rounded-lg border border-n-weak text-n-slate-12 hover:bg-n-alpha-black2 disabled:opacity-50 mb-4"
+            :disabled="
+              !calendarIdChanged(connectionByProvider(provider)) ||
+              savingCalendarId === connectionByProvider(provider).id
+            "
+            @click="saveCalendarId(connectionByProvider(provider))"
+          >
+            {{ t('CALENDAR.INTEGRATIONS.CALENDAR_ID_SAVE') }}
           </button>
         </div>
       </div>
