@@ -1,9 +1,10 @@
 # Configuração da integração GLPI por conta (multi-empresa).
-# show/status: usuário autenticado. update: somente admin.
-# settings = não-secretos (jsonb). SUGGESTED_SETTINGS vai à tela só como placeholder.
+# show/update/test: somente admin (a tela é admin-only). status: usuário autenticado (menu).
+# settings = não-secretos (jsonb). SUGGESTED_SETTINGS vai à tela só como placeholder
+# genérico — nunca expõe dados de conexão de outra empresa.
 # secrets  = senhas (cifradas; nunca devolvidas — só a flag de presença).
 class Api::V1::Accounts::Glpi::ConfigsController < Api::V1::Accounts::BaseController
-  before_action :check_admin_authorization?, only: [:update, :test]
+  before_action :check_admin_authorization?, only: [:show, :update, :test]
 
   # GET /api/v1/accounts/:account_id/glpi/config
   def show

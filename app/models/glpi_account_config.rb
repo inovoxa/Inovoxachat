@@ -22,27 +22,30 @@ class GlpiAccountConfig < ApplicationRecord
 
   validates :account_id, uniqueness: true
 
-  # Sugestões de preenchimento (apenas placeholder na tela). NÃO são herdadas: cada empresa
-  # salva seus próprios valores. Servem só para facilitar o cadastro da Prefeitura.
+  # Chaves de settings não-secretos aceitas (whitelist) + dicas de preenchimento
+  # genéricas para a tela. NÃO contém dados reais de nenhuma empresa: valores de
+  # host/usuário/database/URL/caminho ficam vazios (cada conta digita os seus).
+  # Apenas defaults universais e inofensivos (portas, cron, nome padrão do OCS)
+  # são pré-preenchidos. Assim a tela de uma empresa nunca expõe a infra de outra.
   SUGGESTED_SETTINGS = {
-    'GLPI_DB_HOST' => '187.32.171.151',
+    'GLPI_DB_HOST' => '',
     'GLPI_DB_PORT' => '3306',
-    'GLPI_DB_USER' => 'qtszs1qRYvTW5lKR',
-    'GLPI_DB_DATABASE' => 'glpi-db',
-    'GLPI_API_V1_URL' => 'https://suporte.araraquara.sp.gov.br/api.php/v1',
-    'PG_HOST' => 'e8w8400k0wc0gksos8okwgwg',
+    'GLPI_DB_USER' => '',
+    'GLPI_DB_DATABASE' => '',
+    'GLPI_API_V1_URL' => '',
+    'PG_HOST' => '',
     'PG_PORT' => '5432',
-    'PG_USER' => 'postgres',
-    'PG_DATABASE' => 'Prefeitura_Municipal_de_Araraquara',
-    'PG_SCHEMA' => 'glpi_n8n',
-    'AD_SSH_HOST' => '187.32.171.139',
+    'PG_USER' => '',
+    'PG_DATABASE' => '',
+    'PG_SCHEMA' => '',
+    'AD_SSH_HOST' => '',
     'AD_SSH_PORT' => '22',
-    'AD_SSH_USER' => 'pma\\lgti.fmiguel',
-    'AD_SCRIPT_PATH' => 'C:\\Scripts\\Coletar_Auditoria_AD.ps1',
-    'AD_APROVADORES_SCRIPT' => 'C:\\Scripts\\Gerenciar_Aprovadores.ps1',
+    'AD_SSH_USER' => '',
+    'AD_SCRIPT_PATH' => '',
+    'AD_APROVADORES_SCRIPT' => '',
     'AD_COLLECTOR_CRON' => '*/5 * * * *',
-    'AGENTE_MIN_POR_OP' => '25',
-    'AGENTE_CUSTO_HORA' => '30',
+    'AGENTE_MIN_POR_OP' => '',
+    'AGENTE_CUSTO_HORA' => '',
     'OCS_DB_HOST' => '',
     'OCS_DB_PORT' => '3306',
     'OCS_DB_USER' => '',

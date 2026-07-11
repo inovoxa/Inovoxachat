@@ -208,7 +208,7 @@ onMounted(load);
         <button
           type="button"
           class="rounded-lg border border-n-weak px-4 py-2 text-sm text-n-slate-12"
-          title="Copia os valores sugeridos (Prefeitura) para os campos ainda vazios"
+          title="Preenche os campos vazios com valores padrão genéricos (portas, cron)"
           @click="aplicarSugestoes"
         >
           Preencher com sugestões
