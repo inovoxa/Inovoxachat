@@ -61,7 +61,7 @@ json.payload do
         json.next_calendar_event do
           json.id next_event.id
           json.title next_event.title
-          json.start_time next_event.start_time
+          json.start_time next_event.start_time.to_i
         end
       end
     end

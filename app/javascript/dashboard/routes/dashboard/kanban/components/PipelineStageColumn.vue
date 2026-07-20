@@ -25,10 +25,18 @@ const initials = name => (name || '?').trim().charAt(0).toUpperCase();
 const relativeTime = ts => (ts ? dynamicTime(ts) : '');
 
 // Tooltip do badge de calendário: título + data/hora do próximo evento.
+// start_time vem como epoch em segundos (ver cards.json.jbuilder), igual aos
+// demais timestamps do card. O try/catch existe porque o date-fns lança
+// RangeError em data inválida e isso derrubava o render do board inteiro.
 const nextEventTooltip = event => {
   if (!event) return '';
-  const when = messageTimestamp(event.start_time, 'MMM d, yyyy · h:mm a');
-  return `${event.title} · ${when}`;
+  if (!event.start_time) return event.title || '';
+  try {
+    const when = messageTimestamp(event.start_time, 'MMM d, yyyy · h:mm a');
+    return `${event.title} · ${when}`;
+  } catch {
+    return event.title || '';
+  }
 };
 </script>
 
